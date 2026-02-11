@@ -1,0 +1,172 @@
+<div class="grid" #grid>
+  <header class="header">
+    <i class="fas fa-bars header__menu"></i>
+    <div class="header__search">
+
+    </div>
+    <div class="header__avatars">
+     <!-- usuarios-online-detalle.component.html -->
+<div class="usuarios-detalle-container">
+  <!-- Badge que es clickeable -->
+  <span class="badge online-badge clickable" (click)="toggleDetalle()">
+    <i class="fas fa-users me-1"></i>
+    {{ textoUsuarios }}
+  </span>
+
+  <!-- Panel que se muestra al hacer clic -->
+  <div class="detalle-panel" [class.show]="mostrarDetalle">
+    <div class="detalle-header">
+      <h6>Usuarios en línea</h6>
+      <small>Actualizado: {{ ultimaActualizacion | date:'HH:mm:ss' }}</small>
+      <button class="close-btn" (click)="cerrarDetalle()">×</button>
+    </div>
+
+    <div class="detalle-lista" *ngIf="usuarios.length > 0; else sinUsuarios">
+      <div class="usuario-item" *ngFor="let usuario of usuarios">
+        <div class="usuario-avatar">
+          <div class="avatar-circle">
+            {{ getInicial(usuario.nombre_completo) }}
+          </div>
+          <div class="status-dot"></div>
+        </div>
+        <div class="usuario-info">
+          <div class="usuario-nombre">{{ usuario.nombre_completo || 'Usuario' }}</div>
+          <div class="usuario-tiempo">{{ formatearTiempo(usuario.ultima_actividad) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #sinUsuarios>
+      <div class="sin-usuarios">
+        No hay usuarios en línea
+      </div>
+    </ng-template>
+
+    <div class="detalle-footer">
+      <button class="btn-refresh" (click)="actualizarTextoUsuarios()">
+        <i class="fas fa-sync-alt"></i> Actualizar
+      </button>
+    </div>
+  </div>
+</div>
+
+      <!-- Segundo avatar - Añade un icono o imagen como disparador -->
+      <div class="header__avatar">
+        <div class="avatar-trigger">
+          <img
+            src="https://i.postimg.cc/HkspyDqG/cc.png"
+            class="avatar-image"> <!-- Icono del primer usuario -->
+
+        </div>
+        <div class="dropdown">
+          <ul class="dropdown__list">
+            <li [routerLink]="['/loguin']" class="dropdown__list-item">
+              <span class="dropdown__icon"><i class="far fa-user"></i></span>
+              <span class="dropdown__title">Iniciar Sesion</span>
+            </li>
+            <li [routerLink]="['/usuario']" class="dropdown__list-item">
+              <span class="dropdown__icon"><i
+                  class="fas fa-clipboard-list"></i></span>
+              <span class="dropdown__title">Mi perfil</span>
+            </li>
+            <li class="dropdown__list-item" (click)="logout()">
+              <span class="dropdown__icon"><i
+                  class="fas fa-sign-out-alt"></i></span>
+              <span class="dropdown__title">Cerrar Sesion</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidenav" #sidenav>
+    <div class="sidenav__brand">
+      <img src="i.png" style="width: 34px; height: 34px;  " alt="Logo">
+      <a class="sidenav__brand-link" href="#">INventory </a>
+      <i class="fas fa-times sidenav__brand-close"></i>
+    </div>
+    <div class="sidenav__profile">
+      <div class="sidenav__profile-avatar"></div>
+     <div class="sidenav__profile-title text-light">{{ userName }}</div>    </div>
+    <div class="row row--align-v-center row--align-h-center">
+      <ul class="navList">
+        <li class="navList__heading">INVENTARIO<i
+            class="far fa-file-alt"></i></li>
+        <li class="nav-item" [routerLink]="['/inicio']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-home-lg-alt"></i></span>
+            <span class="navList__subheading-title">Inicio</span>
+          </div>
+        </li>
+        <li *ngIf="tienePrivilegio('productos.ver')" class="nav-item"
+          [routerLink]="['/inventario']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-box-open"></i></span>
+            <span class="navList__subheading-title">Inventario</span>
+          </div>
+        </li>
+
+        <li *ngIf="tienePrivilegio('ubicaciones.ver')" class="nav-item"
+          [routerLink]="['/ubicacion']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-school"></i></span>
+            <span class="navList__subheading-title">Ubicaciones</span>
+          </div>
+        </li>
+
+        <li class="navList__heading">SYSTEMA<i
+            class="far fa-image"></i></li>
+
+        <li *ngIf="tienePrivilegio('trazabilidad.ver')" class="nav-item"
+          [routerLink]="['/trazabilidad']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-mountain"></i></span>
+            <span class="navList__subheading-title">Trazabilidad</span>
+          </div>
+        </li>
+        <li *ngIf="tienePrivilegio('usuarios.ver')" class="nav-item"
+          [routerLink]="['/usuario']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-users"></i></span>
+            <span class="navList__subheading-title">Usuarios</span>
+          </div>
+        </li>
+        <li *ngIf="tienePrivilegio('roles.ver')" class="nav-item"
+          [routerLink]="['/rol']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-credit-card"></i></span>
+            <span class="navList__subheading-title">Roles </span>
+          </div>
+        </li>
+        <li *ngIf="tienePrivilegio('configuraciones.ver')" class="nav-item"
+          [routerLink]="['/configuracion']">
+          <div class="navList__subheading row row--align-v-center">
+            <span class="navList__subheading-icon"><i
+                class="fas fa-eye"></i></span>
+            <span class="navList__subheading-title">Configuración</span>
+          </div>
+        </li>
+
+         
+
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Reemplaza el contenido del main con router-outlet -->
+  <main class="main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="footer">
+    <p><span class="footer__copyright">&copy;</span> 2026 INventory</p>
+    <p>Sistema desarrolado por: <i class="fas fa-heart footer__icon"></i> </p>
+  </footer>
+</div>

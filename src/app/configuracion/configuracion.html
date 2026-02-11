@@ -1,0 +1,280 @@
+<!-- src/app/components/configuracion/configuracion.component.html -->
+<div class="configuracion-container">
+  <!-- Header -->
+  <header class="config-header">
+    <div class="header-content">
+      <h1><i class="icon-cog"></i> Configuracion del Sistema</h1>
+      
+    </div>
+
+    <button *ngIf="tienePrivilegio('trazabilidad.Editar')"  class="btn btn-primary" (click)="abrirCrear()">
+      <i class="icon-plus"></i> Nueva Configuración
+    </button>
+  </header>
+ 
+  <!-- Panel de filtros -->
+  <div class="filters-panel">
+    <div class="search-box">
+      <i class="icon-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="terminoBusqueda"
+        (keyup.enter)="buscarConfiguraciones()"
+        placeholder="Buscar por clave, valor o descripción..."
+        class="search-input">
+      <button class="btn-search" (click)="buscarConfiguraciones()">
+        Buscar
+      </button>
+      <button class="btn-clear" (click)="limpiarBusqueda()"
+        *ngIf="terminoBusqueda">
+        Limpiar
+      </button>
+    </div>
+
+    <div class="filter-group">
+      <label>Filtrar por grupo:</label>
+      <select [(ngModel)]="filtroGrupo" class="select-group">
+        <option value="todos">Todos los grupos</option>
+        <option value="general">General</option>
+        <option *ngFor="let grupo of grupos" [value]="grupo">{{grupo}}</option>
+      </select>
+    </div>
+  </div>
+
+  
+
+  <!-- Tabla de configuraciones -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3>Configuraciones del Sistema</h3>
+      <div class="table-actions">
+        <button class="btn-refresh" (click)="cargarConfiguraciones()"
+          [disabled]="cargando">
+          <i class="icon-refresh" [class.spin]="cargando"></i>
+          {{cargando ? 'Cargando...' : 'Actualizar'}}
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Clave</th>
+            <th>Valor</th>
+            <th>Descripción</th>
+            <th>Última Actualización</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="cargando">
+            <td colspan="6" class="loading-cell">
+              <div class="loading-spinner"></div>
+              Cargando configuraciones...
+            </td>
+          </tr>
+
+          <tr *ngIf="!cargando && configuracionesFiltradas.length === 0">
+            <td colspan="6" class="empty-cell">
+              <i class="icon-empty"></i>
+              No se encontraron configuraciones
+            </td>
+          </tr>
+
+          <!-- Añadir estos atributos data-label a las celdas en la tabla -->
+          <tr *ngFor="let config of configuracionesFiltradas">
+            <td class="cell-id" data-label="ID">#{{config.id}}</td>
+            <td class="cell-clave" data-label="Clave">
+              <strong>{{config.clave}}</strong>
+              <span class="badge-group">{{config.clave.split('.')[0] ||
+                'general'}}</span>
+            </td>
+            <td class="cell-valor" data-label="Valor">
+              <div class="valor-container"
+                [attr.data-full-value]="config.valor">
+                {{truncarTexto(config.valor, 40)}}
+                <span class="valor-full"
+                  *ngIf="config.valor && config.valor.length > 40">
+                  {{config.valor}}
+                </span>
+              </div>
+            </td>
+            <td class="cell-descripcion" data-label="Descripción">
+              {{truncarTexto(config.descripcion, 60)}}
+            </td>
+            <td class="cell-fecha" data-label="Actualizado">
+              {{config.fecha_actualizacion | date:'dd/MM/yyyy HH:mm'}}
+            </td>
+            <td class="cell-acciones" data-label="Acciones">
+              <div class="action-buttons">
+                <button *ngIf="tienePrivilegio('trazabilidad.Editar')" class="btn-action btn-edit"
+                  (click)="abrirEditar(config)" title="Editar">
+                  <i class="icon-edit"></i>
+                </button>
+                <button *ngIf="tienePrivilegio('trazabilidad.Editar')" class="btn-action btn-delete"
+                  (click)="confirmarEliminar(config.id, config.clave)"
+                  title="Eliminar">
+                  <i class="icon-delete"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" *ngIf="totalPaginas > 1">
+      <button
+        class="page-btn"
+        [disabled]="paginaActual === 1"
+        (click)="cambiarPagina(1)">
+        ««
+      </button>
+      <button
+        class="page-btn"
+        [disabled]="paginaActual === 1"
+        (click)="cambiarPagina(paginaActual - 1)">
+        «
+      </button>
+
+      <button
+        *ngFor="let pagina of paginasNumeros"
+        class="page-btn"
+        [class.active]="pagina === paginaActual"
+        (click)="cambiarPagina(pagina)">
+        {{pagina}}
+      </button>
+
+      <button
+        class="page-btn"
+        [disabled]="paginaActual === totalPaginas"
+        (click)="cambiarPagina(paginaActual + 1)">
+        »
+      </button>
+      <button
+        class="page-btn"
+        [disabled]="paginaActual === totalPaginas"
+        (click)="cambiarPagina(totalPaginas)">
+        »»
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal para crear/editar -->
+  <div class="modal" #dialogModal>
+    <div class="modal-backdrop" (click)="cerrarModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>
+          <i class="icon-cog"></i>
+          {{modoEdicion ? 'Editar Configuración' : 'Nueva Configuración'}}
+        </h2>
+        <button class="btn-close" (click)="cerrarModal()">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="configForm" (ngSubmit)="guardarConfiguracion()">
+          <div class="form-group">
+            <label for="clave">Clave *</label>
+            <input
+              type="text"
+              id="clave"
+              formControlName="clave"
+              placeholder="ej: sistema.nombre"
+              class="form-input"
+              (input)="verificarClaveExistente()">
+            <div class="form-errors">
+              <span *ngIf="submitted && f['clave'].errors?.['required']">
+                La clave es requerida
+              </span>
+              <span *ngIf="submitted && f['clave'].errors?.['pattern']">
+                Solo letras minúsculas, números, puntos y guiones bajos
+              </span>
+              <span *ngIf="claveExistente" class="error-exists">
+                <i class="icon-warning"></i> Esta clave ya existe
+              </span>
+            </div>
+            <small class="form-hint">
+              Usa puntos para agrupar, ej: "sistema.nombre", "email.smtp.host"
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="valor">Valor</label>
+            <textarea
+              id="valor"
+              formControlName="valor"
+              rows="4"
+              placeholder="Valor de la configuración..."
+              class="form-textarea"></textarea>
+            <small class="form-hint">
+              Puede ser texto, número, JSON o cualquier valor necesario
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea
+              id="descripcion"
+              formControlName="descripcion"
+              rows="3"
+              placeholder="Descripción de la configuración..."
+              class="form-textarea"></textarea>
+            <small class="form-hint">
+              Explica para qué sirve esta configuración
+            </small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary"
+              (click)="cerrarModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="icon-save"></i>
+              {{modoEdicion ? 'Actualizar' : 'Crear'}}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div class="modal" #confirmModal>
+    <div class="modal-backdrop" (click)="cerrarConfirmacion()"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h2><i class="icon-warning"></i> Confirmación</h2>
+        <button class="btn-close" (click)="cerrarConfirmacion()">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="confirm-icon">
+          <i class="icon-alert"></i>
+        </div>
+        <p class="confirm-message">{{mensajeConfirmacion}}</p>
+        <p class="confirm-warning">Esta acción no se puede deshacer.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+          (click)="cerrarConfirmacion()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger"
+          (click)="ejecutarConfirmacion()">
+          <i class="icon-delete"></i>
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

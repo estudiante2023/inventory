@@ -1,0 +1,336 @@
+<div class="usuarios-container">
+  <!-- Header -->
+  <div class="usuarios-header">
+    <div class="header-content">
+      <h1>
+        <i class="icon-users"></i>
+        Administración de Usuarios
+      </h1> 
+    </div>
+    
+     
+  </div>
+
+ 
+
+  <!-- Contenedor de tabla -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3>
+        <i class="icon-list"></i>
+        Lista de Usuarios
+        <span class="table-count">({{ totalUsuarios }} registros)</span>
+      </h3>
+      <div class="table-actions">
+       
+     
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Correo</th>
+            <th>Estado</th> 
+            <th>Registro</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loading -->
+          <tr *ngIf="loading">
+            <td colspan="9" class="loading-cell">
+              <div class="loading-spinner"></div>
+              <p>Cargando usuarios...</p>
+            </td>
+          </tr>
+
+          <!-- Empty -->
+          <tr *ngIf="!loading && usuarios.length === 0">
+            <td colspan="9" class="empty-cell">
+              <i class="icon-empty"></i>
+              <p>No se encontraron usuarios</p>
+              <button class="btn btn-small" (click)="filters.search = ''; filters.estado = 'todos'; filters.role_id = 0; cargarUsuarios()">
+                Mostrar todos
+              </button>
+            </td>
+          </tr>
+
+          <!-- Usuarios -->
+          <tr *ngFor="let usuario of usuarios">
+            <td class="cell-id" data-label="ID">
+              {{ usuario.id.substring(0, 8) }}...
+               <div class="avatar-container" *ngIf="usuario.avatar_url">
+                <img
+  [src]="usuario.avatar_url"
+  alt="Avatar"
+  class="avatar"
+  style="width:40px; height:40px; object-fit:cover; border-radius:50%;"
+>
+
+              </div>
+            </td>
+            <td class="cell-nombre" data-label="Usuario">
+              <strong>{{ usuario.nombre_completo || 'Sin nombre' }}</strong>
+               
+            </td>
+            <td class="cell-email" data-label="Email">
+              {{ usuario.email }}
+              <span *ngIf="usuario.email_confirmed_at" class="email-confirmed" title="Email confirmado">
+                ✓
+              </span>
+            </td>
+            <td class="cell-rol" data-label="Rol">
+              <div class="rol-selector">
+                <span class="rol-nombre">{{ getRolNombre(usuario.role_id) }}</span>
+                <select 
+                  class="rol-select" 
+                  [value]="usuario.role_id || 0"
+                 (change)="cambiarRolUsuario(usuario, $event)"
+                  title="Cambiar rol"
+                >
+                  <option [value]="null">Cambiar</option>
+                  <option *ngFor="let rol of roles" [value]="rol.id">
+                    {{ rol.nombre }}
+                  </option>
+                </select>
+              </div>
+            </td>
+            <td class="cell-telefono" data-label="Teléfono">
+              {{ usuario.telefono || 'No especificado' }}
+            </td>
+            <td class="cell-estado" data-label="Estado">
+              <span class="badge" [class]="getBadgeClass(usuario.estado)">
+                {{ getEstadoTexto(usuario.estado) }}
+              </span>
+            </td> 
+            <td class="cell-fecha" data-label="Registro">
+              {{ formatearFecha(usuario.created_at) }}
+            </td>
+            <td class="cell-acciones" data-label="Acciones">
+              <div class="action-buttons">
+                <button class="btn-action btn-edit" (click)="abrirModalEditar(usuario)" title="Editar usuario">
+                  <i class="icon-edit"></i>
+                </button>
+                <button 
+                  class="btn-action" 
+                  [class]="usuario.estado === 'activo' ? 'btn-deactivate' : 'btn-activate'"
+                  (click)="cambiarEstadoUsuario(usuario)"
+                  [title]="usuario.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'"
+                >
+                  <i [class]="usuario.estado === 'activo' ? 'icon-pause' : 'icon-play'"></i>
+                </button> 
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    
+  </div>
+</div>
+
+<!-- Modal para crear/editar usuario -->
+<div class="modal" #dialogUsuario>
+  <div class="modal-backdrop" (click)="cerrarModal('usuario')"></div>
+  <div class="modal-content modal-sm">
+    <div class="modal-header">
+      <h2>
+        <i class="icon-user"></i>
+        {{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}
+      </h2>
+      <button class="btn-close" (click)="cerrarModal('usuario')">
+        <i class="icon-close"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <form (ngSubmit)="guardarUsuario()">
+        <div class="form-group">
+          <label for="nombre_completo">Nombre Completo *</label>
+          <input 
+            type="text" 
+            id="nombre_completo" 
+            [(ngModel)]="usuarioForm.nombre_completo" 
+            name="nombre_completo"
+            placeholder="Ej: Juan Pérez"
+            class="form-input"
+            required
+          />
+          <div class="form-errors">
+            <span *ngIf="submitted && !usuarioForm.nombre_completo?.trim()">
+              El nombre completo es obligatorio
+            </span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="role_id">Rol</label>
+          <select 
+            id="role_id" 
+            [(ngModel)]="usuarioForm.role_id" 
+            name="role_id"
+            class="form-input"
+          >
+            <option [value]="null">Sin rol asignado</option>
+            <option *ngFor="let rol of roles" [value]="rol.id">
+              {{ rol.nombre }}
+            </option>
+          </select>
+          <small class="form-hint">
+            Asigna un rol para definir los permisos del usuario
+          </small>
+        </div>
+        
+        <div class="form-group">
+          <label for="telefono">Correo</label>
+          <input 
+            type="tel" 
+            id="telefono" 
+            [(ngModel)]="usuarioForm.telefono" 
+            name="telefono"
+            placeholder="Ej: +34 600 123 456"
+            class="form-input"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="avatar_url">URL del Avatar</label>
+          <input 
+            type="url" 
+            id="avatar_url" 
+            [(ngModel)]="usuarioForm.avatar_url" 
+            name="avatar_url"
+            placeholder="https://ejemplo.com/avatar.jpg"
+            class="form-input"
+          />
+          <small class="form-hint">
+            URL de la imagen de perfil (opcional)
+          </small>
+        </div>
+        
+        <div class="form-group">
+          <label>Estado del Usuario</label>
+          <div class="form-checkbox">
+            <input 
+              type="checkbox" 
+              id="esta_activo" 
+              [(ngModel)]="usuarioForm.estado" 
+              name="estado"
+              [value]="'activo'"
+              [checked]="usuarioForm.estado === 'activo'"
+              class="checkbox-input"
+            />
+            <label for="esta_activo" class="checkbox-label">
+              Usuario activo
+            </label>
+          </div>
+          <small class="form-hint">
+            Los usuarios inactivos no pueden iniciar sesión
+          </small>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal('usuario')">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="icon-save"></i>
+            {{ modoEdicion ? 'Actualizar Usuario' : 'Crear Usuario' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal" #dialogConfirm>
+  <div class="modal-backdrop" (click)="cerrarModal('confirm')"></div>
+  <div class="modal-content modal-sm">
+    <div class="modal-header">
+      <h2>
+        <i class="icon-warning"></i>
+        Confirmar Eliminación
+      </h2>
+      <button class="btn-close" (click)="cerrarModal('confirm')">
+        <i class="icon-close"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="confirm-icon">
+        <i class="icon-alert"></i>
+      </div>
+      
+      <div class="confirm-message" *ngIf="usuarioAEliminar">
+        ¿Estás seguro de eliminar al usuario 
+        <strong>"{{ usuarioAEliminar.nombre_completo || usuarioAEliminar.email }}"</strong>?
+      </div>
+      
+      <div class="confirm-warning">
+        <i class="icon-warning"></i>
+        Esta acción eliminará el perfil del usuario pero NO su cuenta de autenticación.
+      </div>
+      
+      <div class="confirm-details" *ngIf="usuarioAEliminar">
+        <div class="confirm-warning">
+          <i class="icon-info"></i>
+          Detalles del usuario a eliminar:
+        </div>
+        <ul class="confirm-list">
+          <li>Email: {{ usuarioAEliminar.email }}</li>
+          <li>Rol: {{ getRolNombre(usuarioAEliminar.role_id) }}</li>
+          <li>Estado: {{ getEstadoTexto(usuarioAEliminar.estado) }}</li>
+          <li>Registrado: {{ formatearFecha(usuarioAEliminar.created_at) }}</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="cerrarModal('confirm')" [disabled]="eliminando">
+        Cancelar
+      </button>
+      <button type="button" class="btn btn-danger" (click)="eliminarUsuarioConfirmado()" [disabled]="eliminando">
+        <i class="icon-delete"></i>
+        {{ eliminando ? 'Eliminando...' : 'Eliminar Usuario' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Notificaciones -->
+<div class="notificacion" [class]="'notificacion ' + notificacion.tipo" [class.show]="notificacion.show">
+  <span>{{ notificacion.mensaje }}</span>
+  <button class="btn-close-small" (click)="notificacion.show = false">
+    <i class="icon-close"></i>
+  </button>
+</div>
+
+<!-- Iconos CSS -->
+<style>
+  .icon-users:before { content: '👥'; }
+  .icon-user:before { content: '👤'; }
+  .icon-plus:before { content: '➕'; }
+  .icon-refresh:before { content: '🔄'; }
+  .icon-search:before { content: '🔍'; }
+  .icon-list:before { content: '📋'; }
+  .icon-download:before { content: '📥'; }
+  .icon-edit:before { content: '✏️'; }
+  .icon-delete:before { content: '🗑️'; }
+  .icon-save:before { content: '💾'; }
+  .icon-close:before { content: '✕'; }
+  .icon-warning:before { content: '⚠️'; }
+  .icon-alert:before { content: '🚨'; }
+  .icon-info:before { content: 'ℹ️'; }
+  .icon-empty:before { content: '📭'; }
+  .icon-pause:before { content: '⏸️'; }
+  .icon-play:before { content: '▶️'; }
+</style>

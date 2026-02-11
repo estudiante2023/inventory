@@ -1,0 +1,1227 @@
+/* ===============================
+   VARIABLES GLOBALES
+================================ */
+:root {
+  --primary: #104861;
+  --primary-dark: #104861;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --radius: 12px;
+}
+
+/* ===============================
+   CONTENEDOR PRINCIPAL
+================================ */
+.ubicaciones-container {
+  padding: 24px;
+  background: var(--gray-50);
+  min-height: 100vh;
+  min-width: 2px !important;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ===============================
+   ENCABEZADO
+================================ */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--gray-900);
+}
+
+.subtitle {
+  margin-top: 4px;
+  color: var(--gray-500);
+}
+
+/* ===============================
+   BOTONES
+================================ */
+.btn-primary {
+  background:  #104861;
+  color: #fff;
+  border-color: #007bff;
+  border: none;
+  padding: 10px 16px;
+  
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  background: #ffc000;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary {
+  background: #fff;
+  border: 1px solid var(--gray-300);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: 0.2s;
+  margin-left: 3%;
+}
+
+.btn-outline-primary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline-secondary:hover {
+  border-color: var(--gray-500);
+}
+
+/* ===============================
+   ALERTAS
+================================ */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alert-success {
+  background: #ecfdf5;
+  color: var(--success);
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: var(--danger);
+}
+
+.btn-cerrar-alerta {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+/* ===============================
+   TARJETAS DE ESTADÍSTICAS
+================================ */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+   min-width: 2px !important;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+   min-width: 2px !important;
+}
+
+.stat-card-icon {
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--gray-900);
+}
+
+/* ===============================
+   FILTROS
+================================ */
+.filter-panel {
+  background: #fff;
+  padding: 16px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+   min-width: 2px !important;
+   margin-top: 4%;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #b9b9b9; /* Borde azul más notorio */
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  border-color: #000000; /* Morado más intenso al enfocar */
+  box-shadow: 0 0 0 3px rgba(189, 189, 189, 0.2);
+  outline: none;
+}
+
+.filter-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234facfe' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 35px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+
+
+/* ===============================
+   MODAL
+================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background: #fff;
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 500px;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-encabezado,
+.modal-pie {
+  padding: 16px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-pie {
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-cuerpo {
+  padding: 16px;
+}
+
+.btn-guardar {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+}
+
+.btn-cancelar {
+  background: var(--gray-200);
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
+   BADGES DE ESTADO
+================================ */
+.estado-activo {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(34,197,94,.25);
+}
+
+.estado-inactivo {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(239,68,68,.25);
+}
+
+/* ===============================
+   ACCIONES
+================================ */
+.acciones-container {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-accion {
+  background: #f3f4f6;
+  border: none;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-accion i {
+  font-size: 1rem;
+}
+
+.btn-editar {
+  color: #104861;
+}
+
+.btn-editar:hover {
+  background: #eef2ff;
+  transform: translateY(-2px);
+}
+
+.btn-activar {
+  color: #16a34a;
+}
+
+.btn-desactivar {
+  color: #dc2626;
+}
+
+.btn-activar:hover {
+  background: #dcfce7;
+  transform: translateY(-2px);
+}
+
+.btn-desactivar:hover {
+  background: #fee2e2;
+  transform: translateY(-2px);
+}
+
+.btn-eliminar {
+  color: #dc2626;
+}
+
+.btn-eliminar:hover {
+  background: #fee2e2;
+  transform: scale(1.1);
+}
+
+/* ===============================
+   TEXTO "NO DATA"
+================================ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: #104861;
+  margin-bottom: 10px;
+}
+/* ===============================
+   OVERLAY
+================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: overlayFade 0.25s ease;
+}
+
+/* ===============================
+   CONTENEDOR MODAL
+================================ */
+.modal-contenido {
+  background: #ffffff;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+  animation: modalPop 0.3s ease;
+}
+
+/* ===============================
+   ENCABEZADO
+================================ */
+.modal-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: linear-gradient(
+    90deg,
+    #104861,
+    #104861
+  );
+}
+
+.modal-titulo {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* BOTÓN CERRAR */
+.btn-cerrar-modal {
+  background: rgba(255,255,255,.15);
+  color: #ffffff;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cerrar-modal:hover {
+  background: rgba(255,255,255,.25);
+  transform: rotate(90deg);
+}
+
+/* ===============================
+   CUERPO
+================================ */
+.modal-cuerpo {
+  padding: 22px;
+  background: #f9fafb;
+}
+
+/* ===============================
+   FORMULARIOS
+================================ */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: #dc2626;
+}
+
+/* INPUTS */
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #104861;
+  box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+}
+
+/* ===============================
+   ERRORES
+================================ */
+.error-message {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===============================
+   PIE MODAL
+================================ */
+.modal-pie {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ===============================
+   BOTONES
+================================ */
+.btn-cancelar {
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancelar:hover {
+  background: #d1d5db;
+}
+
+.btn-guardar {
+  background: linear-gradient(
+    135deg,
+    #104861,
+    #104861
+  );
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-guardar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(79,70,229,.35);
+}
+
+.btn-guardar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   SPINNER MINI
+================================ */
+.spinner-mini {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===============================
+   ANIMACIONES
+================================ */
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+ 
+td {
+  white-space: nowrap;
+}
+
+td .btn-accion {
+  display: inline-flex;
+  margin-right: 12px;   /* 👈 espacio entre botones */
+}
+
+/* opcional: quitar espacio al último */
+td .btn-accion:last-child {
+  margin-right: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===============================
+   LAYOUT STATS + BANNER
+================================ */
+.stats-banner-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 1/3 cards, 2/3 imagen */
+  gap: 20px;
+  margin-bottom: 24px;
+  
+  
+}
+
+/* Columna izquierda - Estadísticas */
+.stats-cards.small {
+  flex: 1;
+  min-width: 280px;
+  max-width: 25%;
+  display: flex; /* Cambia de grid a flex */
+  flex-direction: column; /* Una columna */
+  gap: 12px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Tarjetas de estadísticas */
+.stats-cards.small .stat-card {
+  padding: 14px 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  box-shadow: 
+    0 4px 12px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reducir tamaño de iconos para dar más espacio al texto */
+.stats-cards.small .stat-card-icon {
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  flex-shrink: 0; /* Evitar que se encoja */
+}
+
+/* Asegurar que el contenido de texto tenga prioridad */
+.stats-cards.small .stat-content {
+  flex: 1;
+  min-width: 0; /* Permitir que se reduzca, pero no demasiado */
+  overflow: hidden; /* Contener contenido largo */
+}
+
+/* Ajustar tamaño de números para que quepan siempre */
+.stats-cards.small .stat-value {
+  font-size: 20px; /* Tamaño fijo que funcione en todos lados */
+  font-weight: 700;
+  line-height: 1;
+  min-width: 40px; /* Ancho mínimo para números */
+  color: #2c3e50; /* Color sólido en lugar de gradiente para mejor legibilidad */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Ajustar etiquetas para que no se desborden */
+.stats-cards.small .stat-label {
+  font-size: 11px;
+  color: #5a6c7d;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap; /* Mantener en una línea */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Puntos suspensivos si es muy largo */
+  max-width: 100px; /* Ancho máximo controlado */
+}
+/* ===============================
+   BANNER IMAGEN
+================================ */
+.stats-banner {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden; 
+  height: 230px !important;
+}
+
+.stats-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+ 
+/* ===============================
+   CARDS ULTRA COMPACTAS
+================================ */
+/* ===============================
+   CONTENIDO HORIZONTAL EN CARDS
+================================ */
+.stats-cards.small .stat-card {
+  display: flex;
+  align-items: center;      /* centra vertical */
+  gap: 10px;                /* espacio entre icono y texto */
+}
+
+/* ICONO */
+.stats-cards.small .stat-card-icon {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* TEXTO (label + número) */
+.stats-cards.small .stat-label,
+.stats-cards.small .stat-value {
+  margin: 0;
+}
+
+/* Agrupar texto y número en fila */
+.stats-cards.small .stat-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.stats-cards.small .stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-left: auto;   /* 👈 empuja el número a la derecha */
+}
+
+
+
+
+
+
+
+/* ===============================
+   TABLA RESPONSIVE SIN WRAPPER
+================================ */
+
+.table-container {
+  width: 100%;
+  max-width: 98vw;           /* 🔒 no deja crecer */
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+  overflow-x: auto;           /* 👈 SCROLL AQUÍ */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* CLAVE ABSOLUTA */
+.ubicaciones-table {
+  min-width:  20px;           /* 👈 fuerza overflow */
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* HEADER */
+.ubicaciones-table thead {
+  background: #104861;
+}
+
+.ubicaciones-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* BODY */
+.ubicaciones-table td { 
+  font-size: 0.9rem;
+  color: #374151;
+  vertical-align: middle;
+  white-space: nowrap;   
+  left: 0% !important;
+}
+
+ 
+/* ACCIONES */
+.ubicaciones-table td:last-child {
+  white-space: nowrap;
+}
+
+/* HOVER */
+.ubicaciones-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.ubicaciones-table tbody tr:hover {
+  background-color: #eef2ff;
+}
+.ubicaciones-table {
+  font-size: 0.9em;
+}
+.ubicaciones-table {
+  font-size: 0.85rem;
+}
+
+.ubicaciones-table th,
+.ubicaciones-table td {
+  padding: 15px 18px;
+  
+}
+ 
+
+
+
+
+
+
+
+/* ===== LAYOUT ESTADÍSTICAS + BANNER ===== */
+
+/* Contenedor principal */
+.stats-banner-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 180px;
+  max-height: 220px;
+}
+
+/* Columna izquierda - Estadísticas */
+.stats-cards.small {
+  flex: 1;
+  min-width: 280px;
+  max-width: 25%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Tarjetas de estadísticas con colores suaves */
+.stats-cards.small .stat-card {
+  padding: 14px 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  box-shadow: 
+    0 4px 12px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto hover elegante */
+.stats-cards.small .stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 20px rgba(0,0,0,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* Efecto de brillo al pasar el mouse */
+.stats-cards.small .stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.stats-cards.small .stat-card:hover::before {
+  left: 100%;
+}
+
+/* Iconos con colores suaves y degradados */
+.stats-cards.small .stat-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de brillo en los iconos */
+.stats-cards.small .stat-card-icon::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 20px;
+  height: 20px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  filter: blur(5px);
+}
+
+/* Contenido de texto */
+.stats-cards.small .stat-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Valores numéricos */
+.stats-cards.small .stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  color: #2c3e50;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  letter-spacing: -0.5px;
+}
+
+/* Etiquetas */
+.stats-cards.small .stat-label {
+  font-size: 12px;
+  color: #5a6c7d;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+/* ===== COLORES ESPECÍFICOS PARA CADA TARJETA ===== */
+
+/* Total Ubicaciones - Azul suave */
+.stats-cards.small .total .stat-card-icon {
+ background: #10485f ;
+}
+
+.stats-cards.small .total .stat-value {
+  background: #10485f ;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Activas - Verde suave */
+.stats-cards.small .active .stat-card-icon {
+ background: #10485f ;
+}
+
+.stats-cards.small .active .stat-value {
+  background: #10485f ;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Inactivas - Naranja suave */
+.stats-cards.small .inactive .stat-card-icon {
+  background: #10485f ;
+}
+
+.stats-cards.small .inactive .stat-value {
+  background: #10485f ;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== BANNER DE IMAGEN ===== */
+.stats-banner {
+  flex: 3;
+  min-width: 300px;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  position: relative;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* Imagen ajustada sin zoom excesivo */
+.stats-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.4s ease;
+  filter: brightness(0.95) contrast(1.05) saturate(1.1);
+}
+
+
+/* Overlay sutil para mejor contraste */
+.stats-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255,255,255,0.1) 0%,
+    rgba(255,255,255,0) 50%,
+    rgba(255,255,255,0.1) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 12px;
+}
+ /* ===== LAYOUT ESTADÍSTICAS + BANNER ===== */
+
+/* Contenedor principal */
+.stats-banner-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 180px;
+  max-height: 220px;
+}
+
+/* Columna izquierda - Estadísticas en UNA SOLA COLUMNA */
+.stats-cards.small {
+  flex: 1;
+  min-width: 280px;
+  max-width: 25%;
+  display: flex;            /* Cambiado de grid a flex */
+  flex-direction: column;   /* Una sola columna */
+  gap: 12px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Tarjetas de estadísticas */
+.stats-cards.small .stat-card {
+  padding: 14px 12px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  box-shadow: 
+    0 4px 12px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(5px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Resto de estilos (iconos, contenido, colores) se mantienen igual... *//* ===== MOBILE: cards arriba, imagen abajo ===== */
+@media (max-width: 768px) {
+
+  .stats-banner-layout {
+    flex-direction: column;
+    max-height: none;
+    gap: 16px;
+  }
+
+  /* Cards ocupan todo el ancho */
+  .stats-cards.small {
+    max-width: 95%;
+    width: 95%;
+    order: 1;
+  }
+
+   .stats-banner {
+    width: 100%;
+    order: 2;
+    padding: 0;        /* 👈 quita espacio interno */
+    margin: 0 auto;    /* mantiene centrado */
+  }
+
+  .stats-banner img {
+    display: block;    /* 👈 elimina espacio fantasma */
+    width: 100%;
+    height: 110px !important;
+    object-fit: cover;
+    margin: 0;         /* 👈 sin margen */
+  }
+}
+
+
+/* ===== MOBILE: header en columna ===== */
+@media (max-width: 768px) {
+
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+    margin: 0;
+  }
+
+  .btn-nueva-ubicacion {
+    width: 90%;
+    justify-content: center;
+  }
+}
+
+
+/* ===== MOBILE: modal optimizado ===== */
+@media (max-width: 768px) {
+
+  .modal-contenido {
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 14px;
+  }
+
+  .modal-pie {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-pie button {
+    flex: 1;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px) {
+
+  .filter-panel {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .filter-grid {
+    width: 80%;
+    max-width: 360px;   /* ⚠️ 60px era demasiado chico */
+    margin-left: 0;
+    margin-right: auto;
+    gap: 10px;
+  }
+
+  .filter-select,
+  .filter-input {
+    width: 100%;
+  }
+}
+
+
+
+/* ===== MOBILE: tabla MÁS angosta ===== */
+@media (max-width: 768px) {
+
+  .table-container {
+    display: flex;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .table-content {
+    width: 70%;
+    max-width: 280px;   /* 👈 ahora sí bien angosta */
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  .ubicaciones-table {
+    min-width: 560px;   /* mantiene scroll */
+  }
+}

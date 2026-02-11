@@ -1,0 +1,1961 @@
+
+<div class="inventario-container">
+
+  <!-- Alerta -->
+  <div *ngIf="alerta.mostrar"
+    class="inventario-alert"
+    [class.inventario-alert-success]="alerta.tipo === 'success'"
+    [class.inventario-alert-danger]="alerta.tipo === 'error'"
+    [class.inventario-alert-warning]="alerta.tipo === 'warning'">
+    <span class="inventario-alert-message">{{ alerta.mensaje }}</span>
+    <button class="inventario-alert-close" (click)="cerrarAlerta()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <!-- Loading general -->
+  <div *ngIf="loading && vistaActual === 'lista'" class="inventario-loading">
+    <div class="inventario-spinner"></div>
+    <p>Cargando inventario...</p>
+  </div>
+
+  <!-- VISTA PRINCIPAL: LISTA DE PRODUCTOS -->
+  <div *ngIf="vistaActual === 'lista' && !loading">
+
+    <!-- Header -->
+    <div class="inventario-header">
+      <h1 class="inventario-title">
+        Inventario de Repuestos
+      </h1>
+      <button *ngIf="tienePrivilegio('productos.Editar')"
+        class="inventario-btn inventario-btn-primary"
+        (click)="mostrarFormularioCrear()">
+        <i class="bi bi-plus-circle"></i> Nuevo Repuesto
+      </button>
+      <button (click)="exportarExcel()"
+        [disabled]="loading || productos.length === 0"
+        class="inventario-btn inventario-btn-primary">
+        <span *ngIf="loading">⏳</span>
+        <span *ngIf="!loading">📊</span>
+        Exportar Excel
+      </button>
+
+      <!-- Botón para edición masiva -->
+      <button class="inventario-btn inventario-btn-info ms-2"
+        (click)="abrirModalImportacion()"
+        [disabled]="loading">
+        <i class="bi bi-upload"></i> Importar Excel
+      </button>
+      <button
+        *ngIf="tienePrivilegio('productos.Editar') && (productosSeleccionados.size > 0 || formEdicionMultiCampo.aplicarATodos)"
+        class="inventario-btn inventario-btn-warning"
+        (click)="abrirEdicionMultiCampo()">
+        <i class="bi bi-pencil-square"></i>
+        {{ getTextoSeleccionMultiCampo() }} <!-- Cambia este método -->
+      </button>
+
+      <!-- Checkbox para aplicar a todos - CORREGIDO para edición multicampo -->
+      <div *ngIf="tienePrivilegio('productos.Editar')"
+        class="form-check form-switch d-inline-block ms-3">
+        <input class="form-check-input" type="checkbox"
+          id="aplicarATodos" [(ngModel)]="formEdicionMultiCampo.aplicarATodos"
+          (change)="onAplicarATodosChange()"> <!-- Agregar evento change -->
+        <label class="form-check-label" for="aplicarATodos">
+          Aplicar a todos los repuestos filtrados ({{ totalProductos }})
+        </label>
+      </div>
+
+
+
+
+      <!-- En la sección de botones de acción -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <!-- Tus otros botones aquí -->
+  </div>
+  
+  <!-- Botón de eliminar todo (solo para admin) -->
+  <div *ngIf="tienePrivilegio('eliminar.todo')">
+    <button 
+      class="btn-eliminar-todo"
+      (click)="abrirConfirmacionEliminacion()"
+      [disabled]="loading">
+      <i class="bi bi-trash3"></i>
+      <span class="d-none d-md-inline">Limpiar Base de Datos</span>
+    </button>
+  </div>
+</div>
+    </div>
+
+
+    <!-- Contenedor principal para estadísticas + imagen -->
+    <div class="stats-banner-layout">
+
+      <!-- COLUMNA IZQUIERDA: Estadísticas (1/4 del ancho) -->
+      <div class="stats-cards small">
+        <div class="stat-card total">
+          <div class="stat-card-icon">
+            <i class="bi bi-box"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticas.total }}</div>
+            <div class="stat-label">Total Repuestos</div>
+          </div>
+        </div>
+        <div class="stat-card active">
+          <div class="stat-card-icon">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ contarCriticos() }}</div>
+    <div class="stat-label">Críticos</div>
+          </div>
+        </div>
+        <div class="stat-card bajo">
+          <div class="stat-card-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticas.bajoStock }}</div>
+            <div class="stat-label">Bajo Stock</div>
+          </div>
+        </div>
+        <div class="stat-card agotado">
+          <div class="stat-card-icon">
+            <i class="bi bi-x-circle"></i>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticas.agotados }}</div>
+            <div class="stat-label">Agotados</div>
+          </div>
+        </div>
+        <!-- Cambia las 4 últimas tarjetas por estas: -->
+
+        <!-- Versión con nombres más cortos -->
+
+<!-- NUEVO -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-box-seam"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.NUEVO || 0 }}</div>
+    <div class="stat-label">NUEVO</div>
+  </div>
+</div>
+
+<!-- UTIL -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.UTIL || 0 }}</div>
+    <div class="stat-label">UTIL</div>
+  </div>
+</div>
+
+<!-- MANT. BANCO -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-tools"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.MANTENIMIENTO_BANCO_DE_PRUEBAS || 0 }}</div>
+    <div class="stat-label">MANT. BANCO</div>
+  </div>
+</div>
+
+<!-- MANT. FÁBRICA -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-gear"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.MANTENIMIENTO_FABRICA || 0 }}</div>
+    <div class="stat-label">MANT. FÁBRICA</div>
+  </div>
+</div>
+
+<!-- EXPORTACIÓN -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-truck"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.PROCESO_DE_EXPORTACION_MODALTRADE || 0 }}</div>
+    <div class="stat-label">EXPORTACIÓN</div>
+  </div>
+</div>
+
+<!-- CUARENTENA -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-shield-exclamation"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.CUARENTENA_BODEGA || 0 }}</div>
+    <div class="stat-label">CUARENTENA</div>
+  </div>
+</div>
+
+<!-- CONDENADO -->
+<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+  <div class="stat-card-icon"><i class="bi bi-x-circle"></i></div>
+  <div class="stat-content">
+    <div class="stat-value">{{ estadisticasPorEstado.CONDENADO || 0 }}</div>
+    <div class="stat-label">CONDENADO</div>
+  </div>
+</div>
+</div>
+      <!-- COLUMNA DERECHA: Imagen (3/4 del ancho) -->
+      <div class="stats-banner">
+        <img src="hi.jpg" alt="Banner estadísticas">
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="inventario-filters-card">
+      <div class="inventario-search">
+        <input type="text"
+          class="inventario-search-input"
+          placeholder="Buscar repuestos..."
+          [(ngModel)]="filtros.search"
+          (keyup.enter)="buscarProductos()">
+
+        <button class="inventario-search-button"
+          (click)="buscarProductos()">
+          Buscar
+        </button>
+      </div>
+
+      <div class="inventario-filters-grid">
+        <select class="inventario-filter-select" [(ngModel)]="filtros.estado"
+          (change)="buscarProductos()">
+          <option value="todos">Todos los estados</option>
+          <option value="NUEVO">NUEVO</option>
+          <option value="UTIL">UTIL</option>
+          <option value="MANTENIMIENTO BANCO DE PRUEBAS">MANTENIMIENTO BANCO DE
+            PRUEBAS</option>
+          <option value="MANTENIMIENTO FÁBRICA">MANTENIMIENTO FÁBRICA</option>
+          <option value="PROCESO DE EXPORTACIÓN (MODALTRADE)">PROCESO DE
+            EXPORTACIÓN (MODALTRADE)</option>
+
+          <option value="CUARENTENA BODEGA">CUARENTENA BODEGA
+          </option>
+          <option value="CONDENADO">CONDENADO</option>
+        </select>
+
+        <select class="inventario-filter-select"
+          [(ngModel)]="filtros.criticidad" (change)="buscarProductos()">
+          <option value="todos">Todas criticidades</option>
+          <option value="Bajo">Bajo</option>
+          <option value="Medio">Medio</option>
+          <option value="Alto">Alto</option>
+          <option value="Critico">Crítico</option>
+        </select>
+
+        <select class="inventario-filter-select"
+          [(ngModel)]="filtros.ubicacion_id" (change)="buscarProductos()">
+          <option [ngValue]="0">Todas ubicaciones</option>
+          <option *ngFor="let ubicacion of ubicaciones"
+            [ngValue]="ubicacion.id">
+            {{ ubicacion.nombre }}
+          </option>
+        </select>
+
+        <div class="inventario-filter-switch">
+          <input type="checkbox"
+            class="inventario-switch-input"
+            id="bajoStock"
+            [(ngModel)]="filtros.bajo_stock"
+            (change)="buscarProductos()">
+          <label class="inventario-switch-label" for="bajoStock">Bajo
+            stock</label>
+        </div>
+        <button
+          class="inventario-btn inventario-btn-outline inventario-btn-sm"
+          (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle"></i> Limpiar filtros
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="inventario-table-container">
+      <div class="inventario-table-wrapper">
+        <table class="inventario-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">
+                <input type="checkbox"
+                  [checked]="productosSeleccionados.size === productos.length && productos.length > 0"
+                  (change)="seleccionarTodos()"
+                  [disabled]="productos.length === 0">
+              </th>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Código</th>
+              <th>Part Number</th>
+              <th>Serial</th>
+              <th>Stock</th> 
+              <th>Estado</th>
+              <th>Criticidad</th>
+              <th>Componente</th>
+              <th>Ubicación</th>
+              <th>Estantería</th>
+              <th>Precio</th>
+              <th>Fecha Adq.</th>
+              <th>Orden</th>
+              <th>Factura</th>
+              <th>Descripción</th>
+              <th>Observaciones</th>
+              <th>Creado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Loading -->
+            <tr *ngIf="loadingProductos">
+              <td colspan="19" class="inventario-loading">
+                <div class="inventario-spinner"></div>
+                <span>Cargando repuestos...</span>
+              </td>
+            </tr>
+
+            <!-- Productos -->
+            <tr *ngFor="let producto of productos">
+              <td>
+                <input type="checkbox"
+                  [checked]="estaSeleccionado(producto.id)"
+                  (change)="toggleSeleccionProducto(producto.id)">
+              </td>
+              <!-- ID -->
+              <td>
+                <span
+                  class="inventario-badge inventario-bg-light">#{{producto.id}}</span>
+              </td>
+
+              <!-- Nombre -->
+              <td>
+                <strong>{{producto.nombre || '-'}}</strong>
+              </td>
+
+              <!-- Código -->
+              <td>
+                <span
+                  class="inventario-badge inventario-bg-light">{{producto.codigo
+                  || '-'}}</span>
+              </td>
+
+              <!-- Part Number -->
+              <td>
+                <small>{{producto.part_number || '-'}}</small>
+              </td>
+
+              <!-- Serial Number -->
+              <td>
+                <small class="inventario-text-muted">{{producto.serial_number
+                  || '-'}}</small>
+              </td>
+
+              <!-- Stock Actual -->
+              <td>
+                <span
+                  [class]="'inventario-badge inventario-badge-stock-' + getEstadoStockClase(producto)">
+                  {{producto.cantidad_actual || 0}}
+                </span>
+              </td>
+
+               
+
+              <!-- Estado -->
+              <td>
+                <span [class]="getEstadoClase(producto.estado)">
+                  {{ getEstadoTexto(producto.estado) }}
+                </span>
+              </td>
+
+              <!-- Criticidad -->
+              <td>
+                <span
+                  [class]="'inventario-badge inventario-badge-criticidad-' + producto.criticidad">
+                  {{producto.criticidad || '-'}}
+                </span>
+              </td>
+
+              <!-- Componente -->
+              <td>
+                <small>{{producto.componente || '-'}}</small>
+              </td>
+
+              <!-- Ubicación -->
+              <td>
+                <span class="inventario-badge inventario-text-primary"
+                  *ngIf="producto.ubicacion_nombre">
+                  {{producto.ubicacion_nombre}}
+                </span>
+                <span class="inventario-text-muted"
+                  *ngIf="!producto.ubicacion_nombre">-</span>
+              </td>
+
+              <td>
+                <small class="inventario-text-truncate">
+                  {{producto.estanteria || '-'}}
+                </small>
+              </td>
+
+              <!-- Precio -->
+              <td>
+                <span *ngIf="producto.precio"
+                  class="inventario-text-success inventario-stat-value">
+                  ${{producto.precio | number:'1.2-2'}}
+                </span>
+                <span *ngIf="!producto.precio"
+                  class="inventario-text-muted">-</span>
+              </td>
+
+              <!-- Fecha Adquisición -->
+              <td>
+                <small
+                  *ngIf="producto.fecha_adquisicion">{{producto.fecha_adquisicion
+                  | date:'dd/MM/yy'}}</small>
+                <small *ngIf="!producto.fecha_adquisicion"
+                  class="inventario-text-muted">-</small>
+              </td>
+
+              <!-- Orden Envío -->
+              <!-- Orden de Envío -->
+              <td>
+                <div *ngIf="producto.orden_envio; else sinOrdenEnvio">
+                  <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary"
+                      (click)="verImagen(producto.orden_envio, 'Orden de Envío')"
+                      title="Ver Orden de Envío">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success"
+                      (click)="descargarImagen(producto.orden_envio, 'orden_envio_' + producto.id)"
+                      title="Descargar Orden de Envío">
+                      <i class="bi bi-download"></i>
+                    </button>
+                  </div>
+                </div>
+                <ng-template #sinOrdenEnvio>
+                  <small class="text-muted">-</small>
+                </ng-template>
+              </td>
+
+              <!-- Factura -->
+              <td>
+                <div *ngIf="producto.factura; else sinFactura">
+                  <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary"
+                      (click)="verImagen(producto.factura, 'Factura')"
+                      title="Ver Factura">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success"
+                      (click)="descargarImagen(producto.factura, 'factura_' + producto.id)"
+                      title="Descargar Factura">
+                      <i class="bi bi-download"></i>
+                    </button>
+                  </div>
+                </div>
+                <ng-template #sinFactura>
+                  <small class="text-muted">-</small>
+                </ng-template>
+              </td>
+
+              <!-- Descripción -->
+              <td>
+                <small class="inventario-text-truncate">
+                  {{producto.descripcion || '-'}}
+                </small>
+              </td>
+
+              <!-- Observaciones -->
+              <td>
+                <small class="inventario-text-truncate">
+                  {{producto.observaciones || '-'}}
+                </small>
+              </td>
+
+              <!-- Creado -->
+              <td>
+                <small class="inventario-text-muted">{{producto.created_at |
+                  date:'dd/MM/yy'}}</small>
+              </td>
+
+              <!-- Acciones -->
+              <td>
+                <div class="inventario-btn-group">
+                  <button *ngIf="tienePrivilegio('productos.Editar')"
+                    class="inventario-btn inventario-btn-outline inventario-btn-sm inventario-btn-icon"
+                    (click)="seleccionarProducto(producto)" title="Ver">
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+                  <button *ngIf="tienePrivilegio('productos.Editar')"
+                    class="inventario-btn inventario-btn-outline inventario-btn-sm inventario-btn-icon"
+                    (click)="mostrarFormularioEditar(producto)"
+                    title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button *ngIf="tienePrivilegio('trazabilidad.ver')"
+                    class="inventario-btn inventario-btn-outline inventario-btn-sm inventario-btn-icon"
+                    (click)="verMovimientos(producto)" title="Historial">
+                    <i class="bi bi-clock-history"></i>
+                  </button>
+                  <button *ngIf="tienePrivilegio('productos.Editar')"
+                    class="inventario-btn inventario-btn-danger inventario-btn-sm inventario-btn-icon"
+                    (click)="eliminarProducto(producto)" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Sin resultados -->
+            <tr *ngIf="!loadingProductos && productos.length === 0">
+              <td colspan="19" class="inventario-empty-state">
+                <i class="bi bi-inbox inventario-empty-icon"></i>
+                <h4 class="inventario-empty-title">No se encontraron
+                  repuestos</h4>
+                <p class="inventario-empty-message">Intenta con otros filtros
+                  o crea un nuevo repuesto</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+ 
+  <!-- VISTA DETALLE: FORMULARIO COMPLETO DE MOVIMIENTO -->
+ <div *ngIf="vistaActual === 'detalle'">
+  <div class="inventario-form-card">
+    <form (ngSubmit)="ejecutarMovimiento()">
+      <div class="inventario-form-grid">
+        <div style="background: linear-gradient(135deg, #ffd146 0%, #ffc000 100%); 
+              color: white; 
+              padding: 15px 20px; 
+              margin-bottom: 20px; 
+              border-radius: 8px; 
+              font-size: 1.3rem; 
+              font-weight: 600;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <i class="bi bi-box-seam" style="margin-right: 10px;"></i>Registro Movimiento
+        </div>
+
+        <!-- Información del producto -->
+        <div class="inventario-form-group" style="grid-column: span 2;">
+          <div class="alert alert-info"> 
+            <strong>Repuesto:</strong> {{ productoSeleccionado.nombre }}<br>
+            <strong>Código:</strong> {{ productoSeleccionado.codigo || 'N/A' }}<br>
+            <strong>Ubicación actual:</strong> {{ productoSeleccionado.ubicacion_nombre }}<br>
+            <strong *ngIf="productoEsSeriado" class="text-warning">⚠️ REPUESTO SERIADO</strong>
+          </div>
+        </div>
+
+        <!-- Tipo de Evento -->
+        <div class="inventario-form-group">
+          <label class="inventario-form-label">Tipo de Evento *</label>
+          <select class="inventario-form-select"
+            [(ngModel)]="formMovimiento.tipo_evento"
+            name="tipo_evento"
+            required>
+            <option value="entrada">Entrada</option>
+            <option value="salida">Salida</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="consumo">Consumo</option>
+            <option value="devolucion">Devolución</option>
+          </select>
+        </div>
+
+        <!-- Producto (auto-seleccionado) -->
+        <div class="inventario-form-group" *ngIf="productoSeleccionado">
+          <label class="inventario-form-label">Producto *</label>
+          <div class="inventario-form-info">
+            <strong>{{ productoSeleccionado.nombre }}</strong> 
+          </div>
+          <input type="hidden"
+            [(ngModel)]="formMovimiento.producto_id"
+            [value]="productoSeleccionado?.id"
+            name="producto_id">
+        </div>
+
+        <!-- Cantidad -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">Cantidad *</label>
+  <input type="number"
+    class="inventario-form-input"
+    [(ngModel)]="formMovimiento.cantidad"
+    name="cantidad"
+    [disabled]="productoEsSeriado"
+    [min]="1"
+    [max]="productoSeleccionado?.cantidad_actual"
+    [attr.max]="productoSeleccionado?.cantidad_actual"
+    required
+    #cantidadInput="ngModel"
+    (change)="validarCantidad()">
+  
+  <!-- Mostrar mensaje de error si cantidad excede stock -->
+  <div *ngIf="cantidadInput.errors && (cantidadInput.dirty || cantidadInput.touched)" class="text-danger small mt-1">
+    <div *ngIf="cantidadInput.errors['required']">La cantidad es requerida</div>
+    <div *ngIf="cantidadInput.errors['min']">La cantidad mínima es 1</div>
+    <div *ngIf="cantidadInput.errors['max']">Cantidad excede el stock disponible ({{productoSeleccionado?.cantidad_actual}})</div>
+  </div>
+  
+  <!-- Mensaje para productos seriados -->
+  <small *ngIf="productoEsSeriado" class="text-muted">
+    Repuestos seriados siempre tienen cantidad 1
+  </small>
+  
+  <!-- Mostrar stock disponible -->
+  <div *ngIf="!productoEsSeriado && productoSeleccionado" class="mt-2">
+    <small class="text-info">
+      <i class="bi bi-box"></i> 
+      Stock disponible: <strong>{{productoSeleccionado.cantidad_actual}}</strong>
+      <span *ngIf="formMovimiento.cantidad > productoSeleccionado.cantidad_actual" class="text-danger">
+        (Excede stock)
+      </span>
+    </small>
+  </div>
+</div>
+
+        <!-- Estado del Evento -->
+        <div class="inventario-form-group">
+          <label class="inventario-form-label">Estado</label>
+          <select class="inventario-form-select"
+            [(ngModel)]="formMovimiento.estado_evento"
+            name="estado_evento">
+            <option value="completado">Completado</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <!-- Motivo -->
+        <div class="inventario-form-group" style="grid-column: span 2;">
+          <label class="inventario-form-label">Motivo *</label>
+          <input type="text"
+            class="inventario-form-input"
+            [(ngModel)]="formMovimiento.motivo"
+            name="motivo"
+            placeholder="Descripción del movimiento"
+             >
+        </div>
+
+        <!-- Ubicación Origen -->
+        <div class="inventario-form-group">
+          <label class="inventario-form-label">Ubicación Origen</label>
+          <select class="inventario-form-select"
+            [(ngModel)]="formMovimiento.ubicacion_origen"
+            name="ubicacion_origen"
+            [disabled]="true">
+            <option value>{{ productoSeleccionado?.ubicacion_nombre || 'Sin ubicación' }}</option>
+          </select> 
+          
+            <strong>Ubicación actual:</strong> {{ productoSeleccionado.ubicacion_nombre }}<br>
+        </div>
+
+        <!-- Ubicación Destino -->
+       <!-- Ubicación Destino -->
+<!-- Ubicación Destino -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">Ubicación Destino *</label>
+  <select class="inventario-form-select"
+    [(ngModel)]="formMovimiento.ubicacion_destino"
+    name="ubicacion_destino"
+    required>
+    <option value>Seleccionar destino</option>
+    <option *ngFor="let ubicacion of ubicaciones" 
+            [value]="ubicacion.nombre"
+            [disabled]="ubicacion.nombre === productoSeleccionado?.ubicacion_nombre">
+      {{ ubicacion.nombre }}
+      <span *ngIf="ubicacion.nombre === productoSeleccionado?.ubicacion_nombre">
+        (ubicación actual)
+      </span>
+    </option>
+  </select>
+  
+  <!-- Mensaje informativo -->
+  <small *ngIf="productoSeleccionado?.ubicacion_nombre" class="text-muted mt-1 d-block">
+    <i class="bi bi-info-circle"></i> La ubicación "{{ productoSeleccionado.ubicacion_nombre }}" está desactivada para evitar movimientos a la misma ubicación.
+  </small>
+</div>
+
+<!-- Mensaje informativo según el escenario -->
+<div class="inventario-form-group" style="grid-column: span 2;" *ngIf="productoSeleccionado">
+  <div class="alert" [ngClass]="{
+    'alert-info': productoEsSeriado,
+    'alert-warning': !productoEsSeriado && productoSeleccionado.ubicacion_id === 9,
+    'alert-success': !productoEsSeriado
+  }">
+    <i class="bi" [ngClass]="{
+      'bi-tag': productoEsSeriado,
+      'bi-box-arrow-right': !productoEsSeriado && productoSeleccionado.ubicacion_id === 9,
+      'bi-arrow-right-circle': !productoEsSeriado
+    }"></i>
+    
+    <span *ngIf="productoEsSeriado">
+      <strong>Producto Seriado:</strong> Se moverá el repuesto completo a la nueva ubicación.
+    </span>
+    
+    <span *ngIf="!productoEsSeriado && productoSeleccionado.ubicacion_id === 9">
+      <strong>Desde BODEGA QUITO:</strong> Se creará un nuevo producto en la ubicación destino.
+    </span>
+    
+    <span *ngIf="!productoEsSeriado && productoSeleccionado.ubicacion_id !== 9">
+      <strong>Movimiento entre ubicaciones:</strong> Se buscará producto con mismo código en destino. Si existe, se sumará cantidad.
+    </span>
+  </div>
+</div>
+
+
+<!-- Estantería (solo para BODEGA QUITO como destino) -->
+<div class="inventario-form-group" *ngIf="esDestinoBodegaQuito()">
+  <label class="inventario-form-label">
+    Estantería <span class="text-danger">*</span>
+  </label>
+  <textarea class="inventario-form-textarea"
+    rows="2"
+    [(ngModel)]="formMovimiento.estanteria"
+    name="estanteria"
+    [required]="esDestinoBodegaQuito()"
+    placeholder="Estantería (obligatoria para BODEGA QUITO)">
+  </textarea>
+  
+  <div *ngIf="esDestinoBodegaQuito() && !formMovimiento.estanteria?.trim()" 
+       class="text-danger small mt-1">
+    ⚠️ La estantería es obligatoria para BODEGA QUITO
+  </div>
+</div>
+
+        <!-- Detalles -->
+        <div class="inventario-form-group" style="grid-column: span 2;">
+          <label class="inventario-form-label">Detalles</label>
+          <textarea class="inventario-form-textarea"
+            rows="3"
+            [(ngModel)]="formMovimiento.detalles"
+            name="detalles"
+            placeholder="Detalles adicionales del movimiento"></textarea>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="inventario-form-group" style="grid-column: span 2;">
+          <label class="inventario-form-label">Observaciones</label>
+          <textarea class="inventario-form-textarea"
+            rows="2"
+            [(ngModel)]="formMovimiento.observaciones"
+            name="observaciones"
+            placeholder="Observaciones adicionales"></textarea>
+        </div>
+
+        <!-- Resumen del Movimiento -->
+        <div class="inventario-card-header" style="grid-column: span 2;">
+          <h5><i class="bi bi-info-circle"></i> Resumen del Movimiento</h5>
+        </div>
+        <div class="inventario-card-body" style="grid-column: span 2;">
+          <p><strong>Repuestos:</strong> {{ productoSeleccionado.nombre }}</p>
+          <p><strong>Tipo:</strong> {{ getTipoMovimientoTexto(formMovimiento.tipo_evento) }}</p>
+          <p><strong>Cantidad:</strong> {{ formMovimiento.cantidad }}</p>
+          <p><strong>Origen:</strong> {{ formMovimiento.ubicacion_origen || productoSeleccionado?.ubicacion_nombre }}</p>
+          <p><strong>Destino:</strong> {{ formMovimiento.ubicacion_destino }}</p>
+          <p><strong>Stock después:</strong>
+            <span [ngClass]="{
+              'text-success': getStockDespues() > 0,
+              'text-danger': getStockDespues() <= 0
+            }">
+              {{ getStockDespues() }}
+            </span>
+          </p>
+          
+          <div class="inventario-form-actions">
+            <button type="button"
+              class="inventario-btn inventario-btn-outline"
+              (click)="volver()">
+              Cancelar
+            </button>
+            
+<!-- Botón de ejecutar movimiento - Deshabilitado si cantidad es 0 o excede stock -->
+<!-- HTML - Deja el botón así: -->
+<button type="button"
+  class="inventario-btn inventario-btn-primary"
+  [class.inventario-btn-deshabilitado]="loading || !formMovimiento.motivo || formMovimiento.cantidad <= 0 || 
+              (!productoEsSeriado && formMovimiento.cantidad > productoSeleccionado?.cantidad_actual) || 
+              !formMovimiento.ubicacion_destino"
+  (click)="manejarClickBoton()">
+  <span *ngIf="loading" class="inventario-spinner"></span>
+  Ejecutar Movimiento
+</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+  <!-- AQUÍ AYUDAME EN ALGO PORFAVOR ... -->
+<div *ngIf="vistaActual === 'formulario'">
+  <div class="inventario-form-card">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #114762 100%); 
+                color: white; 
+                padding: 15px 20px; 
+                margin-bottom: 20px; 
+                border-radius: 8px; 
+                font-size: 1.3rem; 
+                font-weight: 600;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <i class="bi bi-box-seam" style="margin-right: 10px;"></i>Registro Repuesto
+    </div>
+    <form (ngSubmit)="guardarProducto()">
+      <div class="inventario-form-grid">
+        
+        <!-- Checkbox Repuesto Seriado (NUEVO) -->
+        <div class="inventario-form-group" style="grid-column: span 2;">
+          <label class="inventario-form-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" 
+                   [(ngModel)]="esRepuestoSeriado"
+                   name="esRepuestoSeriado"
+                   (change)="onRepuestoSeriadoChange()">
+            <span style="font-weight: 500;">Repuesto seriado</span>
+          </label>
+          <small class="text-muted" *ngIf="esRepuestoSeriado">
+            Al marcar esta opción, puedes buscar un repuesto existente por Part Number y clonar sus datos.
+          </small>
+        </div>
+
+        <!-- Campo para buscar Part Number existente (solo visible si es repuesto seriado) -->
+        <div class="inventario-form-group" *ngIf="esRepuestoSeriado" style="grid-column: span 2;">
+          <label class="inventario-form-label">Buscar Part Number existente</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="text"
+                   class="inventario-form-input"
+                   [(ngModel)]="partNumberBuscar"
+                   name="partNumberBuscar"
+                   placeholder="Ingresa el Part Number para buscar repuestos existentes"
+                   style="flex: 1;">
+            <button type="button" 
+                    class="inventario-btn inventario-btn-secondary"
+                    (click)="buscarPorPartNumber()"
+                    [disabled]="!partNumberBuscar.trim() || buscandoProducto">
+              <span *ngIf="buscandoProducto" class="inventario-spinner"></span>
+              {{ buscandoProducto ? 'Buscando...' : 'Buscar' }}
+            </button>
+          </div>
+          
+          <!-- Mensaje de confirmación simple -->
+<div *ngIf="clonandoDeProductoExistente" 
+     class="mt-3 p-3 border border-success rounded bg-success bg-opacity-10 position-relative">
+  <div style="position: absolute; top: 10px; right: 10px;">
+    <button type="button" 
+            class="btn-close"
+            (click)="clonandoDeProductoExistente = false"
+            aria-label="Cerrar"></button>
+  </div>
+  
+  <div class="d-flex align-items-center">
+    <i class="bi bi-check-circle-fill text-success me-2 fs-4"></i>
+    <div>
+      <strong>¡Repuesto clonado!</strong>
+       
+    </div>
+  </div>
+</div>
+        </div>
+
+        <!-- Nombre -->
+        <div class="inventario-form-group">
+          <label class="inventario-form-label">Nombre *</label>
+          <input type="text"
+            class="inventario-form-input"
+            [(ngModel)]="formProducto.nombre"
+            name="nombre"
+            placeholder="Nombre del repuesto"
+            required>
+        </div>
+
+        <!-- Descripción -->
+        <div class="inventario-form-group">
+          <label class="inventario-form-label">Descripción</label>
+          <textarea class="inventario-form-textarea"
+            rows="2"
+            [(ngModel)]="formProducto.descripcion"
+            name="descripcion"
+            placeholder="Descripción del repuesto"></textarea>
+        </div>
+
+        <!-- Componente -->
+        <!-- Componente - CON VALOR POR DEFECTO "RA" -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">Componente</label>
+  <select class="inventario-form-select"
+    [(ngModel)]="formProducto.componente"
+    name="componente">
+    <option value="RA" selected>RA</option>
+    <option value="GAREX/SCV">GAREX/SCV</option>
+    <option value="MYC">MYC</option>
+    <option value="SATCOM">SATCOM</option>
+    <option value="COMMS">COMMS</option>
+    <option value="CAMIONES">CAMIONES</option>
+    <option value="AA">AA</option>
+    <option value="GENERADORES">GENERADORES</option>
+    <option value="UPS">UPS</option>
+  </select>
+</div>
+
+        <!-- Criticidad -->
+        <div class="inventario-form-group">
+          <label class="inventario-form-label">Criticidad</label>
+          <select class="inventario-form-select"
+            [(ngModel)]="formProducto.criticidad"
+            name="criticidad">
+            <option value="Bajo">Bajo</option>
+            <option value="Medio">Medio</option>
+            <option value="Alto">Alto</option>
+            <option value="Critico">Crítico</option>
+          </select>
+        </div>
+
+        <!-- Part Number -->
+        <!-- Part Number - AHORA OBLIGATORIO PARA TODOS -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">
+    Part Number <span class="text-danger">*</span>
+  </label>
+  <input type="text"
+    class="inventario-form-input"
+    [(ngModel)]="formProducto.part_number"
+    name="part_number"
+    required
+    #partNumberInput="ngModel"
+    placeholder="Número de parte">
+  
+  <!-- Mensaje de validación -->
+  <div *ngIf="partNumberInput.invalid && (partNumberInput.dirty || partNumberInput.touched)" 
+       class="text-danger small mt-1">
+    <div *ngIf="partNumberInput.errors?.['required']">
+      El Part Number es obligatorio
+    </div>
+  </div>
+  
+  <small class="text-muted">
+    Identificador único del repuesto
+  </small>
+</div>
+
+        <!-- Código -->
+       <!-- Código -->
+<!-- Código - AHORA OBLIGATORIO PARA TODOS -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">
+    Código <span class="text-danger">*</span>
+  </label>
+  <input type="text"
+    class="inventario-form-input"
+    [(ngModel)]="formProducto.codigo"
+    name="codigo"
+    required
+    #codigoInput="ngModel"
+    placeholder="Código interno">
+  
+  <!-- Mensaje de validación -->
+  <div *ngIf="codigoInput.invalid && (codigoInput.dirty || codigoInput.touched)" 
+       class="text-danger small mt-1">
+    <div *ngIf="codigoInput.errors?.['required']">
+      El código es obligatorio
+    </div>
+  </div>
+</div>
+
+        <!-- Serial Number - Solo requerido y habilitado para repuestos seriados -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">
+    Serial Number 
+    <span *ngIf="esRepuestoSeriado" class="text-danger">*</span>
+  </label>
+  <input type="text"
+    class="inventario-form-input"
+    [(ngModel)]="formProducto.serial_number"
+    name="serial_number"
+    [required]="esRepuestoSeriado"
+    [disabled]="!esRepuestoSeriado"
+    placeholder="Número de serie">
+  
+  <small *ngIf="esRepuestoSeriado" class="text-muted">
+    Este campo es obligatorio para repuestos seriados
+  </small>
+  
+  <small *ngIf="!esRepuestoSeriado" class="text-muted">
+    Solo para repuestos seriados
+  </small>
+</div>
+
+        <!-- El resto de los campos se mantienen igual -->
+        <!-- ... resto del formulario ... -->
+          <!-- Estado -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Estado</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formProducto.estado"
+              name="estado">
+              <option value="todos">Todos los estados</option>
+              <option value="NUEVO">NUEVO</option>
+              <option value="UTIL">UTIL</option>
+              <option value="MANTENIMIENTO BANCO DE PRUEBAS">MANTENIMIENTO BANCO
+                DE
+                PRUEBAS</option>
+              <option value="MANTENIMIENTO FÁBRICA">MANTENIMIENTO
+                FÁBRICA</option>
+              <option value="PROCESO DE EXPORTACIÓN (MODALTRADE)">PROCESO DE
+                EXPORTACIÓN (MODALTRADE)</option>
+
+              <option value="CUARENTENA BODEGA">CUARENTENA BODEGA
+              </option>
+              <option value="CONDENADO">CONDENADO</option>
+            </select>
+          </div>
+
+<!-- Cantidad Actual - CORREGIDO -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">Cantidad *</label>
+  <input type="number"
+    class="inventario-form-input"
+    [(ngModel)]="formProducto.cantidad_actual"
+    name="cantidad_actual"
+    [min]="esRepuestoSeriado ? 1 : 1"
+    [max]="esRepuestoSeriado ? 1 : null"
+    [required]="!esRepuestoSeriado"
+    [readonly]="esRepuestoSeriado"
+    #cantidadInput="ngModel">
+  
+  <div *ngIf="cantidadInput.invalid && (cantidadInput.dirty || cantidadInput.touched)" class="text-danger small mt-1">
+    <div *ngIf="cantidadInput.errors?.['required']">La cantidad es requerida</div>
+    <div *ngIf="cantidadInput.errors?.['min']">La cantidad mínima es 1</div>
+  </div>
+  
+  <small class="text-muted" *ngIf="esRepuestoSeriado">
+    Los repuestos seriados siempre tienen cantidad 1
+  </small>
+</div>
+
+          <!-- Ubicación -->
+          <!-- Ubicación -->
+<!-- Ubicación -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">Ubicación</label>
+  <select class="inventario-form-select"
+    [(ngModel)]="formProducto.ubicacion_id"
+    name="ubicacion_id"
+    (ngModelChange)="onUbicacionChange($event)"> <!-- Solo ngModelChange -->
+    <option value="">Seleccionar ubicación</option>
+    <option *ngFor="let ubicacion of ubicaciones"
+      [value]="ubicacion.id">
+      {{ ubicacion.nombre }}
+    </option>
+  </select>
+</div>
+
+<!-- Estantería -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">
+    Estantería
+    <span *ngIf="formProducto.ubicacion_id === 9" class="text-danger"> *</span>
+  </label>
+  <textarea class="inventario-form-textarea"
+    rows="2"
+    [(ngModel)]="formProducto.estanteria"
+    name="estanteria"
+    [required]="formProducto.ubicacion_id === 9"
+    [placeholder]="formProducto.ubicacion_id === 9 ? 'Estantería (obligatoria)' : 'Estantería (opcional)'">
+  </textarea>
+  
+  <!-- Mensaje dinámico -->
+  <div *ngIf="formProducto.ubicacion_id === 9 && !formProducto.estanteria?.trim()" 
+       class="text-danger small mt-1">
+    ⚠️ La estantería es obligatoria para BODEGA QUITO
+  </div>
+</div>
+
+          <!-- Precio -->
+       <!-- Precio -->
+<div class="inventario-form-group">
+  <label class="inventario-form-label">Precio *</label>
+  <input type="number"
+    class="inventario-form-input"
+    [(ngModel)]="formProducto.precio"
+    name="precio"
+    min="0.01"
+    step="0.01"
+    required
+    #precioInput="ngModel"
+    placeholder="0.00">
+  
+  <div *ngIf="precioInput.invalid && (precioInput.dirty || precioInput.touched)" class="text-danger small mt-1">
+     
+  </div>
+</div>
+
+          <!-- Fecha Adquisición -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Fecha Adquisición</label>
+            <input type="date"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.fecha_adquisicion"
+              name="fecha_adquisicion">
+          </div>
+
+          <!-- Orden de Envío -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Orden de Envío</label>
+
+            <!-- Input para subir archivo -->
+            <input type="file"
+              class="inventario-form-input"
+              (change)="onOrdenEnvioSelected($event)"
+              accept="image/*,.pdf"
+              style="padding: 8px;">
+
+            <!-- Previsualización si ya existe imagen -->
+
+            <!-- Previsualización de nueva imagen -->
+            <div *ngIf="ordenEnvioPreview" class="mt-2">
+              <p class="text-muted mb-1">Nueva imagen:</p>
+              <img [src]="ordenEnvioPreview"
+                alt="Vista previa"
+                style="max-width: 200px; max-height: 150px; border-radius: 4px;">
+            </div>
+          </div>
+
+          <!-- Factura -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Factura</label>
+
+            <!-- Input para subir archivo -->
+            <input type="file"
+              class="inventario-form-input"
+              (change)="onFacturaSelected($event)"
+              accept="image/*,.pdf"
+              style="padding: 8px;">
+
+            <!-- Previsualización si ya existe imagen -->
+
+            <!-- Previsualización de nueva imagen -->
+            <div *ngIf="facturaPreview" class="mt-2">
+              <p class="text-muted mb-1">Nueva imagen:</p>
+              <img [src]="facturaPreview"
+                alt="Vista previa"
+                style="max-width: 200px; max-height: 150px; border-radius: 4px;">
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="inventario-form-group" style="grid-column: span 2;">
+            <label class="inventario-form-label">Observaciones</label>
+            <textarea class="inventario-form-textarea"
+              rows="3"
+              [(ngModel)]="formProducto.observaciones"
+              name="observaciones"
+              placeholder="Observaciones adicionales"></textarea>
+          </div>
+        </div>
+
+        <div class="inventario-form-actions">
+          <button type="button" class="inventario-btn inventario-btn-outline"
+            (click)="volver()">
+            Cancelar
+          </button>
+          <button type="submit" 
+        class="inventario-btn inventario-btn-primary"
+        [disabled]="loading"
+        (click)="validarYGuardar($event)">
+  <span *ngIf="loading" class="inventario-spinner"></span>
+  {{ modoFormulario === 'crear' ? 'Crear Repuesto' : 'Actualizar Repuesto' }}
+</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- VISTA MOVIMIENTOS: HISTORIAL DE PRODUCTO -->
+  <!-- VISTA MOVIMIENTOS: HISTORIAL DE PRODUCTO -->
+  <div *ngIf="vistaActual === 'movimientos' && productoSeleccionado">
+    <!-- Modal de movimientos -->
+    <div class="movimientos-modal-overlay">
+      <div class="movimientos-modal">
+        <div class="movimientos-modal-header">
+          <button class="movimientos-modal-back-btn" (click)="volver()">
+            <i class="bi bi-arrow-left"></i> Volver
+          </button>
+          <h2 class="movimientos-modal-title">
+            <i class="bi bi-clock-history"></i> Historial de Movimientos: {{
+            productoSeleccionado.nombre }}
+          </h2>
+        </div>
+
+        <div class="movimientos-modal-content">
+          <!-- Loading movimientos -->
+          <div *ngIf="loadingMovimientos" class="movimientos-loading">
+            <div class="movimientos-spinner"></div>
+            <span>Cargando movimientos...</span>
+          </div>
+
+          <!-- Lista de movimientos -->
+          <div *ngIf="!loadingMovimientos">
+            <div *ngIf="movimientosProducto.length === 0"
+              class="movimientos-empty-state">
+              <i class="bi bi-clock movimientos-empty-icon"></i>
+              <h4 class="movimientos-empty-title">No hay movimientos
+                registrados</h4>
+              <p class="movimientos-empty-message">Este Repuesto aún no tiene
+                movimientos registrados</p>
+            </div>
+
+            <div *ngFor="let movimiento of movimientosProducto"
+              [class]="'movimiento-card movimiento-' + movimiento.tipo_evento">
+
+              <!-- Cabecera con ID -->
+              <div class="movimiento-header">
+                <div class="movimiento-icon">
+                  <i [class]="getMovimientoIcono(movimiento.tipo_evento)"></i>
+                </div>
+                <div class="movimiento-title">
+                  <!-- ID del movimiento -->
+                  <span class="movimiento-id">#{{ movimiento.id }}</span>
+                  {{ movimiento.tipo_evento | titlecase }}
+                </div>
+              </div>
+
+              <div class="movimiento-body">
+                <!-- Información principal en grid -->
+                <div class="movimiento-info-grid">
+                  <!-- Fila 1: Fecha y Tipo -->
+                  <div class="info-row">
+                    <div class="info-item">
+                      <strong>Fecha:</strong> {{ movimiento.fecha_evento |
+                      date:'medium' }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Tipo Evento:</strong> {{ movimiento.tipo_evento |
+                      titlecase }}
+                    </div>
+                  </div>
+
+                  <!-- Fila 2: Producto -->
+                  <div class="info-row">
+                    <div class="info-item full-width">
+                      <strong>Repuesto:</strong>
+                      {{ movimiento.producto_nombre ||
+                      productoSeleccionado.nombre }}
+                      <span *ngIf="movimiento.producto_codigo">({{
+                        movimiento.producto_codigo }})</span>
+                      <span *ngIf="productoSeleccionado.codigo">({{
+                        productoSeleccionado.codigo }})</span>
+                    </div>
+                  </div>
+
+                  <!-- Fila 3: Cantidad y Estado -->
+                  <div class="info-row">
+                    <div class="info-item">
+                      <strong>Cantidad:</strong> {{ movimiento.cantidad }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Estado:</strong> {{ movimiento.estado_evento |
+                      titlecase }}
+                    </div>
+                  </div>
+
+                  <!-- Fila 4: Ubicaciones -->
+                  <div class="info-row"
+                    *ngIf="movimiento.ubicacion_origen || movimiento.ubicacion_destino">
+                    <div class="info-item" *ngIf="movimiento.ubicacion_origen">
+                      <strong>Origen:</strong> {{ movimiento.ubicacion_origen }}
+                    </div>
+                    <div class="info-item" *ngIf="movimiento.ubicacion_destino">
+                      <strong>Destino:</strong> {{ movimiento.ubicacion_destino
+                      }}
+                    </div>
+                  </div>
+
+                  <!-- Fila 5: Usuario -->
+                  <div class="info-row">
+                    <div class="info-item full-width">
+                      <strong>Usuario:</strong> {{ movimiento.usuario_nombre ||
+                      'Sistema' }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Motivo -->
+                <p class="movimiento-motivo">
+                  <strong>Motivo:</strong> {{ movimiento.motivo }}
+                </p>
+
+                <!-- Detalles -->
+                <div *ngIf="movimiento.detalles" class="movimiento-detalles">
+                  <strong>Detalles:</strong>
+                  <div class="detalles-content">{{ movimiento.detalles }}</div>
+                </div>
+
+                <!-- Observaciones -->
+                <div *ngIf="movimiento.observaciones"
+                  class="movimiento-observaciones">
+                  <strong>Observaciones:</strong>
+                  <div class="observaciones-content">{{ movimiento.observaciones
+                    }}</div>
+                </div>
+
+                <!-- Fecha de modificación si existe -->
+                <div *ngIf="movimiento.fecha_modificacion"
+                  class="movimiento-modificado">
+                  <strong>Última modificación:</strong> {{
+                  movimiento.fecha_modificacion | date:'medium' }}
+                </div>
+
+                <!-- Meta información original (mantengo por compatibilidad) -->
+                <div class="movimiento-meta">
+                  <span class="movimiento-date">{{ movimiento.fecha_evento |
+                    date:'medium' }}</span>
+                  <span class="movimiento-user">• Registrado por: {{
+                    movimiento.usuario_nombre || 'Sistema' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Paginación -->
+  <div *ngIf="totalPaginas > 1 && vistaActual === 'lista'"
+    class="inventario-pagination">
+    <div class="inventario-pagination-info">
+      Página {{ filtros.page }} de {{ totalPaginas }}
+    </div>
+    <div class="inventario-pagination-controls">
+      <button class="inventario-page-btn"
+        [class.disabled]="filtros.page === 1"
+        (click)="cambiarPagina(filtros.page - 1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      <button *ngFor="let pagina of paginas"
+        class="inventario-page-btn"
+        [class.active]="pagina === filtros.page"
+        (click)="cambiarPagina(pagina)">
+        {{ pagina }}
+      </button>
+
+      <button class="inventario-page-btn"
+        [class.disabled]="filtros.page === totalPaginas"
+        (click)="cambiarPagina(filtros.page + 1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div><!-- Modal para visualizar imágenes -->
+<div class="modal fade" [class.show]="imagenModal.mostrar"
+  [style.display]="imagenModal.mostrar ? 'block' : 'none'"
+  tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{imagenModal.titulo}}</h5>
+        <button type="button" class="btn-close"
+          (click)="cerrarModalImagen()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <!-- Mostrar imagen si es imagen -->
+        <img *ngIf="esImagen(imagenModal.url)"
+          [src]="imagenModal.url"
+          alt="Vista previa"
+          style="max-width: 100%; max-height: 70vh;">
+
+        <!-- Mostrar PDF en iframe si es PDF -->
+        <iframe *ngIf="esPdf(imagenModal.url)"
+          [src]="imagenModal.url"
+          width="100%" height="500px"
+          frameborder="0">
+          Tu navegador no soporta la visualización de PDFs.
+        </iframe>
+
+        <!-- Mostrar enlace si no se puede mostrar directamente -->
+        <div *ngIf="mostrarAlertaNoPrevisualizable(imagenModal.url)"
+          class="alert alert-info mt-3">
+          <p>No se puede previsualizar este tipo de archivo.</p>
+          <a [href]="imagenModal.url" target="_blank" class="btn btn-primary">
+            Abrir en nueva pestaña
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+          (click)="cerrarModalImagen()">
+          Cerrar
+        </button>
+        <button type="button" class="btn btn-primary"
+          (click)="descargarImagen(imagenModal.url, imagenModal.titulo)">
+          <i class="bi bi-download me-1"></i> Descargar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fondo del modal -->
+<div class="modal-backdrop fade show"
+  [style.display]="imagenModal.mostrar ? 'block' : 'none'"
+  (click)="cerrarModalImagen()"></div>
+
+<!-- Modal de Edición Múltiple de Campos -->
+<div class="modal-backdrop fade show"
+  *ngIf="mostrandoEdicionMultiCampo"
+  (click)="cerrarEdicionMultiCampo()"></div>
+<div class="modal fade show"
+  [class.show]="mostrandoEdicionMultiCampo"
+  [style.display]="mostrandoEdicionMultiCampo ? 'block' : 'none'"
+  tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-list-check me-2"></i>
+          Edición Masiva de Múltiples Campos
+        </h5>
+        <button type="button" class="btn-close btn-close-white"
+          (click)="cerrarEdicionMultiCampo()"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Resumen -->
+        <div class="alert alert-info mb-3">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Resumen:</strong>
+          <span *ngIf="!formEdicionMultiCampo.aplicarATodos">
+            Se actualizarán <strong>{{ productosSeleccionados.size }}</strong>
+            repuestos seleccionados.
+          </span>
+          <span *ngIf="formEdicionMultiCampo.aplicarATodos">
+            Se actualizarán <strong>TODOS</strong> los repuestos filtrados ({{
+            totalProductos }}).
+          </span>
+          <p class="mb-0 mt-1">Puedes editar varios campos a la vez. Agrega
+            tantos campos como necesites.</p>
+        </div>
+
+        <!-- Campos a editar (dinámicos) -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-label fw-bold">Campos a actualizar</label>
+            <button type="button" class="btn btn-sm btn-outline-primary"
+              (click)="agregarCampoEdicion()">
+              <i class="bi bi-plus-circle"></i> Agregar campo
+            </button>
+          </div>
+
+          <!-- Lista de campos -->
+          <div *ngFor="let item of formEdicionMultiCampo.campos; let i = index"
+            class="row g-2 mb-2 align-items-end campo-edicion-item">
+            <div class="col-md-5">
+              <label class="form-label small">Campo {{ i + 1 }}</label>
+              <select class="form-select"
+                [(ngModel)]="item.campo"
+                [name]="'campo' + i"
+                required>
+                <option value>Seleccionar campo...</option>
+                <option *ngFor="let campo of camposEditables"
+                  [value]="campo.id">
+                  {{ campo.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-5">
+              <label class="form-label small">Nuevo valor</label>
+
+              <!-- Diferentes tipos de inputs según el campo -->
+              <input
+                *ngIf="item.campo && (item.campo === 'nombre' || item.campo === 'componente' || 
+                       item.campo === 'part_number' || item.campo === 'codigo' || 
+                       item.campo === 'serial_number')"
+                type="text"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [placeholder]="getPlaceholderCampo(item.campo)"
+                required>
+
+              <input
+    *ngIf="item.campo && item.campo === 'cantidad_actual'"
+    type="number"
+    class="form-control"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    [step]="1"
+    [min]="0"
+    required>
+
+              <input *ngIf="item.campo === 'precio'"
+                type="number"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [step]="0.01"
+                [min]="0"
+                required>
+
+              <select *ngIf="item.campo === 'estado'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar estado...</option>
+                <option *ngFor="let opcion of getOpcionesCampo('estado')"
+                  [value]="opcion">
+                  {{ opcion | titlecase }}
+                </option>
+              </select>
+
+              <select *ngIf="item.campo === 'criticidad'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar criticidad...</option>
+                <option *ngFor="let opcion of getOpcionesCampo('criticidad')"
+                  [value]="opcion">
+                  {{ opcion | titlecase }}
+                </option>
+              </select>
+
+              <select *ngIf="item.campo === 'ubicacion_id'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar ubicación...</option>
+                <option *ngFor="let ubicacion of ubicaciones"
+                  [value]="ubicacion.id">
+                  {{ ubicacion.nombre }}
+                </option>
+              </select>
+
+              <input *ngIf="item.campo === 'fecha_adquisicion'"
+                type="date"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+
+              <textarea
+                *ngIf="item.campo && (item.campo === 'descripcion' || item.campo === 'estanteria'|| item.campo === 'observaciones')"
+                class="form-control"
+                rows="2"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [placeholder]="getPlaceholderCampo(item.campo)"
+                required></textarea>
+            </div>
+
+            <div class="col-md-2">
+              <button type="button" class="btn btn-outline-danger w-100"
+                (click)="eliminarCampoEdicion(i)"
+                [disabled]="formEdicionMultiCampo.campos.length <= 1">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Motivo -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Motivo de la actualización *</label>
+          <input type="text"
+            class="form-control"
+            [(ngModel)]="formEdicionMultiCampo.motivo"
+            name="motivo_multi"
+            placeholder="Ej: Actualización masiva de varios campos"
+            required>
+        </div>
+
+        <!-- Opción para aplicar a todos -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox"
+            id="aplicarATodosMulti"
+            [(ngModel)]="formEdicionMultiCampo.aplicarATodos">
+          <label class="form-check-label" for="aplicarATodosMulti">
+            <strong>Aplicar a Todos los Repuestos Filtrados</strong> ({{
+            totalProductos }} productos)
+          </label>
+        </div>
+
+        <!-- Resumen de cambios -->
+        <div class="alert alert-warning" *ngIf="validarCamposMultiples()">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>Resumen de cambios:</strong>
+          <ul class="mb-0 mt-2">
+            <li *ngFor="let item of getCamposValidos()">
+              <strong>{{ getNombreCampo(item.campo) }}:</strong>
+              {{ item.valor }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Botones -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary"
+            (click)="cerrarEdicionMultiCampo()" [disabled]="loading">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-success"
+            (click)="ejecutarEdicionMultiCampo()"
+            [disabled]="loading || !validarCamposMultiples()">
+            <span *ngIf="loading"
+              class="spinner-border spinner-border-sm me-1"></span>
+            Aplicar {{ getCamposValidosCount() }} cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de importación -->
+<!-- Modal de Importación de Excel - VERSIÓN QUE SE CIERRA AUTOMÁTICAMENTE -->
+<div class="modal-backdrop fade show"
+  *ngIf="mostrandoModalImportacion"
+  (click)="cerrarModalImportacion()"></div>
+<div class="modal fade show"
+  [class.show]="mostrandoModalImportacion"
+  [style.display]="mostrandoModalImportacion ? 'block' : 'none'"
+  tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          Importar repuestos desde Excel
+        </h5>
+        <button type="button" class="btn-close btn-close-white"
+          (click)="cerrarModalImportacion()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Instrucciones -->
+        <div class="alert alert-light border mb-4">
+          <h6 class="mb-2"><i
+              class="bi bi-info-circle me-2 text-primary"></i>Importación
+            automática:</h6>
+          <ul class="mb-0 ps-3">
+            <li>Los repuestos existentes se actualizarán (por código o
+              serial)</li>
+            <li>Los repuestos nuevos se crearán automáticamente</li>
+            <li>El modal se cerrará automáticamente al terminar</li>
+          </ul>
+        </div>
+
+        <!-- Sección 2: Seleccionar archivo -->
+        <div class="card mb-4">
+          <div class="card-body">
+
+            <!-- Estado del archivo -->
+            <div *ngIf="!archivoImportacion">
+              <p class="card-text mb-3">Selecciona un archivo Excel (.xlsx o
+                .xls) con los repuestos a importar.</p>
+
+              <div class="d-grid">
+                <button class="btn btn-primary btn-lg"
+                  (click)="archivoImportInput.click()"
+                  [disabled]="loading">
+                  <i class="bi bi-folder-plus me-2"></i> Seleccionar archivo
+                  Excel
+                </button>
+              </div>
+              <div class="form-text mt-2 text-center">
+                Formatos: .xlsx, .xls (máximo 10MB)
+              </div>
+            </div>
+
+            <!-- Archivo seleccionado -->
+            <div *ngIf="archivoImportacion" class="alert alert-info">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="bi bi-file-earmark-excel me-2"></i>
+                  <strong>Archivo listo:</strong> {{ archivoImportacion.name }}
+                  <span class="text-muted ms-2">
+                    ({{ (archivoImportacion.size / 1024).toFixed(2) }} KB)
+                  </span>
+                </div>
+                <div>
+                  <button class="btn btn-sm btn-outline-danger"
+                    (click)="archivoImportacion = null; archivoImportInput.value = ''">
+                    <i class="bi bi-x-circle"></i> Cambiar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección 3: Ejecutar importación (solo si hay archivo) -->
+        <div class="card" *ngIf="archivoImportacion && !resultadoImportacion">
+          <div class="card-body">
+            <h6 class="card-title mb-3">
+              <i class="bi bi-play-circle me-2 text-success"></i>Paso 3:
+              Ejecutar importación
+            </h6>
+            <p class="card-text">Al ejecutar, los repuestos se procesarán y el
+              modal se cerrará automáticamente.</p>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-success btn-lg"
+                (click)="ejecutarImportacion()"
+                [disabled]="importando">
+                <span *ngIf="importando"
+                  class="spinner-border spinner-border-sm me-1"></span>
+                <i class="bi bi-play-circle me-2"></i>
+                {{ importando ? 'Importando...' : 'Ejecutar Importación' }}
+              </button>
+
+              <button class="btn btn-outline-secondary"
+                (click)="cerrarModalImportacion()">
+                <i class="bi bi-x-circle me-1"></i> Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección 4: Resultados (durante los 3 segundos antes de cerrar) -->
+        <div *ngIf="resultadoImportacion" class="mt-4">
+          <div class="alert alert-success">
+            <h5 class="alert-heading">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              Importación Completada
+            </h5>
+
+            <!-- Contador regresivo -->
+            <div class="alert alert-warning mt-3">
+              <i class="bi bi-clock me-2"></i>
+              Cerrando en <span class="badge bg-danger">3</span> segundos...
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-md-3 text-center">
+                <div class="bg-light rounded p-3">
+                  <h2 class="text-primary mb-0">{{ resultadoImportacion.total
+                    }}</h2>
+                  <small class="text-muted">Total procesados</small>
+                </div>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="bg-light rounded p-3">
+                  <h2 class="text-success mb-0">{{ resultadoImportacion.creados
+                    }}</h2>
+                  <small class="text-muted">Nuevos creados</small>
+                </div>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="bg-light rounded p-3">
+                  <h2 class="text-warning mb-0">{{
+                    resultadoImportacion.actualizados }}</h2>
+                  <small class="text-muted">Actualizados</small>
+                </div>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="bg-light rounded p-3">
+                  <h2
+                    [class.text-danger]="resultadoImportacion.errores.length > 0"
+                    [class.text-success]="resultadoImportacion.errores.length === 0"
+                    class="mb-0">
+                    {{ resultadoImportacion.errores.length }}
+                  </h2>
+                  <small class="text-muted">Errores</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Errores (solo si hay) -->
+            <div *ngIf="resultadoImportacion.errores.length > 0" class="mt-4">
+              <hr>
+              <h6 class="mb-3">
+                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                Se encontraron {{ resultadoImportacion.errores.length }} errores
+              </h6>
+              <div class="table-responsive"
+                style="max-height: 150px; overflow-y: auto;">
+                <table class="table table-sm table-bordered">
+                  <thead class="table-light">
+                    <tr>
+                      <th width="80">Fila</th>
+                      <th>Error</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let error of resultadoImportacion.errores">
+                      <td class="text-center">
+                        <span class="badge bg-danger">{{ error.fila }}</span>
+                      </td>
+                      <td class="small">{{ error.error }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Input oculto para archivo -->
+<input #archivoImportInput type="file" id="archivoImportacion"
+  accept=".xlsx,.xls"
+  (change)="onArchivoImportacionSelected($event)"
+  style="display: none">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Agrega esto al final del archivo, antes del cierre del componente -->
+
+<!-- Modal de confirmación para eliminar todos los registros -->
+<div *ngIf="confirmacionEliminacion.mostrar" class="modal-overlay-danger">
+  <div class="modal-danger">
+    
+    <!-- Paso 1: Advertencia inicial -->
+    <div *ngIf="confirmacionEliminacion.paso === 1" class="modal-paso">
+      <div class="modal-header-danger">
+        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+        <h3>⚠️ ADVERTENCIA CRÍTICA</h3>
+      </div>
+      
+      <div class="modal-body-danger">
+        <div class="alert alert-danger">
+          <h5><i class="bi bi-x-octagon-fill"></i> ESTA ACCIÓN NO SE PUEDE DESHACER</h5>
+        </div>
+        
+        <p class="text-danger">
+          Está a punto de eliminar <strong>TODOS los registros</strong> de la base de datos.
+        </p>
+        
+        <ul class="lista-advertencias">
+         
+          <li><i class="bi bi-arrow-clockwise"></i> Los contadores (IDs) se reiniciarán a 1</li>
+          <li><i class="bi bi-layers"></i> La <strong>estructura</strong> (tablas, vistas, triggers) se mantendrá</li>
+        </ul>
+        
+        <div class="text-center mt-4">
+          <p class="fw-bold">¿Desea continuar con esta acción irreversible?</p>
+        </div>
+      </div>
+      
+      <div class="modal-footer-danger">
+        <button class="btn btn-secondary" (click)="cerrarConfirmacionEliminacion()">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button class="btn btn-warning" (click)="avanzarConfirmacion()">
+          <i class="bi bi-exclamation-triangle"></i> Sí, continuar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Paso 2: Confirmación con texto -->
+    <div *ngIf="confirmacionEliminacion.paso === 2" class="modal-paso">
+      <div class="modal-header-danger">
+        <i class="bi bi-shield-exclamation text-danger"></i>
+        <h3>CONFIRMACIÓN FINAL</h3>
+      </div>
+      
+      <div class="modal-body-danger">
+        <div class="alert alert-warning">
+          <h5><i class="bi bi-key-fill"></i> Confirmación por texto</h5>
+          <p>Para proceder, escriba exactamente: <code class="bg-dark text-warning p-1">ELIMINAR</code></p>
+        </div>
+        
+        <div class="mb-3">
+          <input 
+            type="text" 
+            class="form-control form-control-lg text-center"
+            [(ngModel)]="confirmacionEliminacion.textoConfirmacion"
+            placeholder="Escriba aquí..."
+            autocomplete="off"
+            [class.is-valid]="textoConfirmacionValido()"
+            [class.is-invalid]="confirmacionEliminacion.textoConfirmacion && !textoConfirmacionValido()"
+          >
+          
+          <div *ngIf="textoConfirmacionValido()" class="valid-feedback">
+            <i class="bi bi-check-circle"></i> Texto correcto
+          </div>
+          
+          <div *ngIf="confirmacionEliminacion.textoConfirmacion && !textoConfirmacionValido()" class="invalid-feedback">
+            <i class="bi bi-x-circle"></i> Texto incorrecto. Debe escribir exactamente: <strong>ELIMINAR</strong>
+          </div>
+        </div>
+        
+        <p class="text-muted small">
+          Esta medida de seguridad previene eliminaciones accidentales.
+        </p>
+      </div>
+      
+      <div class="modal-footer-danger">
+        <button class="btn btn-secondary" (click)="cerrarConfirmacionEliminacion()">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <button 
+          class="btn btn-danger" 
+          (click)="avanzarConfirmacion()"
+          [disabled]="!textoConfirmacionValido()">
+          <i class="bi bi-shield-check"></i> Confirmar
+        </button>
+      </div>
+    </div>
+    
+    <!-- Paso 3: Ejecución final -->
+    <div *ngIf="confirmacionEliminacion.paso === 3" class="modal-paso">
+      <div class="modal-header-danger">
+        <i class="bi bi-gear-fill text-danger"></i>
+        <h3>EJECUTANDO ELIMINACIÓN</h3>
+      </div>
+      
+      <div class="modal-body-danger text-center">
+        <div *ngIf="!confirmacionEliminacion.eliminando">
+          <div class="alert alert-danger">
+            <h5><i class="bi bi-play-circle-fill"></i> ÚLTIMA OPORTUNIDAD</h5>
+          </div>
+          
+          <p class="mb-4">
+            ¿Está <strong>absolutamente seguro</strong> de proceder con la eliminación total?
+          </p>
+          
+          <div class="d-grid gap-2">
+            <button class="btn btn-lg btn-outline-secondary" (click)="cerrarConfirmacionEliminacion()">
+              <i class="bi bi-x-octagon"></i> NO, CANCELAR
+            </button>
+            <button class="btn btn-lg btn-danger" (click)="ejecutarEliminacionTotal()">
+              <i class="bi bi-trash3-fill"></i> SÍ, ELIMINAR TODO
+            </button>
+          </div>
+        </div>
+        
+        <!-- Estado de carga -->
+        <div *ngIf="confirmacionEliminacion.eliminando" class="text-center py-4">
+          <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Eliminando...</span>
+          </div>
+          <h4 class="mt-3 text-danger">ELIMINANDO REGISTROS...</h4>
+          <p class="text-muted">Por favor espere. Esto puede tomar unos segundos.</p>
+          <div class="progress mt-3">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" 
+                 style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>

@@ -1,0 +1,1145 @@
+/* src/app/components/configuracion/configuracion.component.css */
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffffff 0%, #c9c9c9 100%);
+}
+
+.configuracion-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.config-header {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.5s ease;
+}
+
+.header-content h1 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 2.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-content .subtitle {
+  margin: 8px 0 0;
+  color: #718096;
+  font-size: 1rem;
+}
+
+/* Botones */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-primary {
+  background: #104861;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4092 100%);
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e0;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+}
+
+/* Panel de filtros */
+.filters-panel {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.search-box {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+  display: flex;
+  gap: 10px;
+}
+
+.search-box i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+}
+
+.search-input {
+  flex: 1;
+  padding: 14px 14px 14px 46px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #104861;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-search, .btn-clear {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-search {
+  background: #edf2f7;
+  color: #4a5568;
+}
+
+.btn-search:hover {
+  background: #e2e8f0;
+}
+
+.btn-clear {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.btn-clear:hover {
+  background: #feb2b2;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.select-group {
+  padding: 12px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.select-group:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.stat {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s;
+}
+
+.stat:hover {
+  transform: translateY(-4px);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+/* Tabla */
+.table-container {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.table-header {
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-header h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.5rem;
+}
+
+.btn-refresh {
+  padding: 10px 20px;
+  background: #edf2f7;
+  border: none;
+  border-radius: 8px;
+  color: #4a5568;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.btn-refresh i.spin {
+  animation: spin 1s linear infinite;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+   
+  background: #104861; 
+}
+
+.data-table th {
+  padding: 18px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #ffffff;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 16px;
+  border-bottom: 1px solid #edf2f7;
+  transition: background 0.2s;
+}
+
+.data-table tbody tr:hover td {
+  background: #f7fafc;
+}
+
+.loading-cell, .empty-cell {
+  text-align: center;
+  padding: 60px !important;
+  color: #718096;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+/* Celdas especiales */
+.cell-id {
+  font-family: 'SF Mono', Monaco, monospace;
+  color: #718096;
+  font-weight: 600;
+}
+
+.cell-clave {
+  font-weight: 500;
+}
+
+.badge-group {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #ebf4ff;
+  color: #4299e1;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.cell-valor .valor-container {
+  position: relative;
+}
+
+.valor-full {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #2d3748;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  z-index: 10;
+  min-width: 200px;
+  max-width: 400px;
+  word-wrap: break-word;
+}
+
+.cell-valor:hover .valor-full {
+  display: block;
+}
+
+.cell-fecha {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+/* Botones de acción */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-action {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-action:hover {
+  transform: scale(1.1);
+}
+
+.btn-edit {
+  background: #e6fffa;
+  color: #38b2ac;
+}
+
+.btn-edit:hover {
+  background: #b2f5ea;
+}
+
+.btn-delete {
+  background: #fed7d7;
+  color: #e53e3e;
+}
+
+.btn-delete:hover {
+  background: #feb2b2;
+}
+
+/* Paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.page-btn {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #edf2f7;
+  border-color: #cbd5e0;
+}
+
+.page-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s;
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s forwards;
+}
+
+.modal.show .modal-content {
+  animation: modalSlideIn 0.3s forwards;
+}
+
+.modal-sm {
+  max-width: 400px;
+}
+
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #edf2f7;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #e2e8f0;
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Formulario */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-errors {
+  margin-top: 8px;
+  min-height: 24px;
+}
+
+.form-errors span {
+  display: block;
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.error-exists {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  color: #c53030 !important;
+  font-weight: 500;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 6px;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+/* Modal de confirmación */
+.confirm-icon {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.confirm-icon i {
+  font-size: 48px;
+  color: #e53e3e;
+}
+
+.confirm-message {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+.confirm-warning {
+  text-align: center;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+/* Notificaciones */
+.notificacion {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 500;
+  z-index: 1001;
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.notificacion.show {
+  transform: translateX(0);
+}
+
+.notificacion.success {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.notificacion.error {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.notificacion.warning {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+}
+
+/* Iconos (puedes usar Font Awesome o SVGs) */
+.icon-cog:before { content: '⚙️'; }
+.icon-plus:before { content: '➕'; }
+.icon-search:before { content: '🔍'; }
+.icon-refresh:before { content: '🔄'; }
+.icon-edit:before { content: '✏️'; }
+.icon-delete:before { content: '🗑️'; }
+.icon-save:before { content: '💾'; }
+.icon-close:before { content: '✕'; }
+.icon-warning:before { content: '⚠️'; }
+.icon-alert:before { content: '🚨'; }
+.icon-empty:before { content: '📭'; }
+
+/* Animaciones */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .filters-panel {
+    flex-direction: column;
+  }
+  
+  .search-box {
+    min-width: auto;
+  }
+  
+  .stats-bar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    transform: none;
+    max-height: calc(100vh - 20px);
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .modal-footer {
+    padding: 16px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* src/app/components/configuracion/configuracion.component.css - Añadir al final */
+
+/* =========================================== */
+/* RESPONSIVE PARA MÓVILES (max-width: 680px) */
+/* =========================================== */
+
+@media screen and (max-width: 680px) {
+  .configuracion-container {
+    padding: 10px;
+  }
+  
+  /* Header móvil */
+  .config-header {
+    padding: 20px 15px;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    border-radius: 12px;
+  }
+  
+  .header-content h1 {
+    font-size: 1.6rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .header-content .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+  
+  /* Panel de filtros móvil */
+  .filters-panel {
+    padding: 15px;
+    flex-direction: column;
+    gap: 15px;
+    border-radius: 12px;
+  }
+  
+  .search-box {
+    min-width: 100%;
+    flex-direction: column;
+  }
+  
+  .search-box i {
+    left: 12px;
+    top: 18px;
+  }
+  
+  .search-input {
+    padding: 12px 12px 12px 40px;
+    font-size: 0.95rem;
+  }
+  
+  .btn-search, .btn-clear {
+    width: 100%;
+    padding: 12px;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .select-group {
+    width: 100%;
+    padding: 12px;
+  }
+  
+   
+  
+ /* Fuerza que la tabla sea horizontal con scroll */
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 90vw !important;
+  }
+  
+  /* Tabla más estrecha que se ajusta a 500px */
+  .data-table {
+    min-width: 400px !important;
+    width: auto !important;
+    display: table !important;
+    border-collapse: collapse !important;
+  }
+  
+  /* Asegura que las filas sean horizontales */
+  .data-table tbody tr {
+    display: table-row !important;
+    width: 100% !important;
+  }
+  
+  /* Asegura que las celdas sean horizontales */
+  .data-table td {
+    display: table-cell !important;
+    width: auto !important;
+    padding: 8px 6px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+  
+  /* Asegura que el encabezado sea horizontal */
+  .data-table thead {
+    display: table-header-group !important;
+  }
+  
+  .data-table th {
+    display: table-cell !important;
+    padding: 10px 6px !important;
+    background: #f7fafc !important;
+  }
+  
+  /* Elimina los estilos de tarjetas que pudieran estar aplicados */
+  .data-table td:before {
+    display: none !important;
+    content: none !important;
+  }
+  
+  /* Asegura que las celdas especiales mantengan su diseño */
+  .cell-id, .cell-clave, .cell-valor, .cell-descripcion, .cell-fecha, .cell-acciones {
+    display: table-cell !important;
+    position: static !important;
+    order: 0 !important;
+    flex: none !important;
+    text-align: left !important;
+    width: auto !important;
+  }
+  
+  /* Contenedor de tabla más compacto */
+  .table-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  
+  /* Paginación móvil */
+  .pagination {
+    padding: 15px;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  
+  .page-btn {
+    min-width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+  
+  /* Modal móvil */
+  .modal-content {
+    width: 95%;
+    max-width: none;
+    max-height: 90vh;
+    border-radius: 16px;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    bottom: auto;
+  }
+  
+  .modal-header {
+    padding: 20px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modal-body {
+   
+    padding: 20px;
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-input, .form-textarea {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .modal-footer {
+    padding: 20px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+  
+  /* Modal de confirmación móvil */
+  .modal-sm {
+    width: 90%;
+  }
+  
+  .confirm-message {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  
+  /* Notificaciones móviles */
+  .notificacion {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  
+  /* Valor completo en tooltip para móvil */
+  .valor-full {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    min-width: auto;
+    z-index: 1002;
+    font-size: 1rem;
+    padding: 15px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+}
+ 
+
+/* Mejoras de accesibilidad para móviles */
+@media (hover: none) and (pointer: coarse) {
+  /* Aumentar áreas táctiles */
+  .btn, .btn-action, .page-btn, .btn-close {
+    min-height: 44px; /* Tamaño mínimo recomendado por Apple */
+  }
+  
+  /* Mejorar feedback táctil */
+  .btn:active, .btn-action:active, .page-btn:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  
+  /* Desactivar hover effects que no funcionan en táctiles */
+  .data-table tbody tr:hover td {
+    background: inherit;
+  }
+  
+  .valor-full {
+    display: none;
+  }
+  
+  /* Mejor alternativa para mostrar valores largos en móvil */
+  .cell-valor {
+    position: relative;
+  }
+  
+  .cell-valor .valor-container {
+    cursor: pointer;
+  }
+  
+  .cell-valor .valor-container:active::after {
+    content: attr(data-full-value);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2d3748;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 1002;
+    max-width: 90%;
+    word-wrap: break-word;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+}
+
+
+
+
+
+/* =========================================== */
+/* TABLA MÓVIL - RESOLUCIÓN BAJA (500px o menos) */
+/* =========================================== */
+
+@media screen and (max-width: 500px) {
+  /* Fuerza que la tabla sea horizontal con scroll */
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 90vw !important;
+  }
+  
+  /* Tabla más estrecha que se ajusta a 500px */
+  .data-table {
+    min-width: 400px !important;
+    width: auto !important;
+    display: table !important;
+    border-collapse: collapse !important;
+  }
+  
+  /* Asegura que las filas sean horizontales */
+  .data-table tbody tr {
+    display: table-row !important;
+    width: 100% !important;
+  }
+  
+  /* Asegura que las celdas sean horizontales */
+  .data-table td {
+    display: table-cell !important;
+    width: auto !important;
+    padding: 8px 6px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+  
+  /* Asegura que el encabezado sea horizontal */
+  .data-table thead {
+    display: table-header-group !important;
+  }
+  
+  .data-table th {
+    display: table-cell !important;
+    padding: 10px 6px !important;
+    background: #104861 !important;
+  }
+  
+  /* Elimina los estilos de tarjetas que pudieran estar aplicados */
+  .data-table td:before {
+    display: none !important;
+    content: none !important;
+  }
+  
+  /* Asegura que las celdas especiales mantengan su diseño */
+  .cell-id, .cell-clave, .cell-valor, .cell-descripcion, .cell-fecha, .cell-acciones {
+    display: table-cell !important;
+    position: static !important;
+    order: 0 !important;
+    flex: none !important;
+    text-align: left !important;
+    width: auto !important;
+  }
+  
+  /* Contenedor de tabla más compacto */
+  .table-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+}.data-table thead th {
+    padding: 8px 10px; /* Ajusta los valores de padding (arriba/abajo y laterales) */
+    font-size: 0.9rem; /* Reduce el tamaño de la fuente si es necesario */
+}
+
+/* Opcional: ajustar la altura de la fila del encabezado */
+.data-table thead tr {
+    height: 40px; /* O el valor que desees */
+}

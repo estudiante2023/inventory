@@ -1,0 +1,90 @@
+<main class="main">
+  <div class="main-header">
+    <div class="main-header__intro-wrapper">
+      <div class="main-header__welcome">  
+      </div>
+       
+    </div>
+  </div>
+  
+ <!-- Reemplaza todo el bloque main-overview con esto: -->
+<div class="main-overview">
+  <!-- Usuarios en línea -->
+  <div class="overviewCard" *ngIf="usuariosOnline.length > 0">
+    <div class="overviewCard-icon overviewCard-icon--people">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div class="overviewCard-description">
+      <h3 class="overviewCard-title text-light">Usuarios <strong>en Línea</strong></h3> 
+      <div class="online-users-list">
+        <div *ngFor="let usuario of usuariosOnline.slice(0, 3)" class="online-user-item">
+          <i class="bi bi-person-circle"></i>
+          <span class="user-name">{{ usuario.nombre_completo }}</span>
+          <span class="user-time">{{ usuario.tiempo_transcurrido }}</span>
+        </div>
+        <div *ngIf="usuariosOnline.length > 3" class="more-users">
+          + {{ usuariosOnline.length - 3 }} más
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contador de productos -->
+  <div class="overviewCard">
+    <div class="overviewCard-icon overviewCard-icon--product">
+      <i class="bi bi-box-seam"></i>
+    </div>
+    <div class="overviewCard-description">
+      <h3 class="overviewCard-title text-light">Productos <strong>Totales</strong></h3>
+      <p class="overviewCard-subtitle">{{ estadisticas?.total || 0 }} registros</p>
+    </div>
+  </div>
+
+  <!-- Movimientos recientes -->
+  <div class="overviewCard">
+    <div class="overviewCard-icon overviewCard-icon--activity">
+      <i class="bi bi-activity"></i>
+    </div>
+    <div class="overviewCard-description">
+      <h3 class="overviewCard-title text-light">Acciones <strong>Hoy</strong></h3>
+      <p class="overviewCard-subtitle">{{ movimientosHoy || 0 }} registros</p>
+    </div>
+  </div>
+
+  <!-- Stock bajo -->
+ <!-- inicio.html (modificar la tarjeta de stock bajo) -->
+<div class="overviewCard"
+     (click)="enviarAlertaStockBajo()"
+     [class.clickable]="true"
+     [class.sending]="enviandoCorreo"
+     title="Haz clic para enviar alerta por correo a todos los usuarios">
+  <div class="overviewCard-icon overviewCard-icon--warning">
+    <i class="bi bi-exclamation-triangle"></i>
+  </div>
+  <div class="overviewCard-description">
+    <h3 class="overviewCard-title text-light">Stock <strong>Bajo</strong></h3>
+    <p class="overviewCard-subtitle">{{ estadisticas?.bajoStock || 0 }} repuestos</p>
+    
+    <!-- Mensaje de estado -->
+    <div *ngIf="enviandoCorreo" class="sending-message">
+      <div class="spinner-border spinner-border-sm" role="status"></div>
+      <span class="ms-2">{{ mensajeCorreo }}</span>
+    </div>
+    
+    <!-- Indicador de clic -->
+    <div *ngIf="!enviandoCorreo" class="click-hint">
+      <small><i class="bi bi-envelope"></i> Haz clic para enviar alerta por correo</small>
+    </div>
+  </div>
+</div>
+</div>
+  
+  <div class="main__cards">
+    <!-- Cards de eventos -->
+     
+    
+    <!-- Cards de documentos -->
+     
+    
+  </div>
+</main>

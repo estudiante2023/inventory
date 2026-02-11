@@ -1,0 +1,2997 @@
+/* RESET Y CONTENEDOR PRINCIPAL */
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.inventario-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 14px;
+  color: #333;
+  width: 100%;  /* CAMBIADO: de 100vh a 100% */
+  box-sizing: border-box;
+  padding: 16px;
+  overflow-y: auto;
+  transition: width 0.3s ease; /* Añadida transición para suavizar */
+  min-height: 100vh;
+}
+
+/* ===== ALERTAS ===== */
+.inventario-alert {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideIn 0.3s ease;
+  border-left: 4px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.inventario-alert-success {
+  background-color: #d4edda;
+  border-color: #28a745;
+  color: #155724;
+}
+
+.inventario-alert-danger {
+  background-color: #f8d7da;
+  border-color: #dc3545;
+  color: #721c24;
+}
+
+.inventario-alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.inventario-alert-message {
+  flex: 1;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.inventario-alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 4px;
+  margin-left: 10px;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.inventario-alert-close:hover {
+  opacity: 1;
+}
+
+/* ===== LOADING ===== */
+.inventario-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #666;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.inventario-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== HEADER PRINCIPAL ===== */
+.inventario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+}
+
+.inventario-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== BOTONES ===== */
+.inventario-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.inventario-btn-primary {
+  background-color: #10485f;
+  color: white;
+  border-color: #10485f;
+}
+
+.inventario-btn-primary:hover {
+  background-color: #ffc000;
+  border-color: #ffc000;
+}
+
+.inventario-btn-outline {
+  background-color: transparent;
+  color: #6c757d;
+  border-color: #dee2e6;
+}
+
+.inventario-btn-outline:hover {
+  background-color: #104861;
+  border-color: #208abb;
+}
+
+.inventario-btn-danger {
+  background-color: #10485f;
+  color: white;
+  border-color: #1b6c8b;
+}
+
+.inventario-btn-danger:hover {
+  background-color: #ffc000;
+  border-color: #f3c63d;
+}
+
+.inventario-btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.inventario-btn-icon {
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+}
+
+.inventario-btn-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ===== ESTADÍSTICAS ===== */
+.inventario-stats-horizontal {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+
+.inventario-stat-card {
+  flex: 0 0 auto;
+  min-width: 120px;
+  padding: 6px 8px;
+  gap: 6px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+
+.inventario-stat-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 21px;
+}
+
+ 
+.inventario-stat-content {
+  flex: 1;
+  min-width: 0;
+  
+}
+
+.inventario-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.inventario-stat-label {
+  font-size: 12px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ===== FILTROS ===== */
+.inventario-filters-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e9ecef;
+  max-width: 100%;
+  box-sizing: border-box;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.inventario-search-group {
+  display: flex; 
+  max-width: 100% !important;
+  max-width: 500px;
+}
+
+.inventario-search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  width: 200px !important;
+  gap: 18px !important;
+  margin-bottom: 16px  !important;
+  box-sizing: border-box;
+}
+
+.inventario-search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.inventario-search-button {
+  padding: 8px 20px;
+  background-color: #10485f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.inventario-search-button:hover {
+  background-color: #ffc000;
+}
+
+.inventario-filters-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch; /* scroll suave en móvil */
+  width: 100%;
+}
+
+.inventario-filter-select,
+.inventario-filter-switch {
+  flex: 0 0 auto;          /* evita que se compriman */
+  min-width: 180px;        /* fuerza desborde */
+}
+
+
+
+.inventario-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+ 
+.inventario-filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.inventario-filter-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.inventario-switch-input {
+  width: 40px;
+  height: 20px;
+  appearance: none;
+  background-color: #ced4da;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  
+}
+
+.inventario-switch-input:checked {
+  background-color: #ffc000;
+}
+
+.inventario-switch-input::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.inventario-switch-input:checked::before {
+  transform: translateX(20px);
+}
+
+.inventario-switch-label {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.inventario-filters-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+  width: 100%;
+}
+
+.inventario-pagination-info {
+  font-size: 14px;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+/* ===== TABLA RESPONSIVA ===== */
+.inventario-table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e9ecef;
+  width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.inventario-table-wrapper {
+  width: 100%;
+  min-width: 120px; /* Mantén esto para que la tabla sea desplazable horizontalmente */
+}
+
+.inventario-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: auto;
+}
+
+.inventario-table thead {
+  background-color: #104861;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+}
+
+.inventario-table th {
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  min-width: 5px;
+}
+
+.inventario-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.inventario-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* ===== BADGES ===== */
+.inventario-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.inventario-bg-light {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Estados básicos (ya los tienes) */
+.inventario-badge-estado-NUEVO {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.inventario-badge-estado-UTIL {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+/* Estados con espacios convertidos a guiones */
+.inventario-badge-estado-MANTENIMIENTO-BANCO-DE-PRUEBAS {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.inventario-badge-estado-MANTENIMIENTO-FABRICA {
+    background-color: #cce5ff;
+  color: #004085;
+}
+
+.inventario-badge-estado-PROCESO-DE-EXPORTACION-MODALTRADE {
+    background-color: #cce5ff;
+  color: #004085;
+}
+
+.inventario-badge-estado-CUARENTENA-BODEGA {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.inventario-badge-estado-CONDENADO {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Clase base para todos los badges */
+.inventario-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  white-space: nowrap;
+}
+.inventario-badge-criticidad-bajo {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.inventario-badge-criticidad-medio {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.inventario-badge-criticidad-alto {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.inventario-badge-criticidad-critico {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.inventario-badge-stock-normal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.inventario-badge-stock-bajo {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.inventario-badge-stock-critico {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* ===== TEXTO ===== */
+.inventario-text-muted {
+  color: #6c757d !important;
+}
+
+.inventario-text-primary {
+  color: #007bff !important;
+}
+
+.inventario-text-success {
+  color: #28a745 !important;
+}
+
+.inventario-text-truncate {
+  display: block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== ESTADO VACÍO ===== */
+.inventario-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  width: 100%;
+}
+
+.inventario-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #dee2e6;
+}
+
+.inventario-empty-title {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #495057;
+}
+
+.inventario-empty-message {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ===== PAGINACIÓN ===== */
+.inventario-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-top: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+  z-index: 1;
+}
+
+.inventario-pagination-controls {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.inventario-page-btn {
+  padding: 6px 12px;
+  border: 1px solid #dee2e6;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.inventario-page-btn:hover:not(.disabled):not(.active) {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.inventario-page-btn.active {
+  background-color: #10485f;
+  border-color: #257899;
+  color: white;
+}
+
+.inventario-page-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== FORMULARIOS VERTICALES CENTRADOS ===== */
+
+/* Contenedor principal cuando hay formulario abierto */
+.inventario-container:has(.inventario-form-card) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Tarjeta del formulario - vertical y centrada */
+.inventario-form-card {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  max-height: 85vh;
+  margin: 0 auto;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  background: white;
+  z-index: 1001;
+}
+
+/* Header del formulario */
+.inventario-form-header {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.inventario-form-title {
+  font-size: 22px;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* Grid del formulario - AHORA VERTICAL */
+.inventario-form-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 25px !important;
+}
+
+/* Grupos de formulario - cada uno en su propia línea */
+.inventario-form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+/* Labels */
+.inventario-form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Inputs, selects, textareas - tamaño controlado */
+.inventario-form-input,
+.inventario-form-select,
+.inventario-form-textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background: white;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.inventario-form-input:focus,
+.inventario-form-select:focus,
+.inventario-form-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.inventario-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Campos que ocupaban 2 columnas ahora ocupan 1 */
+.inventario-form-group[style*="grid-column: span 2"] {
+  width: 100% !important;
+}
+
+/* Card de resumen */
+.inventario-card.inventario-card-info {
+  margin-top: 20px;
+  margin-bottom: 25px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.inventario-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.inventario-card-header h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.inventario-card-body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.inventario-card-body p {
+  margin: 0 0 10px 0;
+}
+
+.inventario-card-body strong {
+  color: #495057;
+  min-width: 140px;
+  display: inline-block;
+}
+
+/* Acciones del formulario - botones lado a lado */
+.inventario-form-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+  gap: 15px !important;
+  padding-top: 20px !important;
+  border-top: 1px solid #e9ecef !important;
+  margin-top: 20px !important;
+  width: 100% !important;
+}
+
+.inventario-form-actions .inventario-btn {
+  min-width: 120px;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .inventario-form-card {
+    max-width: 95%;
+    padding: 20px 15px;
+    max-height: 95vh;
+  }
+  
+  .inventario-form-title {
+    font-size: 18px;
+  }
+  
+  .inventario-form-grid {
+    gap: 15px !important;
+  }
+  
+  .inventario-form-input,
+  .inventario-form-select,
+  .inventario-form-textarea {
+    padding: 9px 12px;
+    font-size: 16px; /* Para evitar zoom en iOS */
+  }
+  
+  .inventario-form-actions {
+    flex-direction: row !important;
+    gap: 10px !important;
+  }
+  
+  .inventario-form-actions .inventario-btn {
+    flex: 1 !important;
+    min-width: auto !important;
+  }
+  
+  .inventario-card-body strong {
+    min-width: 120px;
+  }
+}
+
+/* Para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .inventario-form-card {
+    max-width: 85%;
+  }
+}
+
+/* Scrollbar personalizada */
+.inventario-form-card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inventario-form-card::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.inventario-form-card::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.inventario-form-card::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Ocultar el contenido de fondo cuando el formulario está abierto */
+body:has(.inventario-container:has(.inventario-form-card)) {
+  overflow: hidden;
+}
+
+/* ===== DETALLE ===== */
+.inventario-detail-header,
+.inventario-movimientos-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.inventario-detail-title,
+.inventario-movimientos-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.inventario-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.inventario-product-card,
+.inventario-movimientos-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e9ecef;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.inventario-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.inventario-product-stock-container {
+  margin-bottom: 24px;
+}
+
+.inventario-product-stock {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.inventario-product-stock-normal {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.inventario-product-stock-bajo {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.inventario-product-stock-critico {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.inventario-product-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.inventario-product-info-item p {
+  margin: 0;
+  font-size: 15px;
+  color: #212529;
+}
+
+.inventario-product-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===== MOVIMIENTOS ===== */
+.inventario-movimientos-list-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e9ecef;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.inventario-movimiento-card {
+  border-left: 4px solid;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #f8f9fa;
+  border-radius: 0 6px 6px 0;
+  width: 100%;
+}
+
+.inventario-movimiento-entrada {
+  border-color: #28a745;
+}
+
+.inventario-movimiento-salida {
+  border-color: #dc3545;
+}
+
+.inventario-movimiento-transferencia {
+  border-color: #007bff;
+}
+
+.inventario-movimiento-ajuste {
+  border-color: #6c757d;
+}
+
+.inventario-movimiento-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.inventario-movimiento-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.inventario-movimiento-title {
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+  min-width: 0;
+}
+
+.inventario-movimiento-body {
+  padding-left: 32px;
+}
+
+.inventario-movimiento-motivo {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #212529;
+}
+
+.inventario-movimiento-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.inventario-movimiento-detalles {
+  margin-top: 8px;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Para móviles */
+@media (max-width: 568px) {
+  .inventario-container {
+    padding: 12px;
+    max-width: 100%;
+    width: 100vw;
+  }
+  
+  .inventario-stats-horizontal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .inventario-filters-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .inventario-search-group {
+    flex-direction: column;
+  }
+  
+  .inventario-search-input {
+    min-width: 10% !important;
+  }
+  
+  .inventario-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .inventario-table-wrapper {
+    min-width: 1000px;
+  }
+  
+  .inventario-btn-group {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+
+  .inventario-search-input { 
+    width: 200px !important; 
+    margin-bottom: 10% !important;
+  }
+}
+
+/* Para tabletas */
+@media (min-width: 569px) and (max-width: 1624px) {
+  
+  .inventario-container {
+    padding: 12px;
+    width: 97vw;
+  }
+  
+  .inventario-stats-horizontal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .inventario-filters-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .inventario-search-group {
+    flex-direction: column;
+  }
+  
+  .inventario-search-input {
+    min-width: 10% !important;
+  }
+  
+  .inventario-form-grid,
+  .inventario-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .inventario-table-wrapper {
+    min-width: 1000px;
+  }
+  .inventario-btn-group {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+  .inventario-movimientos-list-container { 
+    margin-top: 13vh !important;
+ 
+  }
+  
+}
+
+/* ===== LAYOUT ESTADÍSTICAS + BANNER ===== */
+
+/* Contenedor principal que organiza las dos columnas */
+.stats-banner-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+  width: 100%; 
+  box-sizing: border-box;
+  min-height: 180px; /* Altura delgada pero no demasiado */
+  max-height: 220px;
+}
+
+/* Columna izquierda - Estadísticas (25% del ancho) */
+.stats-cards.small {
+  flex: 1;
+  min-width: 280px;
+  max-width: 50%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Cambiado: 4 columnas */
+  grid-template-rows: 1fr 1fr; /* Cambiado: 2 filas */
+  gap: 10px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Tarjetas de estadísticas más compactas */
+.stats-cards.small .stat-card {
+  padding: 12px 10px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 70px; /* Altura uniforme */
+  box-sizing: border-box;
+}
+
+.stats-cards.small .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.stats-cards.small .stat-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stats-cards.small .stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stats-cards.small .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+
+.stats-cards.small .stat-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Colores para cada tarjeta */
+.stats-cards.small .total .stat-card-icon {
+ background: linear-gradient(135deg, #10485f 0%, #10485f 100%);
+}
+
+.stats-cards.small .active .stat-card-icon {
+  background: linear-gradient(135deg, #10485f 0%, #10485f 100%);
+}
+
+.stats-cards.small .bajo .stat-card-icon {
+  background: linear-gradient(135deg, #10485f 0%, #10485f 100%);
+}
+
+.stats-cards.small .agotado .stat-card-icon {
+  background: linear-gradient(135deg, #10485f 0%, #10485f 100%);
+}
+
+/* Columna derecha - Banner/Imagen (75% del ancho) */
+.stats-banner {
+  
+  margin-left: 10% !important;
+  flex: 1; 
+  height: 180px; /* Altura fija y delgada */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats-banner img { 
+  height: 100%;
+  min-width: 1vh !important;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+/* Efecto de superposición opcional para mejorar legibilidad del texto */
+.stats-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  /* Layout: flujo normal */
+  .stats-banner-layout {
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    flex-direction: column;
+  }
+
+  /* Imagen: un poco MÁS ALTA y MÁS ANGOSTA */
+  .stats-banner {
+    width: 95%;            /* 👈 menos ancho */
+    margin: 0 auto;
+  }
+
+  .stats-banner img {
+    width: 100%;
+    height: 120px;         /* 👈 más alto (ajusta a gusto) */
+    object-fit: cover;     /* mantiene buen recorte */
+    display: block;
+    border-radius: 12px;
+  }
+
+  /* Filtros: contenedor más angosto */
+  .inventario-filters-card {
+    margin-top: 28px;
+    width: 95%;            /* 👈 menos ancho */
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Tabla: también más angosta */
+  .table-container,
+  .table-content,
+  .inventario-table-container {
+    width: 95% !important;   /* 👈 AJUSTA AQUÍ */
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Paginación - Ajustes para evitar scroll horizontal */
+.inventario-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0 20px 0;
+  padding: 20px;
+  gap: 15px;
+  width: 100%;
+  max-width: 100%; /* Asegura que no exceda el ancho del contenedor padre */
+  box-sizing: border-box; /* Incluye padding en el ancho */
+}
+
+.inventario-pagination-info {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 5px;
+  padding: 5px 15px;
+  background: #f8f9fa;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.inventario-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si es necesario */
+  background: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  max-width: 100%; /* No exceder el ancho disponible */
+  box-sizing: border-box;
+}
+
+/* Ajustes para los botones */
+.inventario-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px; /* Cambiamos width por min-width para que se ajusten al contenido */
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  padding: 0 8px; /* Añadimos un poco de padding horizontal */
+}
+
+/* ... resto de estilos ... */
+
+/* Responsive */
+@media (max-width: 768px) {
+  .inventario-pagination {
+    margin: 20px 0;
+    padding: 15px 10px;
+  }
+  
+  .inventario-pagination-controls {
+    padding: 8px 15px;
+    gap: 6px;
+  }
+  
+  .inventario-page-btn {
+    min-width: 3px;
+    height: 3px;
+    font-size: 13px;
+  }
+  
+  .inventario-page-btn:first-child,
+  .inventario-page-btn:last-child {
+    min-width: 3px;
+  }
+  
+  .inventario-pagination-info {
+    font-size: 13px;
+    padding: 4px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inventario-pagination-controls {
+    flex-wrap: wrap;
+    max-width: 70%;
+  }
+  
+  .inventario-page-btn {
+    min-width: 3px;
+    height: 34px;
+    font-size: 12px;
+  }
+  
+  .inventario-page-btn:first-child,
+  .inventario-page-btn:last-child {
+    min-width: 36px;
+  }
+  
+  .inventario-pagination-info {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* Para móviles - Scroll vertical en las tarjetas */
+@media (max-width: 768px) {
+  .stats-cards.small {
+    grid-template-columns: 1fr; /* 1 columna en móvil */
+    grid-template-rows: auto; /* Altura automática */
+    max-height: 300px; /* Altura máxima con scroll */
+    overflow-y: auto; /* Scroll vertical */
+    gap: 8px;
+  }
+  
+  /* Cada tarjeta ocupa 100% del ancho */
+  .stats-cards.small .stat-card {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .inventario-movimientos-list-container { 
+    margin-top: 15vh !important;
+ 
+  }
+}
+
+@media (max-width: 1168px) {
+  .stats-cards.small {
+    grid-template-columns: 1fr; /* 1 columna en móvil */
+    grid-template-rows: auto; /* Altura automática */
+    max-height: 200px; /* Altura máxima con scroll */
+    overflow-y: auto; /* Scroll vertical */
+    gap: 8px;
+  }
+  
+  /* Cada tarjeta ocupa 100% del ancho */
+  .stats-cards.small .stat-card {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .inventario-movimientos-list-container { 
+    margin-top: 3vh !important;
+  }
+}
+
+/* Scroll vertical para la lista de movimientos */
+.inventario-movimientos-list-container {
+  max-height: 600px; /* Altura máxima */
+  overflow-y: auto; /* Scroll vertical */
+  padding-right: 8px; /* Espacio para scrollbar */
+}
+
+/* Scrollbar personalizado */
+.inventario-movimientos-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.inventario-movimientos-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.inventario-movimientos-list-container::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.inventario-movimientos-list-container::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
+
+/* Para móviles - altura más reducida */
+@media (max-width: 768px) {
+  .inventario-movimientos-list-container {
+    max-height: 700px; /* Más bajo en móvil */
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .inventario-movimientos-list-container {
+    max-height: 680px;  
+    margin-top: 15vh !important;
+ 
+  }
+}
+
+
+/* PARA MÓVILES - SCROLL VERTICAL */
+@media (max-width: 768px) {
+  .inventario-card.inventario-card-info .inventario-card-body {
+    display: block !important;
+    max-height: 10px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Scrollbar visible */
+  .inventario-card.inventario-card-info .inventario-card-body::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+  }
+  
+  .inventario-card.inventario-card-info .inventario-card-body::-webkit-scrollbar-thumb {
+    background: #667eea !important;
+    border-radius: 3px !important;
+  }
+}
+
+ /* ===== MODAL DE MOVIMIENTOS - NUEVO DISEÑO ===== */
+
+/* Overlay: fondo oscuro fijo */
+.movimientos-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  animation: fadeInOverlay 0.3s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal principal */
+.movimientos-modal {
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Header del modal */
+.movimientos-modal-header {
+  background: linear-gradient(135deg, #10485f 0%, #0d3a4d 100%);
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* Botón de volver */
+.movimientos-modal-back-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.movimientos-modal-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-3px);
+}
+
+/* Título del modal */
+.movimientos-modal-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Contenido del modal con scroll */
+.movimientos-modal-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px); /* Altura total menos header */
+  background: #f8fafc;
+}
+
+/* Scrollbar personalizada */
+.movimientos-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.movimientos-modal-content::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.movimientos-modal-content::-webkit-scrollbar-thumb {
+  background: #10485f;
+  border-radius: 4px;
+}
+
+.movimientos-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #0d3a4d;
+}
+
+/* ===== ESTILOS DE LAS TARJETAS DE MOVIMIENTO ===== */
+
+.movimiento-card {
+  background: white;
+  border-left: 5px solid;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.movimiento-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Colores por tipo de movimiento */
+.movimiento-entrada {
+  border-left-color: #28a745;
+}
+
+.movimiento-salida {
+  border-left-color: #dc3545;
+}
+
+.movimiento-transferencia {
+  border-left-color: #007bff;
+}
+
+.movimiento-ajuste {
+  border-left-color: #6c757d;
+}
+
+.movimiento-consumo {
+  border-left-color: #ffc107;
+}
+
+.movimiento-devolucion {
+  border-left-color: #17a2b8;
+}
+
+/* Header de cada movimiento */
+.movimiento-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.movimiento-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* Colores de iconos según tipo */
+.movimiento-entrada .movimiento-icon {
+  background: #28a745;
+}
+
+.movimiento-salida .movimiento-icon {
+  background: #dc3545;
+}
+
+.movimiento-transferencia .movimiento-icon {
+  background: #007bff;
+}
+
+.movimiento-ajuste .movimiento-icon {
+  background: #6c757d;
+}
+
+.movimiento-consumo .movimiento-icon {
+  background: #ffc107;
+}
+
+.movimiento-devolucion .movimiento-icon {
+  background: #17a2b8;
+}
+
+.movimiento-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Cuerpo del movimiento */
+.movimiento-body {
+  padding-left: 55px; /* 40px (icono) + 15px (gap) */
+}
+
+.movimiento-motivo {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.movimiento-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.movimiento-detalles {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #dee2e6;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #495057;
+  line-height: 1.4;
+}
+
+/* ===== ESTADOS DE LOADING Y VACÍO ===== */
+
+.movimientos-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+  text-align: center;
+}
+
+.movimientos-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #10485f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.movimientos-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.movimientos-empty-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  color: #dee2e6;
+}
+
+.movimientos-empty-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #495057;
+}
+
+.movimientos-empty-message {
+  font-size: 15px;
+  margin: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Para tablets y móviles */
+@media (max-width: 768px) {
+  .movimientos-modal-overlay {
+    padding: 15px;
+    align-items: flex-start;
+    padding-top: 30px;
+  }
+  
+  .movimientos-modal {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+  
+  .movimientos-modal-header {
+    padding: 15px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .movimientos-modal-back-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .movimientos-modal-title {
+    font-size: 18px;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+    width: 100%;
+    
+  }
+  
+  .movimientos-modal-content {
+    padding: 20px;
+    max-height: calc(95vh - 112px); /* Ajuste para header más alto en móvil */
+  }
+  
+  .movimiento-card {
+    padding: 16px;
+  }
+  
+  .movimiento-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .movimiento-body {
+    padding-left: 0;
+  }
+  
+  .movimiento-meta {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .movimientos-modal {
+    max-height: 98vh;
+  }
+  
+  .movimientos-modal-content {
+    max-height: calc(98vh - 112px);
+    padding: 16px;
+  }
+  
+  .movimiento-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .movimiento-title {
+    font-size: 16px;
+  }
+}
+
+/* Para móviles en horizontal */
+@media (max-width: 768px) and (orientation: landscape) {
+  .movimientos-modal-overlay {
+    align-items: center;
+    padding-top: 20px;
+  }
+  
+  .movimientos-modal {
+    max-height: 95vh;
+  }
+  
+  .movimientos-modal-content {
+    max-height: calc(95vh - 80px);
+  }
+}/* Estilos para previsualización de imágenes */
+.img-preview {
+  max-width: 200px;
+  max-height: 150px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  background-color: #f8f9fa;
+}
+
+/* Estilo para input file */
+.inventario-form-input[type="file"] {
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.inventario-form-input[type="file"]:hover {
+  border-color: #80bdff;
+  background-color: #e9f7fe;
+}/* Estilos para el modal de imágenes */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 90%;
+  max-height: 90%;
+  width: auto;
+  overflow: auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.modal-header h5 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  text-align: center;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-img {
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}/* Modal base */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  overflow-y: auto;
+}
+
+/* Dialog centrado y responsive */
+.modal-dialog {
+  margin: 1rem auto;
+  max-width: 90vw;
+}
+
+/* Contenido del modal */
+.modal-content {
+  border-radius: 14px;
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  
+}
+
+/* Header */
+.modal-header {
+  background: #104861;
+  color: #ffffff !important;
+  padding: 1rem;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+/* Body con scroll vertical */
+.modal-body {
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+   
+}
+
+/* Imagen */
+.modal-body img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* PDF */
+.modal-body iframe {
+  width: 100%;
+  height: 70vh;
+  border-radius: 8px;
+}
+
+/* Footer fijo */
+.modal-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+/* Backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+}
+
+/* Móviles */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-body img,
+  .modal-body iframe {
+    max-height: 60vh;
+  }
+}
+.modal .modal-header .modal-title {
+  color: #ffffff !important;
+}
+
+/* Contenedor de acciones */
+td .d-flex {
+  justify-content: center;
+  align-items: center;
+}
+
+/* Botones minimal */
+td .btn {
+  border: none;
+  background: transparent;
+  padding: 6px;
+  line-height: 1;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Íconos */
+td .btn i {
+  font-size: 1.1rem;
+  color: #6c757d; /* gris elegante */
+}
+
+/* Hover ver */
+td .btn-outline-primary:hover i {
+  color: #0d6efd;
+}
+
+/* Hover descargar */
+td .btn-outline-success:hover i {
+  color: #198754;
+}
+
+/* Hover efecto suave */
+td .btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Active */
+td .btn:active {
+  transform: scale(0.95);
+}
+
+/* Quitar focus feo */
+td .btn:focus {
+  box-shadow: none;
+}
+
+/* En móvil un poco más grandes */
+@media (max-width: 576px) {
+  td .btn i {
+    font-size: 1.25rem;
+  }
+}
+/* Footer del modal */
+.modal-footer {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+}
+
+/* Botones minimal */
+.modal-footer .btn {
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Cerrar */
+.modal-footer .btn-secondary {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.modal-footer .btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+/* Descargar */
+.modal-footer .btn-primary {
+  background: #104861;
+  border: none;
+  color: #ffffff;
+}
+
+.modal-footer .btn-primary:hover {
+  background: #ffc000;
+  
+  color: #ffffff;
+}
+
+/* Quitar sombras feas */
+.modal-footer .btn:focus {
+  box-shadow: none;
+}
+
+
+
+/* Estilos para checkboxes de selección masiva */
+.inventario-table th:first-child,
+.inventario-table td:first-child {
+  width: 40px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.inventario-table input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Botón de edición masiva */
+.inventario-btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  border: none;
+  color: #000;
+  font-weight: 600;
+}
+
+.inventario-btn-warning:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #c69500 100%);
+  color: #000;
+}
+
+/* Modal de edición masiva */
+.modal-backdrop {
+  opacity: 0.5;
+}
+
+.modal-content {
+  border: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Resaltar filas seleccionadas */
+tr.selected-row {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+tr.selected-row td:first-child {
+  background-color: rgba(255, 193, 7, 0.2);
+}
+
+/* Animación para checkbox */
+input[type="checkbox"] {
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  transform: scale(1.1);
+}/* ESTILOS ESPECÍFICOS PARA MODAL DE EDICIÓN MULTICAMPO */
+
+/* Contenedor principal del modal */
+.modal-xl .modal-content {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Espaciado vertical en el cuerpo del modal */
+.modal-body {
+  padding: 1.5rem 2rem;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+/* Títulos y etiquetas */
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.form-label {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-label.small {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* Espaciado entre elementos del formulario */
+.campo-edicion-item {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.campo-edicion-item:hover {
+  background-color: #f1f3f4;
+  border-color: #dee2e6;
+}
+
+/* Inputs y selects */
+.form-control, .form-select {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  height: calc(2.25rem + 2px);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Textarea */
+textarea.form-control {
+  min-height: 80px;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+/* Alertas */
+.alert {
+  padding: 0.875rem 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  margin-bottom: 1.25rem;
+}
+
+.alert ul {
+  margin-bottom: 0;
+  padding-left: 1.25rem;
+}
+
+.alert li {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+/* Checkbox */
+.form-check {
+  padding-left: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.form-check-input {
+  margin-top: 0.25rem;
+  margin-left: -1.75rem;
+}
+
+.form-check-label {
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+/* Botones */
+.modal-footer {
+  padding: 1.25rem 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #dee2e6;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-outline-primary {
+  border-width: 1px;
+}
+
+.btn-outline-danger {
+  border-width: 1px;
+  padding: 0.5rem;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .modal-body {
+    padding: 1rem 1.25rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.25rem;
+  }
+  
+  .campo-edicion-item {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-xl .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  
+  .modal-xl .modal-content {
+    max-height: 85vh;
+  }
+  
+  .form-control, .form-select {
+    font-size: 0.9rem;
+    padding: 0.375rem 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-body {
+    padding: 0.75rem 1rem;
+  }
+  
+  .modal-title {
+    font-size: 1.2rem;
+  }
+  
+  .alert {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .col-md-5, .col-md-2 {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Scrollbar personalizado para el modal */
+.modal-xl .modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-xl .modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modal-xl .modal-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-xl .modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animación suave para agregar/remover campos */
+.campo-edicion-item {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estado de carga */
+.spinner-border {
+  vertical-align: middle;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* En tu archivo inventario.css, agrega: */
+.list-group-item-action:hover {
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+}
+
+.list-group-item {
+  border: 1px solid #dee2e6;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+
+
+
+/* CONTENEDOR DE LA ALERTA */
+.inventario-alert {
+  position: fixed;              /* 🔑 clave: no desplaza nada */
+  top: 20px;                    /* arriba de todo */
+  left: 50%;
+  transform: translateX(-50%);  /* centrado horizontal */
+  z-index: 9999;                /* sobre todo el HTML */
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+
+  animation: alertFadeIn 0.3s ease;
+}
+
+/* TEXTO */
+.inventario-alert-message {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* BOTÓN CERRAR */
+.inventario-alert-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* COLORES */
+.inventario-alert-success {
+  background: #0d6efd;
+  color: #fff;
+}
+
+.inventario-alert-danger {
+  background: #dc3545;
+  color: #fff;
+}
+
+.inventario-alert-warning {
+  background: #ffc107;
+  color: #000;
+}
+
+/* ANIMACIÓN SUAVE */
+@keyframes alertFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+
+
+
+
+.inventario-btn-deshabilitado {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: white !important;
+}
+
+.inventario-btn-deshabilitado:hover {
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+
+
+
+/* ===== VERSIÓN BORDES IZQUIERDOS ===== */
+
+/* NOMBRE - Borde izquierdo azul */
+.inventario-form-group:has(input[name="nombre"]) input {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #60a5fa;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* PART NUMBER - Borde izquierdo azul claro */
+.inventario-form-group:has(input[name="part_number"]) input {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #93c5fd;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* SERIAL NUMBER - Borde izquierdo rojo suave */
+.inventario-form-group:has(input[name="serial_number"]) input {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #fca5a5;
+  background: #fef2f2;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* CANTIDAD - Borde izquierdo gris */
+.inventario-form-group:has(input[name="cantidad_actual"]) input {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #d1d5db;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+  width: 100px;
+}
+
+/* PRECIO - Borde izquierdo verde muy suave */
+.inventario-form-group:has(input[name="precio"]) input {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #86efac;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+/* UBICACIÓN - Borde izquierdo azul agua */
+.inventario-form-group:has(select[name="ubicacion_id"]) select {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #67e8f9;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+
+/* IMPORTANTE: Agrega esto AL FINAL de tu archivo CSS para que sobreescriba otros estilos */
+
+/* NOMBRE - Borde izquierdo azul */
+.inventario-form-group:has(input[name="nombre"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #60a5fa !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* PART NUMBER - Borde izquierdo azul claro */
+.inventario-form-group:has(input[name="part_number"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #93c5fd !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* SERIAL NUMBER - Borde izquierdo rojo suave */
+.inventario-form-group:has(input[name="serial_number"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #fca5a5 !important;
+  background: #fef2f2 !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* CANTIDAD - Borde izquierdo naranja */
+.inventario-form-group:has(input[name="cantidad"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #fb923c !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* PRECIO - Borde izquierdo verde muy suave */
+.inventario-form-group:has(input[name="precio"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #86efac !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* UBICACIÓN DESTINO - Borde izquierdo azul fuerte */
+.inventario-form-group:has(select[name="ubicacion_destino"]) select {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #2563eb !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* TIPO EVENTO - Borde izquierdo púrpura */
+.inventario-form-group:has(select[name="tipo_evento"]) select {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #8b5cf6 !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* MOTIVO - Borde izquierdo verde */
+.inventario-form-group:has(input[name="motivo"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #10b981 !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA FORMULARIO DE MOVIMIENTOS ===== */
+
+/* Esto aplica solo al formulario de movimientos (detalle) */
+div[style*="background: linear-gradient(135deg, #ffd146 0%, #ffc000 100%)"] ~ .inventario-form-grid .inventario-form-group:has(input[name="cantidad"]) input {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #fb923c !important;
+  background: #fff7ed !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+div[style*="background: linear-gradient(135deg, #ffd146 0%, #ffc000 100%)"] ~ .inventario-form-grid .inventario-form-group:has(select[name="ubicacion_destino"]) select {
+  border: 1px solid #e5e7eb !important;
+  border-left: 4px solid #2563eb !important;
+  background: #eff6ff !important;
+  padding: 10px 12px !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+
+
+/* ===== ANCHO MÁXIMO PARA COLUMNA ESTADO ===== */
+
+/* Encontrar cuál es la columna de Estado (probablemente la 8va columna) */
+.inventario-table th:nth-child(8),  /* Header de Estado */
+.inventario-table td:nth-child(8) { /* Celdas de Estado */
+  max-width: 180px !important;       /* Ancho máximo */
+  min-width: 80px !important;       /* Ancho mínimo */ 
+  overflow: hidden !important;      /* Ocultar contenido que se sale */
+  text-overflow: ellipsis !important; /* Puntos suspensivos si es muy largo */
+  white-space: nowrap !important;   /* No permitir saltos de línea */
+  text-align: center !important;    /* Centrar texto */
+}
+
+
+
+
+
+/* Modal de peligro - Eliminación total */
+.modal-overlay-danger {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-danger {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(239, 68, 68, 0.3);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header-danger {
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+  color: white;
+  padding: 1.5rem;
+  border-bottom: 2px solid #ef4444;
+  text-align: center;
+  border-radius: 10px 10px 0 0;
+}
+
+.modal-header-danger i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.modal-header-danger h3 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.modal-body-danger {
+  padding: 2rem;
+  color: #e5e7eb;
+  background-color: #1f2937;
+}
+
+.lista-advertencias {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.lista-advertencias li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #374151;
+  display: flex;
+  align-items: center;
+}
+
+.lista-advertencias li i {
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+  width: 24px;
+}
+
+.modal-footer-danger {
+  background: linear-gradient(135deg, #111827 0%, #000000 100%);
+  padding: 1.5rem;
+  border-top: 1px solid #374151;
+  border-radius: 0 0 10px 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.modal-footer-danger button {
+  flex: 1;
+  padding: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.modal-footer-danger button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Botón de peligro en la interfaz principal */
+.btn-eliminar-todo {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.btn-eliminar-todo:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+}
+
+.btn-eliminar-todo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Contenedor de zona de peligro */
+.zona-peligro {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 2px solid #fca5a5;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 2rem;
+  position: relative;
+}
+
+.zona-peligro::before {
+  content: "⚠️";
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  background: #dc2626;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.zona-peligro h5 {
+  color: #991b1b;
+  margin-bottom: 0.5rem;
+}
+
+.zona-peligro p {
+  color: #7f1d1d;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Input de confirmación especial */
+input[type="text"].is-valid {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+input[type="text"].is-invalid {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-danger {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .modal-header-danger h3 {
+    font-size: 1.25rem;
+  }
+  
+  .modal-footer-danger {
+    flex-direction: column;
+  }
+  
+  .lista-advertencias li {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,404 @@
+<div class="roles-container">
+  <!-- Header -->
+  <header class="roles-header">
+    <div class="header-content">
+      <h1><i class="icon-shield"></i> Administración de Roles</h1>
+      <p class="subtitle">Gestión de roles y asignación de privilegios del sistema</p>
+    </div>
+    
+     
+  </header>
+
+   
+  <!-- Estadísticas -->
+   
+
+  <!-- Tabla de roles -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3>Roles del Sistema</h3>
+      <div class="table-actions">
+        <button class="btn-refresh" (click)="cargarRoles()" [disabled]="cargando">
+          <i class="icon-refresh" [class.spin]="cargando"></i>
+          {{cargando ? 'Cargando...' : 'Actualizar'}}
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Nivel</th>
+            <th>Estado</th>
+            <th>Privilegios</th>
+            <th>Creado</th>
+            <th>Actualizado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Estado de carga -->
+          <tr *ngIf="cargando">
+            <td colspan="9" class="loading-cell">
+              <div class="loading-spinner"></div>
+              Cargando roles...
+            </td>
+          </tr>
+
+          <!-- Estado vacío -->
+          <tr *ngIf="!cargando && rolesFiltrados.length === 0">
+            <td colspan="9" class="empty-cell">
+              <i class="icon-empty"></i>
+              No se encontraron roles
+            </td>
+          </tr>
+
+          <!-- Lista de roles -->
+          <tr *ngFor="let rol of rolesFiltrados">
+            <td class="cell-id">#{{rol.id}}</td>
+            <td class="cell-nombre">
+              <strong>{{rol.nombre}}</strong>
+            </td>
+            <td class="cell-descripcion">
+              {{rol.descripcion || 'Sin descripción'}}
+            </td>
+            <td class="cell-nivel">
+              <span [class]="getBadgeNivel(rol.nivel_permisos).clase" class="badge">
+                {{getBadgeNivel(rol.nivel_permisos).texto}}
+              </span>
+              <small class="nivel-valor">({{rol.nivel_permisos}})</small>
+            </td>
+            <td class="cell-estado">
+              <span [class]="getBadgeEstado(rol.esta_activo).clase" class="badge">
+                {{getBadgeEstado(rol.esta_activo).texto}}
+              </span>
+            </td>
+            <td class="cell-privilegios">
+              <span class="badge-privilegios" [title]="rol.total_privilegios + ' privilegios asignados'">
+                <i class="icon-key"></i> {{rol.total_privilegios || 0}}
+              </span>
+            </td>
+            <td class="cell-fecha">
+              {{rol.created_at | date:'dd/MM/yyyy'}}
+            </td>
+            <td class="cell-fecha">
+              {{rol.updated_at | date:'dd/MM/yyyy'}}
+            </td>
+            <td class="cell-acciones">
+              <div class="action-buttons">
+                <!-- Botón para gestionar privilegios -->
+                <button *ngIf="tienePrivilegio('roles.Editar')" class="btn-action btn-privilegios" 
+                        (click)="abrirGestionarPrivilegios(rol)" 
+                        title="Asignar privilegios">
+                  <i class="icon-key"></i>
+                </button>
+                
+                
+                 
+                
+                <button *ngIf="!rol.esta_activo" 
+                        class="btn-action btn-activate" 
+                        (click)="confirmarAccion('activar', rol)" 
+                        title="Activar rol">
+                  <i class="icon-play"></i>
+                </button>
+                 
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" *ngIf="totalPaginas > 1">
+      <button class="page-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(1)">
+        ««
+      </button>
+      <button class="page-btn" [disabled]="paginaActual === 1" (click)="cambiarPagina(paginaActual - 1)">
+        «
+      </button>
+      
+      <button *ngFor="let pagina of paginasNumeros" 
+              class="page-btn" 
+              [class.active]="pagina === paginaActual"
+              (click)="cambiarPagina(pagina)">
+        {{pagina}}
+      </button>
+      
+      <button class="page-btn" [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(paginaActual + 1)">
+        »
+      </button>
+      <button class="page-btn" [disabled]="paginaActual === totalPaginas" (click)="cambiarPagina(totalPaginas)">
+        »»
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal para crear/editar rol -->
+  <div class="modal" #dialogRol>
+    <div class="modal-backdrop" (click)="cerrarModal('rol')"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>
+          <i class="icon-shield"></i>
+          {{modoEdicion ? 'Editar Rol' : 'Nuevo Rol'}}
+        </h2>
+        <button class="btn-close" (click)="cerrarModal('rol')">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form [formGroup]="rolForm" (ngSubmit)="guardarRol()">
+          <div class="form-group">
+            <label for="nombre">Nombre del Rol *</label>
+            <input 
+              type="text" 
+              id="nombre" 
+              formControlName="nombre" 
+              placeholder="Ej: Administrador, Usuario, Auditor"
+              class="form-input"
+              (input)="verificarNombreExistente()">
+            <div class="form-errors">
+              <span *ngIf="submitted && f['nombre'].errors?.['required']">
+                El nombre es obligatorio
+              </span>
+              <span *ngIf="submitted && f['nombre'].errors?.['minlength']">
+                Mínimo 3 caracteres
+              </span>
+              <span *ngIf="submitted && f['nombre'].errors?.['maxlength']">
+                Máximo 50 caracteres
+              </span>
+              <span *ngIf="nombreExistente" class="error-exists">
+                <i class="icon-warning"></i> Ya existe un rol con este nombre
+              </span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea 
+              id="descripcion" 
+              formControlName="descripcion" 
+              rows="3"
+              placeholder="Descripción del rol y sus funciones..."
+              class="form-textarea">
+            </textarea>
+            <small class="form-hint" *ngIf="f['descripcion'].value?.length">
+              {{f['descripcion'].value.length}} / 200 caracteres
+            </small>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nivel_permisos">Nivel de Permisos *</label>
+              <input 
+                type="number" 
+                id="nivel_permisos" 
+                formControlName="nivel_permisos" 
+                min="0"
+                max="1000"
+                class="form-input">
+              <small class="form-hint">
+                Número entre 0 y 1000 (mayor número = más permisos)
+              </small>
+              <div class="form-errors">
+                <span *ngIf="submitted && f['nivel_permisos'].errors?.['required']">
+                  El nivel de permisos es obligatorio
+                </span>
+                <span *ngIf="submitted && f['nivel_permisos'].errors?.['min']">
+                  El valor mínimo es 0
+                </span>
+                <span *ngIf="submitted && f['nivel_permisos'].errors?.['max']">
+                  El valor máximo es 1000
+                </span>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Estado del Rol</label>
+              <div class="form-checkbox">
+                <input type="checkbox" id="esta_activo" formControlName="esta_activo" class="checkbox-input">
+                <label for="esta_activo" class="checkbox-label">
+                  Rol activo
+                </label>
+              </div>
+              <small class="form-hint">
+                Los roles inactivos no pueden ser asignados
+              </small>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal('rol')">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="rolForm.invalid">
+              <i class="icon-save"></i>
+              {{modoEdicion ? 'Actualizar Rol' : 'Crear Rol'}}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para gestionar privilegios -->
+  <div class="modal" #dialogPrivilegios>
+    <div class="modal-backdrop" (click)="cerrarModal('privilegios')"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2>
+          <i  class="icon-key"></i>
+          Asignar Privilegios: {{rolSeleccionado?.nombre}}
+        </h2>
+        <button class="btn-close" (click)="cerrarModal('privilegios')">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div *ngIf="cargandoPrivilegios" class="loading-privilegios">
+          <div class="loading-spinner"></div>
+          Cargando privilegios...
+        </div>
+        
+        <div *ngIf="!cargandoPrivilegios">
+          <div class="privilegios-header">
+            <p class="modal-description">
+              Selecciona los privilegios que tendrá el rol <strong>{{rolSeleccionado?.nombre}}</strong>.
+              Los privilegios están organizados por módulo del sistema.
+            </p>
+            
+            <div class="privilegios-stats">
+              <span class="stat-seleccionados">
+                <i class="icon-check"></i>
+                {{privilegiosSeleccionados.size}} de {{privilegiosDisponibles.length}} seleccionados
+              </span>
+              <div class="privilegios-actions">
+                <button class="btn btn-small" (click)="seleccionarTodosPrivilegios()">
+                  <i class="icon-check-all"></i> Seleccionar todos
+                </button>
+                <button class="btn btn-small btn-secondary" (click)="deseleccionarTodosPrivilegios()">
+                  <i class="icon-uncheck"></i> Deseleccionar todos
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="privilegios-container">
+            <div *ngFor="let modulo of modulosDisponibles" class="modulo-privilegios">
+              <div class="modulo-header">
+                <h3 class="modulo-title">
+                  <i class="icon-folder"></i>
+                  {{modulo}}
+                  <span class="modulo-count">
+                    {{privilegiosAgrupados[modulo]?.length || 0}} privilegios
+                  </span>
+                </h3>
+                
+                <div class="modulo-actions">
+                  <button class="btn btn-small" 
+                          (click)="seleccionarTodosPrivilegios(modulo)"
+                          *ngIf="!moduloCompletamenteSeleccionado(modulo)">
+                    <i class="icon-check"></i> Todo
+                  </button>
+                  <button class="btn btn-small btn-secondary" 
+                          (click)="deseleccionarTodosPrivilegios(modulo)"
+                          *ngIf="moduloParcialmenteSeleccionado(modulo) || moduloCompletamenteSeleccionado(modulo)">
+                    <i class="icon-uncheck"></i> Ninguno
+                  </button>
+                </div>
+              </div>
+              
+              <div class="privilegios-grid">
+                <div *ngFor="let privilegio of privilegiosAgrupados[modulo]" 
+                     class="privilegio-item"
+                     [class.selected]="privilegiosSeleccionados.has(privilegio.id)">
+                  <div class="privilegio-checkbox">
+                    <input 
+                      type="checkbox" 
+                      [id]="'privilegio_' + privilegio.id"
+                      [checked]="privilegiosSeleccionados.has(privilegio.id)"
+                      (change)="togglePrivilegio(privilegio.id)">
+                    <label [for]="'privilegio_' + privilegio.id" class="checkbox-label">
+                      <div class="privilegio-info">
+                        <strong class="privilegio-nombre">{{privilegio.nombre}}</strong>
+                        <small class="privilegio-codigo">{{privilegio.codigo}}</small>
+                        <span class="privilegio-desc">{{privilegio.accion}}</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal('privilegios')">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" 
+                (click)="guardarPrivilegios()"
+                [disabled]="cargandoPrivilegios">
+          <i class="icon-save"></i>
+          Guardar Privilegios ({{privilegiosSeleccionados.size}})
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div class="modal" #confirmModal>
+    <div class="modal-backdrop" (click)="cerrarConfirmacion()"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h2><i class="icon-warning"></i> Confirmar Acción</h2>
+        <button class="btn-close" (click)="cerrarConfirmacion()">
+          <i class="icon-close"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="confirm-icon">
+          <i class="icon-alert"></i>
+        </div>
+        <p class="confirm-message">{{mensajeConfirmacion}}</p>
+        
+        <div class="confirm-details" *ngIf="accionConfirmacion === 'eliminar'">
+          <div class="confirm-warning">
+            <i class="icon-warning"></i>
+            <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+          </div>
+          <ul class="confirm-list">
+            <li>Se eliminarán todas las asignaciones de privilegios</li>
+            <li>Los perfiles con este rol quedarán sin rol asignado</li>
+            <li>Esta acción es permanente</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarConfirmacion()">
+          Cancelar
+        </button>
+        <button type="button" 
+                [class]="accionConfirmacion === 'eliminar' ? 'btn btn-danger' : 'btn btn-warning'"
+                (click)="ejecutarConfirmacion()">
+          <i *ngIf="accionConfirmacion === 'eliminar'" class="icon-delete"></i>
+          <i *ngIf="accionConfirmacion === 'desactivar'" class="icon-pause"></i>
+          <i *ngIf="accionConfirmacion === 'activar'" class="icon-play"></i>
+          {{accionConfirmacion === 'eliminar' ? 'Eliminar Permanentemente' : 
+            accionConfirmacion === 'desactivar' ? 'Desactivar Rol' : 'Activar Rol'}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

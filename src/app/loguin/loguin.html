@@ -1,0 +1,158 @@
+<div class="login-wrapper">
+  <div class="login-container">
+    <!-- Panel Izquierdo - Imagen/Ilustración -->
+    <div class="login-illustration">
+      <div class="illustration-content">
+        <div class="avatar-container">
+          <div class="avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <h1 class="welcome-text">¡Bienvenido!</h1>
+        <p class="welcome-subtext">
+          {{ isLoginMode ? 'Ingresa a tu cuenta para gestionar tu inventario' : 'Crea tu cuenta para comenzar' }}
+        </p>
+        
+        <!-- Características destacadas -->
+        <div class="features">
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Gestión de Inventario</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Trazabilidad en Tiempo Real</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">✓</span>
+            <span>Reportes Detallados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel Derecho - Formulario -->
+    <div class="login-form-container">
+      <div class="form-card">
+        <!-- Logo de la aplicación -->
+        <div class="logo-container">
+          <div class="logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375z"/>
+              <path fill-rule="evenodd" d="M3.087 9l.54 9.176A3 3 0 006.62 21h10.757a3 3 0 002.995-2.824L20.913 9H3.087zM12 10.5a.75.75 0 01.75.75v4.94l1.72-1.72a.75.75 0 111.06 1.06l-3 3a.75.75 0 01-1.06 0l-3-3a.75.75 0 111.06-1.06l1.72 1.72v-4.94a.75.75 0 01.75-.75z" clip-rule="evenodd"/>
+            </svg>
+            <span>INventory</span>
+          </div>
+        </div>
+
+        <h2>{{ isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta' }}</h2>
+        <p class="form-subtitle">
+          {{ isLoginMode ? 'Ingresa tus credenciales para continuar' : 'Completa el formulario para registrarte' }}
+        </p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label"> 
+              Correo Electrónico
+            </label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="ejemplo@correo.com"
+              class="form-input"
+              [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+            />
+            <div class="error" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <span *ngIf="loginForm.get('email')?.errors?.['required']">El correo electrónico es requerido</span>
+              <span *ngIf="loginForm.get('email')?.errors?.['email']">Por favor, ingresa un correo válido</span>
+            </div>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label for="password" class="form-label"> 
+              Contraseña
+            </label>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              class="form-input"
+              [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+            />
+            <div class="error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              <span *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
+              <span *ngIf="loginForm.get('password')?.errors?.['minlength']">
+                Debe tener al menos 6 caracteres
+              </span>
+            </div>
+          </div>
+
+          <!-- Nombre completo (solo en registro) -->
+          <div class="form-group" *ngIf="!isLoginMode">
+            <label for="nombre_completo" class="form-label">
+              <span class="label-icon">👤</span>
+              Nombre Completo
+            </label>
+            <input
+              type="text"
+              id="nombre_completo"
+              formControlName="nombre_completo"
+              placeholder="Tu nombre completo"
+              class="form-input"
+              [class.invalid]="loginForm.get('nombre_completo')?.invalid && loginForm.get('nombre_completo')?.touched"
+            />
+            <div class="error" *ngIf="loginForm.get('nombre_completo')?.invalid && loginForm.get('nombre_completo')?.touched">
+              <span *ngIf="loginForm.get('nombre_completo')?.errors?.['required']">El nombre es requerido</span>
+            </div>
+          </div>
+
+           
+
+          <!-- Mensaje de error general -->
+          <div class="error-message" *ngIf="errorMessage">
+            <span class="error-icon">⚠️</span>
+            {{ errorMessage }}
+          </div>
+
+          <!-- Botón de envío -->
+          <button 
+            type="submit" 
+            class="submit-btn"
+            [disabled]="loginForm.invalid || loading"
+            [class.loading]="loading"
+          >
+            <span *ngIf="!loading">
+              {{ isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta' }}
+            </span>
+            <span *ngIf="loading" class="loading-spinner"></span>
+          </button>
+
+          <!-- Separador -->
+          <div class="separator">
+            <span>o</span>
+          </div>
+
+          
+        </form>
+
+        <!-- Enlace para cambiar entre login y registro -->
+        <div class="switch-mode">
+          <p>
+            {{ isLoginMode ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?' }}
+            <a (click)="switchMode()" class="switch-link">
+              {{ isLoginMode ? 'Regístrate aquí' : 'Inicia sesión aquí' }}
+            </a>
+          </p>
+        </div>
+
+        
+      </div>
+    </div>
+  </div>
+</div>
