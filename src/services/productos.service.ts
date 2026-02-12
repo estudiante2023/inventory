@@ -431,12 +431,13 @@ async desactivarProducto(id: number, motivo?: string) {
 
   // ==================== MÉTODOS EXISTENTES (sin cambios) ====================
 
- async getProductos(filters?: {
+async getProductos(filters?: {
   estado?: string;
   criticidad?: string;
   ubicacion_id?: number;
   search?: string;
   bajo_stock?: boolean;
+  componente?: string;          // ← NUEVA LÍNEA
   limit?: number;
   page?: number;
   orderBy?: string;
@@ -465,7 +466,9 @@ async desactivarProducto(id: number, motivo?: string) {
     if (filters?.ubicacion_id) {
       query = query.eq('ubicacion_id', filters.ubicacion_id);
     }
-
+if (filters?.componente && filters.componente !== 'todos') {
+    query = query.eq('componente', filters.componente);
+}
     if (filters?.search) {
       if (usarVistaAgrupada) {
         // En vista agrupada, buscar solo en nombre y part_number
@@ -868,10 +871,13 @@ async getEstadisticas() {
 
     // 2. Obtener productos individuales SOLO para totales y valor total
     const { data: todosProductos, error: errorProductos } = await supabase
-      .from('productos')
-      .select('id, cantidad_actual, precio')
-      .eq('esta_activo', true);
-
+  .from('productos')
+  .select('id, cantidad_actual, precio, criticidad')   // ← AGREGAR criticidad
+  .eq('esta_activo', true);
+// Productos críticos (ALTA + CRÍTICO)
+const criticos = todosProductos?.filter(p => 
+  p.criticidad === 'ALTA' || p.criticidad === 'CRÍTICO'
+).length || 0;
     if (errorProductos) {
       console.error('Error obteniendo productos totales:', errorProductos);
       throw errorProductos;
@@ -916,6 +922,7 @@ async getEstadisticas() {
       activos: total, // Todos están activos
       bajoStock,      // ← 22 (suma de BAJO + AGOTADO)
       agotados,       // ← 21 (solo AGOTADO)
+       criticos,  
       valorTotal: Number(valorTotal.toFixed(2)),
       
       // Información de configuración
@@ -940,6 +947,7 @@ async getEstadisticas() {
       activos: 0, 
       bajoStock: 0, 
       agotados: 0, 
+      
       valorTotal: 0,
       cantidadMinima: 3,
       totalAlertas: 0,
@@ -973,7 +981,14 @@ async getEstadisticas() {
     }
   }
 
-async exportarProductosAExcel(filters?: any) {
+async exportarProductosAExcel(filters?: {
+  estado?: string;
+  criticidad?: string;
+  ubicacion_id?: number;
+  search?: string;
+  bajo_stock?: boolean;
+  componente?: string;
+}) {
   try {
     console.log('📤 Exportando productos a Excel con filtros:', filters);
 
@@ -999,6 +1014,9 @@ async exportarProductosAExcel(filters?: any) {
       if (filters.ubicacion_id) {
         query = query.eq('ubicacion_id', filters.ubicacion_id);
       }
+      if (filters.componente && filters.componente !== 'todos') {
+  query = query.eq('componente', filters.componente);
+}
       if (filters.search) {
         if (usarVistaAgrupada) {
           // En vista agrupada, buscar solo en nombre y part_number
@@ -1557,17 +1575,32 @@ async getUbicacionPorNombre(nombre: string): Promise<number | null> {
 }
 // Método principal para importar desde Excel
 // Método principal para importar desde Excel
-async importarDesdeExcel(archivo: File): Promise<{
+async importarDesdeExcel(
+  archivo: File,
+  onProgress?: (procesadas: number, total: number) => void
+): Promise<{
   total: number,
   creados: number,
-  actualizados: number,
   errores: Array<{fila: number, error: string}>
 }> {
   try {
     console.log('📥 ============ INICIANDO IMPORTACIÓN DESDE EXCEL ============');
     console.log('📥 Archivo:', archivo.name, 'Tamaño:', archivo.size, 'bytes');
     
-    // 1. Leer archivo Excel
+    // --------------------------------------------------------------------
+    // 1. TRUNCAR TABLAS productos y trazabilidad
+    // --------------------------------------------------------------------
+    console.log('🧹 ============ LIMPIANDO TABLAS ============');
+    try {
+      const truncateResult = await this.ejecutarTruncateCompleto();
+      console.log('🧹 Resultado truncate:', truncateResult);
+    } catch (truncateError) {
+      console.error('🧹 Error al truncar tablas:', truncateError);
+      throw new Error('No se pudo limpiar la base de datos antes de importar. Operación cancelada.');
+    }
+    console.log('🧹 Tablas limpiadas correctamente.');
+    
+    // 2. Leer archivo Excel
     const arrayBuffer = await archivo.arrayBuffer();
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     console.log('📥 Hojas encontradas:', workbook.SheetNames);
@@ -1588,18 +1621,17 @@ async importarDesdeExcel(archivo: File): Promise<{
       console.log(`  Fila ${i + 2}:`, datosExcel[i]);
     }
     
-    // 2. Preparar resultados
+    // 3. Preparar resultados (ya no hay 'actualizados')
     const resultados = {
       total: datosExcel.length,
       creados: 0,
-      actualizados: 0,
       errores: [] as Array<{fila: number, error: string}>
     };
     
-    // 3. Procesar cada registro
+    // 4. Procesar cada registro (SOLO INSERCIÓN)
     console.log('\n🔧 ============ PROCESANDO REGISTROS ============');
     for (let i = 0; i < datosExcel.length; i++) {
-      const fila = i + 2; // +2 porque Excel empieza en 1 y tiene encabezados
+      const fila = i + 2;
       const registro: any = datosExcel[i];
       
       try {
@@ -1610,11 +1642,9 @@ async importarDesdeExcel(archivo: File): Promise<{
         if (!registro.Nombre) {
           throw new Error('El campo "Nombre" es requerido');
         }
-        
         if (!registro.Estado) {
           throw new Error('El campo "Estado" es requerido');
         }
-        
         if (!registro.Criticidad) {
           throw new Error('El campo "Criticidad" es requerido');
         }
@@ -1623,89 +1653,48 @@ async importarDesdeExcel(archivo: File): Promise<{
         console.log(`📝 Estado: "${registro.Estado}"`);
         console.log(`📝 Criticidad: "${registro.Criticidad}"`);
         
-        // ============ UBICACIÓN - CON DEPURACIÓN EXTENSA ============
+        // ============ UBICACIÓN (sin cambios) ============
         console.log(`\n📍 UBICACIÓN - PROCESANDO:`);
         console.log(`📍 Valor crudo de "Ubicación":`, registro.Ubicación);
-        console.log(`📍 Tipo de "Ubicación":`, typeof registro.Ubicación);
         
         let ubicacionId = null;
         if (registro.Ubicación !== undefined && registro.Ubicación !== null) {
           const nombreUbicacionStr = registro.Ubicación.toString();
-          console.log(`📍 Nombre como string: "${nombreUbicacionStr}"`);
-          
           const nombreUbicacionLimpio = nombreUbicacionStr.trim();
-          console.log(`📍 Nombre limpio: "${nombreUbicacionLimpio}"`);
           
           if (nombreUbicacionLimpio !== '') {
             console.log(`📍 📞 LLAMANDO A crearUbicacionSiNoExiste("${nombreUbicacionLimpio}")`);
-            
-            // DEPURACIÓN: Verificar todas las ubicaciones antes
-            console.log('📍 📊 VERIFICANDO UBICACIONES EXISTENTES...');
-            const { data: ubicacionesExistentes } = await supabase
-              .from('ubicaciones')
-              .select('id, nombre')
-              .order('id');
-            
-            console.log('📍 📊 Ubicaciones existentes en BD:');
-            (ubicacionesExistentes || []).forEach(u => {
-              console.log(`  - ID: ${u.id}, Nombre: "${u.nombre}"`);
-            });
-            
-            // Llamar al método
             ubicacionId = await this.crearUbicacionSiNoExiste(nombreUbicacionLimpio);
-            
-            console.log(`📍 ✅ RESULTADO de crearUbicacionSiNoExiste:`, ubicacionId);
-            
-            if (ubicacionId) {
-              console.log(`📍 ✅ Ubicación ID ${ubicacionId} asignada para "${nombreUbicacionLimpio}"`);
-            } else {
-              console.warn(`📍 ⚠️ NO se pudo obtener/crear ubicación para "${nombreUbicacionLimpio}"`);
-              console.warn(`📍 ⚠️ Se usará null para ubicacion_id`);
-            }
+            console.log(`📍 ✅ RESULTADO:`, ubicacionId);
           } else {
             console.log('📍 ℹ️ Nombre de ubicación vacío después de trim');
           }
         } else {
           console.log('📍 ℹ️ Campo "Ubicación" es undefined o null');
         }
-        
         console.log(`📍 📋 ubicacionId final:`, ubicacionId);
         
         // ============ CONVERTIR ESTADO ============
-        console.log(`\n🎯 CONVIRTIENDO ESTADO:`);
         const estadosValidos = ['NUEVO', 'UTIL', 'MANTENIMIENTO BANCO DE PRUEBAS', 'MANTENIMIENTO FÁBRICA', 'PROCESO DE EXPORTACIÓN (MODALTRADE)', 'CUARENTENA BODEGA', 'CONDENADO'];
         const estado = registro.Estado.toString().trim();
         const estadoEsValido = estadosValidos.some(e => 
           e.toLowerCase() === estado.toLowerCase()
         );
-        
-        console.log(`🎯 Estado original: "${registro.Estado}"`);
-        console.log(`🎯 Estado limpio: "${estado}"`);
-        console.log(`🎯 Es válido? ${estadoEsValido}`);
-        
         if (!estadoEsValido) {
           throw new Error(`Estado inválido: "${registro.Estado}". Valores válidos: ${estadosValidos.join(', ')}`);
         }
         
         // ============ CONVERTIR CRITICIDAD ============
-        console.log(`\n⚠️ CONVIRTIENDO CRITICIDAD:`);
-        const criticidadesValidas = ['Bajo', 'Medio', 'Alto', 'Critico'];
+        const criticidadesValidas = ['BAJA', 'MEDIA', 'ALTA', 'CRÍTICO'];
         const criticidad = registro.Criticidad.toString().trim();
         const criticidadEsValida = criticidadesValidas.some(c => 
           c.toLowerCase() === criticidad.toLowerCase()
         );
-        
-        console.log(`⚠️ Criticidad original: "${registro.Criticidad}"`);
-        console.log(`⚠️ Criticidad limpia: "${criticidad}"`);
-        console.log(`⚠️ Es válida? ${criticidadEsValida}`);
-        
         if (!criticidadEsValida) {
           throw new Error(`Criticidad inválida: "${registro.Criticidad}". Valores válidos: ${criticidadesValidas.join(', ')}`);
         }
         
         // ============ PREPARAR DATOS DEL PRODUCTO ============
-        console.log(`\n📋 PREPARANDO DATOS DEL PRODUCTO:`);
-
         const productoData: any = {
           nombre: registro.Nombre.toString().trim(),
           descripcion: registro.Descripción ? registro.Descripción.toString().trim() : null,
@@ -1716,13 +1705,13 @@ async importarDesdeExcel(archivo: File): Promise<{
           serial_number: registro['Serial Number'] ? registro['Serial Number'].toString().trim() : null,
           estado: estado,
           cantidad_actual: registro['Cantidad Actual'] ? Number(registro['Cantidad Actual']) : 0,
-          ubicacion_id: ubicacionId, // <-- AQUÍ VA EL ID
+          ubicacion_id: ubicacionId,
           precio: registro.Precio ? Number(registro.Precio) : null,
           fecha_adquisicion: registro['Fecha Adquisición'] ? registro['Fecha Adquisición'].toString().trim() : null,
           orden_envio: registro['Orden Envío'] ? registro['Orden Envío'].toString().trim() : null,
           factura: registro.Factura ? registro.Factura.toString().trim() : null,
           observaciones: registro.Observaciones ? registro.Observaciones.toString().trim() : null,
-          estanteria: registro.Estantería ? registro.Estantería.toString().trim() : null, // <-- NUEVO CAMPO
+          estanteria: registro.Estantería ? registro.Estantería.toString().trim() : null,
           esta_activo: true
         };
         
@@ -1733,100 +1722,17 @@ async importarDesdeExcel(archivo: File): Promise<{
         
         console.log('📋 Datos finales del producto:', JSON.stringify(productoData, null, 2));
         
-        // ============ BUSCAR SI EL PRODUCTO YA EXISTE ============
-        console.log(`\n🔍 BUSCANDO PRODUCTO EXISTENTE:`);
-        let productoExistente = null;
-        
-        // LÓGICA MODIFICADA PARA PRODUCTOS SERIADOS VS NO SERIADOS
-        const tieneSerialNumber = productoData.serial_number && productoData.serial_number.trim() !== '';
-        
-        if (tieneSerialNumber) {
-          // PRODUCTO SERIADO: Buscar por serial_number (que debe ser único)
-          console.log(`🔍 Producto SERIADO - Buscando por serial: "${productoData.serial_number}"`);
-          const { data: porSerial, error: errorSerial } = await supabase
-            .from('productos')
-            .select('*')
-            .eq('serial_number', productoData.serial_number)
-            .eq('esta_activo', true)
-            .single();
-          
-          if (errorSerial && errorSerial.code !== 'PGRST116') {
-            console.error('🔍 Error buscando por serial:', errorSerial);
-          }
-          
-          if (porSerial) {
-            productoExistente = porSerial;
-            console.log(`🔍 ✅ Encontrado por serial: ID ${porSerial.id}, Nombre: ${porSerial.nombre}`);
-          } else {
-            console.log(`🔍 ❌ No encontrado por serial`);
-          }
-        } else {
-          // PRODUCTO NO SERIADO: Buscar por código (asumiendo que es único para productos no seriados)
-          if (productoData.codigo && productoData.codigo.trim() !== '') {
-            console.log(`🔍 Producto NO SERIADO - Buscando por código: "${productoData.codigo}"`);
-            console.log(`🔍 Nota: Para productos no seriados, el código debe ser único`);
-            
-            const { data: porCodigo, error: errorCodigo } = await supabase
-              .from('productos')
-              .select('*')
-              .eq('codigo', productoData.codigo)
-              .is('serial_number', null) // Solo productos sin serial number
-              .eq('esta_activo', true)
-              .single();
-            
-            if (errorCodigo && errorCodigo.code !== 'PGRST116') {
-              console.error('🔍 Error buscando por código:', errorCodigo);
-            }
-            
-            if (porCodigo) {
-              productoExistente = porCodigo;
-              console.log(`🔍 ✅ Encontrado por código: ID ${porCodigo.id}, Nombre: ${porCodigo.nombre}`);
-            } else {
-              console.log(`🔍 ❌ No encontrado por código`);
-            }
-          } else {
-            console.log(`🔍 ℹ️ Producto NO SERIADO sin código - No se puede buscar duplicados`);
-          }
-        }
-        
-        // ============ CREAR O ACTUALIZAR ============
-        if (productoExistente) {
-          console.log(`\n🔄 ACTUALIZANDO PRODUCTO EXISTENTE: ID ${productoExistente.id}`);
-          console.log(`🔄 Datos anteriores:`, {
-            nombre: productoExistente.nombre,
-            ubicacion_id: productoExistente.ubicacion_id,
-            cantidad_actual: productoExistente.cantidad_actual
-          });
-          
-          // Eliminar campos que no se deben actualizar
-          delete productoData.id;
-          delete productoData.created_at;
-          
-          console.log(`🔄 Datos para actualizar:`, productoData);
-          
-          await this.updateProducto(productoExistente.id, productoData);
-          resultados.actualizados++;
-          
-          console.log(`🔄 ✅ Producto actualizado exitosamente`);
-          
-        } else {
-          console.log(`\n➕ CREANDO NUEVO PRODUCTO`);
-          console.log(`➕ Datos para crear:`, productoData);
-          
-          const productoNuevo = await this.createProducto(productoData);
-          resultados.creados++;
-          
-          console.log(`➕ ✅ Producto creado: ID ${productoNuevo.id}, Nombre: ${productoNuevo.nombre}`);
-          console.log(`➕ ✅ Ubicación asignada en BD: ${productoNuevo.ubicacion_id}`);
-        }
+        // ============ INSERCIÓN DIRECTA (SIN BÚSQUEDA NI ACTUALIZACIÓN) ============
+        console.log(`\n➕ CREANDO NUEVO PRODUCTO`);
+        const productoNuevo = await this.createProducto(productoData);
+        resultados.creados++;
+        console.log(`➕ ✅ Producto creado: ID ${productoNuevo.id}, Nombre: ${productoNuevo.nombre}`);
         
         console.log(`--- ✅ FILA ${fila} PROCESADA CORRECTAMENTE ---\n`);
         
       } catch (error: any) {
-        console.error(`\n❌ ❌ ❌ ERROR EN FILA ${fila} ❌ ❌ ❌`);
-        console.error(`❌ Mensaje:`, error.message);
-        console.error(`❌ Stack:`, error.stack);
-        console.error(`❌ Datos de la fila:`, registro);
+        console.error(`\n❌ ERROR EN FILA ${fila}:`, error.message);
+        console.error('❌ Datos de la fila:', registro);
         
         resultados.errores.push({
           fila,
@@ -1835,12 +1741,14 @@ async importarDesdeExcel(archivo: File): Promise<{
         
         console.log(`--- ❌ FILA ${fila} CON ERROR ---\n`);
       }
+      
+      // 📢 NOTIFICAR PROGRESO DESPUÉS DE CADA FILA (ÉXITO O ERROR)
+      onProgress?.(i + 1, datosExcel.length);
     }
     
     console.log('\n✅ ============ IMPORTACIÓN COMPLETADA ============');
     console.log(`✅ Total procesados: ${resultados.total}`);
     console.log(`✅ Creados: ${resultados.creados}`);
-    console.log(`✅ Actualizados: ${resultados.actualizados}`);
     console.log(`✅ Errores: ${resultados.errores.length}`);
     
     if (resultados.errores.length > 0) {
@@ -1853,10 +1761,7 @@ async importarDesdeExcel(archivo: File): Promise<{
     return resultados;
     
   } catch (error: any) {
-    console.error('❌ ❌ ❌ ERROR GENERAL EN IMPORTACIÓN ❌ ❌ ❌');
-    console.error('❌ Error:', error);
-    console.error('❌ Message:', error.message);
-    console.error('❌ Stack:', error.stack);
+    console.error('❌ ERROR GENERAL EN IMPORTACIÓN:', error);
     throw this.handleError(error, 'importar productos desde Excel');
   }
 }
@@ -1901,7 +1806,7 @@ async descargarPlantillaImportacion(): Promise<void> {
       ['2. Mantenga los nombres de las columnas exactamente como están'],
       ['3. La columna ID es opcional (si existe, se ignorará)'],
       ['4. Valores válidos para Estado: NUEVO,UTIL, MANTENIMIENTO BANCO DE PRUEBAS, MANTENIMIENTO FÁBRICA, PROCESO DE EXPORTACIÓN (MODALTRADE), CUARENTENA BODEGA, CONDENADO'],
-      ['5. Valores válidos para Criticidad: bajo, medio, alto, critico'],
+      ['5. Valores válidos para Criticidad: BAJA, MEDIA, ALTA, CRÍTICO'],
       ['6. "Ubicación" debe ser el NOMBRE exacto de una ubicación existente'],
       ['7. Los productos se identifican por "Código" o "Serial Number"'],
       ['8. Si un producto ya existe, se actualizará'],

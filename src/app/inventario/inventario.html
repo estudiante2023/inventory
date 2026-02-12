@@ -107,7 +107,7 @@
             <i class="bi bi-check-circle"></i>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ contarCriticos() }}</div>
+            <div class="stat-value">{{ estadisticas.criticos || 0 }}</div>
     <div class="stat-label">Críticos</div>
           </div>
         </div>
@@ -237,11 +237,20 @@
         <select class="inventario-filter-select"
           [(ngModel)]="filtros.criticidad" (change)="buscarProductos()">
           <option value="todos">Todas criticidades</option>
-          <option value="Bajo">Bajo</option>
-          <option value="Medio">Medio</option>
-          <option value="Alto">Alto</option>
-          <option value="Critico">Crítico</option>
+          <option value="BAJA">BAJA</option>
+          <option value="MEDIA">MEDIA</option>
+          <option value="ALTA">ALTA</option>
+          <option value="CRÍTICO">CRÍTICO</option>
         </select>
+        <!-- FILTRO POR COMPONENTE -->
+<select class="inventario-filter-select" 
+        [(ngModel)]="filtros.componente" 
+        (change)="buscarProductos()">
+  <option value="todos">Todos los componentes</option>
+  <option *ngFor="let comp of componentesDisponibles" [value]="comp">
+    {{ comp }}
+  </option>
+</select>
 
         <select class="inventario-filter-select"
           [(ngModel)]="filtros.ubicacion_id" (change)="buscarProductos()">
@@ -901,10 +910,10 @@
           <select class="inventario-form-select"
             [(ngModel)]="formProducto.criticidad"
             name="criticidad">
-            <option value="Bajo">Bajo</option>
-            <option value="Medio">Medio</option>
-            <option value="Alto">Alto</option>
-            <option value="Critico">Crítico</option>
+            <option value="BAJA">BAJA</option>
+            <option value="MEDIA">MEDIA</option>
+            <option value="ALTA">ALTA</option>
+            <option value="CRÍTICO">CRÍTICO</option>
           </select>
         </div>
 
@@ -1610,201 +1619,170 @@
   </div>
 </div>
 
-<!-- Modal de importación -->
-<!-- Modal de Importación de Excel - VERSIÓN QUE SE CIERRA AUTOMÁTICAMENTE -->
-<div class="modal-backdrop fade show"
-  *ngIf="mostrandoModalImportacion"
-  (click)="cerrarModalImportacion()"></div>
-<div class="modal fade show"
-  [class.show]="mostrandoModalImportacion"
-  [style.display]="mostrandoModalImportacion ? 'block' : 'none'"
-  tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">
-          Importar repuestos desde Excel
-        </h5>
-        <button type="button" class="btn-close btn-close-white"
-          (click)="cerrarModalImportacion()"></button>
+<!-- Modal de Importación - SIN BOOTSTRAP, CSS PURO -->
+<div class="modal-overlay" *ngIf="mostrandoModalImportacion" (click)="cerrarModalImportacion()"></div>
+<div class="modal-container" *ngIf="mostrandoModalImportacion" [class.show]="mostrandoModalImportacion">
+  <div class="modal-content">
+    <div class="modal-header bg-primary">
+      <h5 class="modal-title">Importar repuestos desde Excel</h5>
+      <button type="button" class="btn-close" (click)="cerrarModalImportacion()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- INSTRUCCIONES -->
+      <div class="alert alert-light border">
+        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Importación automática:</h6>
+        <ul>
+          <li><strong class="text-danger">Antes de importar se eliminarán TODOS los registros actuales</strong> (productos y trazabilidad).</li>
+          <li>Todos los repuestos del Excel se insertarán como nuevos (sin verificar duplicados).</li>
+          <li>Las ubicaciones se crearán automáticamente si no existen.</li>
+          <li>Puedes seleccionar múltiples archivos Excel; se procesarán en orden.</li>
+          <li>El modal se cerrará automáticamente al finalizar.</li>
+        </ul>
       </div>
 
-      <div class="modal-body">
-
-        <!-- Instrucciones -->
-        <div class="alert alert-light border mb-4">
-          <h6 class="mb-2"><i
-              class="bi bi-info-circle me-2 text-primary"></i>Importación
-            automática:</h6>
-          <ul class="mb-0 ps-3">
-            <li>Los repuestos existentes se actualizarán (por código o
-              serial)</li>
-            <li>Los repuestos nuevos se crearán automáticamente</li>
-            <li>El modal se cerrará automáticamente al terminar</li>
-          </ul>
-        </div>
-
-        <!-- Sección 2: Seleccionar archivo -->
-        <div class="card mb-4">
-          <div class="card-body">
-
-            <!-- Estado del archivo -->
-            <div *ngIf="!archivoImportacion">
-              <p class="card-text mb-3">Selecciona un archivo Excel (.xlsx o
-                .xls) con los repuestos a importar.</p>
-
-              <div class="d-grid">
-                <button class="btn btn-primary btn-lg"
-                  (click)="archivoImportInput.click()"
-                  [disabled]="loading">
-                  <i class="bi bi-folder-plus me-2"></i> Seleccionar archivo
-                  Excel
-                </button>
-              </div>
-              <div class="form-text mt-2 text-center">
-                Formatos: .xlsx, .xls (máximo 10MB)
-              </div>
+      <!-- SELECCIÓN DE ARCHIVOS -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div *ngIf="archivosImportacion.length === 0">
+            <p>Selecciona uno o más archivos Excel (.xlsx o .xls) con los repuestos a importar.</p>
+            <div class="d-grid">
+              <button class="btn btn-primary btn-lg" (click)="archivoImportInput.click()" [disabled]="importando">
+                <i class="bi bi-folder-plus"></i> Seleccionar archivo(s) Excel
+              </button>
             </div>
-
-            <!-- Archivo seleccionado -->
-            <div *ngIf="archivoImportacion" class="alert alert-info">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="bi bi-file-earmark-excel me-2"></i>
-                  <strong>Archivo listo:</strong> {{ archivoImportacion.name }}
-                  <span class="text-muted ms-2">
-                    ({{ (archivoImportacion.size / 1024).toFixed(2) }} KB)
-                  </span>
-                </div>
-                <div>
-                  <button class="btn btn-sm btn-outline-danger"
-                    (click)="archivoImportacion = null; archivoImportInput.value = ''">
-                    <i class="bi bi-x-circle"></i> Cambiar
-                  </button>
-                </div>
-              </div>
-            </div>
+            <div class="form-text">Formatos: .xlsx, .xls (máximo 10MB cada uno)</div>
           </div>
-        </div>
 
-        <!-- Sección 3: Ejecutar importación (solo si hay archivo) -->
-        <div class="card" *ngIf="archivoImportacion && !resultadoImportacion">
-          <div class="card-body">
-            <h6 class="card-title mb-3">
-              <i class="bi bi-play-circle me-2 text-success"></i>Paso 3:
-              Ejecutar importación
-            </h6>
-            <p class="card-text">Al ejecutar, los repuestos se procesarán y el
-              modal se cerrará automáticamente.</p>
-
-            <div class="d-grid gap-2">
-              <button class="btn btn-success btn-lg"
-                (click)="ejecutarImportacion()"
+          <div *ngIf="archivosImportacion.length > 0" class="alert alert-info">
+            <div class="d-flex justify-content-between">
+              <div>
+                <i class="bi bi-files"></i>
+                <strong>{{ archivosImportacion.length }} archivo(s) listo(s):</strong>
+                <ul>
+                  <li *ngFor="let file of archivosImportacion">
+                    {{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)
+                  </li>
+                </ul>
+              </div>
+              <button class="btn btn-sm btn-outline-danger" 
+                (click)="archivosImportacion = []; archivoImportInput.value = ''"
                 [disabled]="importando">
-                <span *ngIf="importando"
-                  class="spinner-border spinner-border-sm me-1"></span>
-                <i class="bi bi-play-circle me-2"></i>
-                {{ importando ? 'Importando...' : 'Ejecutar Importación' }}
-              </button>
-
-              <button class="btn btn-outline-secondary"
-                (click)="cerrarModalImportacion()">
-                <i class="bi bi-x-circle me-1"></i> Cancelar
+                <i class="bi bi-x-circle"></i> Cambiar
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Sección 4: Resultados (durante los 3 segundos antes de cerrar) -->
-        <div *ngIf="resultadoImportacion" class="mt-4">
-          <div class="alert alert-success">
-            <h5 class="alert-heading">
-              <i class="bi bi-check-circle-fill me-2"></i>
-              Importación Completada
-            </h5>
+      <!-- BOTÓN DE IMPORTAR (solo si hay archivos) -->
+      <div class="card" *ngIf="archivosImportacion.length > 0 && !resultadoImportacion">
+        <div class="card-body">
+          <h6 class="card-title"><i class="bi bi-play-circle text-success"></i> Paso 3: Ejecutar importación</h6>
+          <p>Al ejecutar, los repuestos se procesarán y el modal se cerrará automáticamente.</p>
+          <div class="d-grid gap-2">
+            <button class="btn btn-success btn-lg" 
+              (click)="ejecutarImportacion()" 
+              [disabled]="importando">
+              <span *ngIf="importando" class="spinner-pequeno"></span>
+              <i class="bi bi-play-circle"></i>
+              {{ importando ? 'Importando...' : 'Ejecutar Importación' }}
+            </button>
+            <button class="btn btn-outline-secondary" (click)="cerrarModalImportacion()">Cancelar</button>
+          </div>
+        </div>
+      </div>
 
-            <!-- Contador regresivo -->
-            <div class="alert alert-warning mt-3">
-              <i class="bi bi-clock me-2"></i>
-              Cerrando en <span class="badge bg-danger">3</span> segundos...
+      <!-- BARRA DE PROGRESO PERSONALIZADA -->
+      <div *ngIf="importando" class="progreso-container">
+        <div class="progreso-card">
+          <div class="progreso-titulo">
+            <i class="bi bi-arrow-repeat"></i> Importando archivos...
+          </div>
+          <div class="progreso-archivo-info">
+            <span>Archivo {{ progresoImportacion.archivoActual }} de {{ progresoImportacion.totalArchivos }}</span>
+            <span class="progreso-archivo-nombre">{{ progresoImportacion.archivoNombre }}</span>
+          </div>
+          <div class="progreso-barra-wrapper" *ngIf="progresoImportacion.totalFilas > 0">
+            <div class="progreso-barra-fill" 
+                 [style.width.%]="(progresoImportacion.filasProcesadas / progresoImportacion.totalFilas) * 100">
+              {{ ((progresoImportacion.filasProcesadas / progresoImportacion.totalFilas) * 100).toFixed(0) }}%
             </div>
+          </div>
+          <div class="progreso-texto" *ngIf="progresoImportacion.totalFilas > 0">
+            {{ progresoImportacion.filasProcesadas }} / {{ progresoImportacion.totalFilas }} filas
+          </div>
+          <div class="progreso-texto" *ngIf="!progresoImportacion.totalFilas">
+            <span class="spinner-pequeno"></span> Leyendo archivo...
+          </div>
+        </div>
+      </div>
 
-            <div class="row mt-3">
-              <div class="col-md-3 text-center">
-                <div class="bg-light rounded p-3">
-                  <h2 class="text-primary mb-0">{{ resultadoImportacion.total
-                    }}</h2>
-                  <small class="text-muted">Total procesados</small>
-                </div>
-              </div>
-              <div class="col-md-3 text-center">
-                <div class="bg-light rounded p-3">
-                  <h2 class="text-success mb-0">{{ resultadoImportacion.creados
-                    }}</h2>
-                  <small class="text-muted">Nuevos creados</small>
-                </div>
-              </div>
-              <div class="col-md-3 text-center">
-                <div class="bg-light rounded p-3">
-                  <h2 class="text-warning mb-0">{{
-                    resultadoImportacion.actualizados }}</h2>
-                  <small class="text-muted">Actualizados</small>
-                </div>
-              </div>
-              <div class="col-md-3 text-center">
-                <div class="bg-light rounded p-3">
-                  <h2
-                    [class.text-danger]="resultadoImportacion.errores.length > 0"
-                    [class.text-success]="resultadoImportacion.errores.length === 0"
-                    class="mb-0">
-                    {{ resultadoImportacion.errores.length }}
-                  </h2>
-                  <small class="text-muted">Errores</small>
-                </div>
+      <!-- RESULTADOS -->
+      <div *ngIf="resultadoImportacion" class="mt-4">
+        <div class="alert alert-success">
+          <h5><i class="bi bi-check-circle-fill"></i> Importación Completada</h5>
+          <div class="alert alert-warning">
+            <i class="bi bi-clock"></i> Cerrando en <span class="badge bg-danger">4</span> segundos...
+          </div>
+          <div class="row mt-3">
+            <div class="col">
+              <div class="bg-light rounded p-3 text-center">
+                <h2 class="text-primary">{{ resultadoImportacion.total }}</h2>
+                <small>Total procesados</small>
               </div>
             </div>
-
-            <!-- Errores (solo si hay) -->
-            <div *ngIf="resultadoImportacion.errores.length > 0" class="mt-4">
-              <hr>
-              <h6 class="mb-3">
-                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
-                Se encontraron {{ resultadoImportacion.errores.length }} errores
-              </h6>
-              <div class="table-responsive"
-                style="max-height: 150px; overflow-y: auto;">
-                <table class="table table-sm table-bordered">
-                  <thead class="table-light">
-                    <tr>
-                      <th width="80">Fila</th>
-                      <th>Error</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let error of resultadoImportacion.errores">
-                      <td class="text-center">
-                        <span class="badge bg-danger">{{ error.fila }}</span>
-                      </td>
-                      <td class="small">{{ error.error }}</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="col">
+              <div class="bg-light rounded p-3 text-center">
+                <h2 class="text-success">{{ resultadoImportacion.creados }}</h2>
+                <small>Nuevos creados</small>
+              </div>
+            </div>
+            <div class="col">
+              <div class="bg-light rounded p-3 text-center">
+                <h2 [class.text-danger]="resultadoImportacion.errores.length > 0" 
+                    [class.text-success]="resultadoImportacion.errores.length === 0">
+                  {{ resultadoImportacion.errores.length }}
+                </h2>
+                <small>Errores</small>
               </div>
             </div>
           </div>
+          <div *ngIf="resultadoImportacion.errores.length > 0" class="mt-4">
+            <hr>
+            <h6><i class="bi bi-exclamation-triangle text-warning"></i> Se encontraron {{ resultadoImportacion.errores.length }} errores</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>Archivo</th>
+                    <th>Fila</th>
+                    <th>Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let error of resultadoImportacion.errores">
+                    <td>{{ error.archivo || '-' }}</td>
+                    <td><span class="badge bg-danger">{{ error.fila }}</span></td>
+                    <td>{{ error.error }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- Input oculto para archivo -->
-<input #archivoImportInput type="file" id="archivoImportacion"
-  accept=".xlsx,.xls"
-  (change)="onArchivoImportacionSelected($event)"
-  style="display: none">
-
+<!-- INPUT OCULTO PARA ARCHIVOS -->
+<input #archivoImportInput type="file" 
+       id="archivoImportacion"
+       accept=".xlsx,.xls"
+       multiple
+       (change)="onArchivoImportacionSelected($event)"
+       style="display: none">
 
 
 

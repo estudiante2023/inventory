@@ -38,7 +38,7 @@ export class UbicacionesService {
       let query = supabase
         .from(this.tableName)
         .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false });
+        .order('id', { ascending: false });
 
       // Aplicar filtros
       if (filters?.estado && filters.estado !== 'todos') {

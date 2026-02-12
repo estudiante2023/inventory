@@ -172,7 +172,7 @@
       <table *ngIf="!isLoading && ubicacionesx.length > 0" class="ubicaciones-table">
         <thead>
           <tr>
-            <th class="col-id">ID</th>
+            <th class="col-id">Numeración</th>
             <th class="col-nombre">Nombre</th>
             <th class="col-descripcion">Descripción</th>
             <th>Estado</th>
@@ -181,8 +181,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let ubicacion of ubicacionesx">
-            <td class="col-id">#{{ ubicacion.id }}</td>
+          <tr *ngFor="let ubicacion of ubicacionesx; let i = index">
+           <td class="col-id">{{ totalRegistros - ((page-1) * limit + i) }}</td>
             <td class="col-nombre">{{ ubicacion.nombre }}</td>
             <td class="col-descripcion">{{ ubicacion.descripcion || 'Sin descripción' }}</td>
             <td>

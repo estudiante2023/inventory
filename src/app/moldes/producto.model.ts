@@ -4,7 +4,7 @@ export interface Producto {
   nombre: string;
   descripcion: string | null;
   componente: string | null;
-  criticidad: 'Bajo' | 'Medio' | 'Alto' | 'Critico';
+  criticidad:  'BAJA' | 'MEDIA' | 'ALTA' | 'CRÍTICO';
   part_number: string | null;
   codigo: string | null;
   serial_number: string | null;

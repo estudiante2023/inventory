@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnDestroy, ElementRef, ViewChild, Renderer2, ViewEncapsulation, OnInit, HostListener } from '@angular/core';
-import { RouterLink, RouterOutlet, Router, NavigationEnd } from "@angular/router";
+import { RouterLink, RouterOutlet, Router, NavigationEnd, RouterLinkActive } from "@angular/router";
 import { AuthService } from '../../services/auth.service';
 import { UsuariosService } from '../../services/usuarios.service'; // Importar el servicio
 import { filter } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { UsuariosOnlineService } from '../../services/usuarios-online.service';
 
 @Component({
   selector: 'app-navegacion',
-  imports: [RouterLink, RouterOutlet, CommonModule],
+  imports: [RouterLink, RouterOutlet, CommonModule,RouterLinkActive],
   templateUrl: './navegacion.html',
   styleUrl: './navegacion.css',
   encapsulation: ViewEncapsulation.Emulated
@@ -296,18 +296,7 @@ export class Navegacion implements OnInit, AfterViewInit, OnDestroy {
       this.listeners.push(listener);
     }
 
-    // Sidenav subheadings
-    const subHeadings = document.querySelectorAll('.navList__subheading');
-    subHeadings.forEach((subHeading) => {
-      const listener = this.renderer.listen(subHeading, 'click', (e) => {
-        const target = e.currentTarget as HTMLElement;
-        document.querySelectorAll('.navList__subheading')
-          .forEach(el => el.classList.remove('navList__subheading--active'));
-
-        target.classList.add('navList__subheading--active');
-      });
-      this.listeners.push(listener);
-    });
+    
   }
 
   private setupNavItemsListeners(): void {

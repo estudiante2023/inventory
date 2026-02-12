@@ -1,5 +1,5 @@
 // components/inventario.component.ts
-import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProductosService } from '../../services/productos.service';
@@ -172,23 +172,36 @@ export class Inventario implements OnInit {
     this.mostrandoModalImportacion = true;
   }
   @ViewChild('archivoImportInput') archivoImportInput!: ElementRef<HTMLInputElement>;
+// Control de importación (múltiples archivos)
+archivosImportacion: File[] = [];          // Array de archivos seleccionados
+importando = false;
+resultadoImportacion: {
+  total: number;
+  creados: number;
+  errores: Array<{ archivo: string; fila: number; error: string }>;
+} | null = null;
 
+progresoImportacion = {
+  archivoActual: 0,        // Índice del archivo que se está procesando
+  totalArchivos: 0,
+  archivoNombre: '',
+  filasProcesadas: 0,
+  totalFilas: 0,
+  porcentaje: 0
+};
 
   // Asegúrate de que cerrarModalImportacion limpie todo:
   cerrarModalImportacion() {
-    this.mostrandoModalImportacion = false;
-    this.archivoImportacion = null;
-    this.resultadoImportacion = null;
-    this.importando = false;
-
-    // Limpiar input de archivo
-    if (this.archivoImportInput && this.archivoImportInput.nativeElement) {
-      this.archivoImportInput.nativeElement.value = '';
-    }
+  this.mostrandoModalImportacion = false;
+  this.archivosImportacion = [];
+  this.resultadoImportacion = null;
+  this.importando = false;
+  this.progresoImportacion = { archivoActual: 0, totalArchivos: 0, filasProcesadas: 0, totalFilas: 0, porcentaje: 0, archivoNombre: '' };
+  if (this.archivoImportInput) {
+    this.archivoImportInput.nativeElement.value = '';
   }
-  archivoImportacion: File | null = null;
-  importando = false;
-  resultadoImportacion: any = null;
+}
+  archivoImportacion: File | null = null; 
 
   // Propiedades para el modal de imagen
   imagenModal = {
@@ -284,30 +297,35 @@ export class Inventario implements OnInit {
     return !this.esImagen(url) && !this.esPdf(url);
   }
 
-  onArchivoImportacionSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
+onArchivoImportacionSelected(event: any) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
 
+  const archivosValidos: File[] = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     // Validar extensión
-    const extensionesPermitidas = ['.xlsx', '.xls'];
     const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-
-    if (!extensionesPermitidas.includes(extension)) {
-      this.mostrarAlerta('Solo se permiten archivos Excel (.xlsx, .xls)', 'error');
-      return;
+    if (!['.xlsx', '.xls'].includes(extension)) {
+      this.mostrarAlerta(`El archivo "${file.name}" no es un Excel válido`, 'error');
+      continue;
     }
-
-    // Validar tamaño (10MB máximo)
+    // Validar tamaño (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      this.mostrarAlerta('El archivo es demasiado grande. Máximo 10MB', 'error');
-      return;
+      this.mostrarAlerta(`El archivo "${file.name}" excede los 10MB`, 'error');
+      continue;
     }
-
-    this.archivoImportacion = file;
-    this.resultadoImportacion = null;
-
-    console.log('📂 Archivo seleccionado para importación:', file.name);
+    archivosValidos.push(file);
   }
+
+  this.archivosImportacion = archivosValidos;
+  this.resultadoImportacion = null;
+
+  if (archivosValidos.length > 0) {
+    console.log(`📂 ${archivosValidos.length} archivo(s) seleccionado(s)`);
+  }
+}
 
   // Método para descargar plantilla
   async descargarPlantilla() {
@@ -326,54 +344,92 @@ export class Inventario implements OnInit {
   // En tu inventario.component.ts
 
   // Modifica el método ejecutarImportacion:
-  async ejecutarImportacion() {
-    if (!this.archivoImportacion) {
-      this.mostrarAlerta('Selecciona un archivo Excel para importar', 'error');
-      return;
-    }
-
-    try {
-      this.importando = true;
-      this.loading = true;
-
-      console.log('🚀 Iniciando importación desde Excel...');
-
-      this.resultadoImportacion = await this.productosService.importarDesdeExcel(this.archivoImportacion);
-
-      // Recargar datos si hubo éxito
-      if (this.resultadoImportacion.creados > 0 || this.resultadoImportacion.actualizados > 0) {
-        await this.cargarProductos();
-        await this.cargarEstadisticas(); 
-      }
-
-      // Mostrar mensaje de éxito y cerrar después de 3 segundos
-      const mensaje = `Importación completada:\n\n` +
-        `• Creados: ${this.resultadoImportacion.creados}\n` +
-        `• Actualizados: ${this.resultadoImportacion.actualizados}\n` +
-        `• Errores: ${this.resultadoImportacion.errores.length}\n\n` +
-        `El modal se cerrará automáticamente...`;
-
-      this.mostrarAlerta(mensaje, 'success');
-
-      // Cerrar automáticamente después de 3 segundos
-      setTimeout(() => {
-        this.cerrarModalImportacion();
-      }, 3000);
-
-    } catch (error: any) {
-      console.error('❌ Error en importación:', error);
-      this.mostrarAlerta(`Error al importar: ${error.message}`, 'error');
-
-      // Cerrar también en caso de error después de 3 segundos
-      setTimeout(() => {
-        this.cerrarModalImportacion();
-      }, 3000);
-    } finally {
-      this.importando = false;
-      this.loading = false;
-    }
+ async ejecutarImportacion() {
+  if (this.archivosImportacion.length === 0) {
+    this.mostrarAlerta('Selecciona al menos un archivo Excel', 'error');
+    return;
   }
 
+  try {
+    this.importando = true;
+    this.loading = true;
+
+    // Inicializar progreso global
+    this.progresoImportacion = {
+      archivoActual: 0,
+      totalArchivos: this.archivosImportacion.length,
+      archivoNombre: '',
+      filasProcesadas: 0,
+      totalFilas: 0,
+      porcentaje: 0
+    };
+
+    let totalCreados = 0;
+    let totalRegistros = 0;
+    let totalErrores: Array<{ archivo: string; fila: number; error: string }> = [];
+
+    // Procesar cada archivo
+    for (let i = 0; i < this.archivosImportacion.length; i++) {
+      const archivo = this.archivosImportacion[i];
+
+      this.progresoImportacion.archivoActual = i + 1;
+      this.progresoImportacion.archivoNombre = archivo.name;
+      this.progresoImportacion.filasProcesadas = 0;
+      this.progresoImportacion.totalFilas = 0;
+      this.progresoImportacion.porcentaje = 0;
+
+      console.log(`📄 Procesando archivo ${i + 1}/${this.archivosImportacion.length}: ${archivo.name}`);
+
+     const resultadoArchivo = await this.productosService.importarDesdeExcel(
+  archivo,
+  (procesadas, total) => {
+  this.progresoImportacion.filasProcesadas = procesadas;
+  this.progresoImportacion.totalFilas = total;
+  this.cdRef.detectChanges();   // 👈 Forzar actualización
+}
+);
+
+      // Acumular resultados
+      totalCreados += resultadoArchivo.creados;
+      totalRegistros += resultadoArchivo.total;
+      totalErrores = [
+        ...totalErrores,
+        ...resultadoArchivo.errores.map(e => ({
+          archivo: archivo.name,
+          fila: e.fila,
+          error: e.error
+        }))
+      ];
+    }
+
+    // Resultado final
+    this.resultadoImportacion = {
+      total: totalRegistros,
+      creados: totalCreados,
+      errores: totalErrores
+    };
+
+    // Recargar datos
+    await this.cargarProductos();
+    await this.cargarEstadisticas();
+
+    this.mostrarAlerta(
+      `✅ Importación completada: ${totalCreados} repuestos creados en ${this.archivosImportacion.length} archivo(s).`,
+      'success'
+    );
+
+    // Cerrar modal después de 4 segundos
+    setTimeout(() => this.cerrarModalImportacion(), 4000);
+
+  } catch (error: any) {
+    console.error('❌ Error en importación:', error);
+    this.mostrarAlerta(`Error al importar: ${error.message}`, 'error');
+    setTimeout(() => this.cerrarModalImportacion(), 4000);
+  } finally {
+    this.importando = false;
+    this.loading = false;
+  }
+}
   // Método para cancelar importación
   cancelarImportacion() {
     this.archivoImportacion = null;
@@ -594,7 +650,7 @@ export class Inventario implements OnInit {
       // Contar productos con criticidad 'Critico' (insensible a mayúsculas/minúsculas)
       const criticos = this.productos.filter(producto =>
         producto.criticidad &&
-        producto.criticidad.toString().toUpperCase() === 'CRITICO'
+        producto.criticidad.toString().toUpperCase() === 'CRÍTICO'
       );
 
       return criticos.length;
@@ -673,31 +729,43 @@ onUbicacionChange(event: any) {
   ubicaciones: any[] = [];
 
   // Filtros
-  filtros = {
-    search: '',
-    estado: 'todos',
-    criticidad: 'todos',
-    ubicacion_id: 0,
-    bajo_stock: false,
-    page: 1,
-    limit: 10,
-    orderBy: 'id',
-    orderDir: 'desc' as 'asc' | 'desc'
-  };
-
+filtros = {
+  search: '',
+  estado: 'todos',
+  criticidad: 'todos',
+  ubicacion_id: 0,
+  componente: 'todos',      // ← NUEVA LÍNEA
+  bajo_stock: false,
+  page: 1,
+  limit: 10,
+  orderBy: 'id',
+  orderDir: 'desc' as 'asc' | 'desc'
+};
+componentesDisponibles: string[] = [
+  'RA',
+  'GAREX/SCV',
+  'MYC',
+  'SATCOM',
+  'COMMS',
+  'CAMIONES',
+  'AA',
+  'GENERADORES',
+  'UPS'
+];
   // Paginación
   totalProductos = 0;
   totalPaginas = 0;
   paginas: number[] = [];
 
   // Estadísticas
-  estadisticas = {
-    total: 0,
-    activos: 0,
-    bajoStock: 0,
-    agotados: 0,
-    valorTotal: 0
-  };
+estadisticas = {
+  total: 0,
+  activos: 0,
+  bajoStock: 0,
+  agotados: 0,
+  valorTotal: 0,
+  criticos: 0   // ← agregar esta línea
+};
 
   // Formulario de producto
   formProducto = {
@@ -705,7 +773,7 @@ onUbicacionChange(event: any) {
     nombre: '',
     descripcion: '',
     componente: '',
-    criticidad: 'Medio' as 'Bajo' | 'Medio' | 'Alto' | 'Critico',
+    criticidad: 'MEDIA' as 'BAJA' | 'MEDIA' | 'ALTA' | 'CRÍTICO',
     part_number: '',
     codigo: '',
     serial_number: '',
@@ -1176,7 +1244,8 @@ formMovimiento = {
   constructor(
     private productosService: ProductosService,
     private trazabilidadService: TrazabilidadService,
-    private ubicacionesService: UbicacionesService
+    private ubicacionesService: UbicacionesService,
+    private cdRef: ChangeDetectorRef 
   ) { }
 
   async ngOnInit() {
@@ -1237,7 +1306,14 @@ formMovimiento = {
     try {
       // Obtener las estadísticas básicas del servicio
       const statsBasicas = await this.productosService.getEstadisticas();
-      this.estadisticas = statsBasicas;
+     this.estadisticas = {
+  total: statsBasicas.total,
+  activos: statsBasicas.activos,
+  bajoStock: statsBasicas.bajoStock,
+  agotados: statsBasicas.agotados,
+  valorTotal: statsBasicas.valorTotal,
+  criticos: statsBasicas.criticos ?? 0
+};
 
       // Calcular estadísticas por estado
       this.calcularEstadisticasPorEstado();
@@ -1281,12 +1357,13 @@ formMovimiento = {
       this.loading = true;
 
       const filtrosExportacion = {
-        search: this.filtros.search,
-        estado: this.filtros.estado !== 'todos' ? this.filtros.estado : undefined,
-        criticidad: this.filtros.criticidad !== 'todos' ? this.filtros.criticidad : undefined,
-        ubicacion_id: this.filtros.ubicacion_id || undefined,
-        bajo_stock: this.filtros.bajo_stock || undefined
-      };
+  search: this.filtros.search,
+  estado: this.filtros.estado !== 'todos' ? this.filtros.estado : undefined,
+  criticidad: this.filtros.criticidad !== 'todos' ? this.filtros.criticidad : undefined,
+  ubicacion_id: this.filtros.ubicacion_id || undefined,
+  componente: this.filtros.componente !== 'todos' ? this.filtros.componente : undefined, // ← NUEVO
+  bajo_stock: this.filtros.bajo_stock || undefined
+};
 
       console.log('📤 Exportando inventario a Excel con filtros:', filtrosExportacion);
 
@@ -1329,20 +1406,21 @@ formMovimiento = {
     this.cargarProductos();
   }
 
-  limpiarFiltros() {
-    this.filtros = {
-      search: '',
-      estado: 'todos',
-      criticidad: 'todos',
-      ubicacion_id: 0,
-      bajo_stock: false,
-      page: 1,
-      limit: 10,
-      orderBy: 'id',
-      orderDir: 'desc'
-    };
-    this.cargarProductos();
-  }
+limpiarFiltros() {
+  this.filtros = {
+    search: '',
+    estado: 'todos',
+    criticidad: 'todos',
+    ubicacion_id: 0,
+    componente: 'todos',     // ← NUEVA LÍNEA
+    bajo_stock: false,
+    page: 1,
+    limit: 10,
+    orderBy: 'id',
+    orderDir: 'desc'
+  };
+  this.cargarProductos();
+}
   // Agrega este método a tu componente
   getEstadoClase(estado: string): string {
     if (!estado) return '';
@@ -1669,7 +1747,7 @@ formMovimiento = {
       nombre: '',
       descripcion: '',
       componente: 'RA',
-      criticidad: 'Medio',
+      criticidad: 'MEDIA',
       part_number: '',
       codigo: '',
       serial_number: '',

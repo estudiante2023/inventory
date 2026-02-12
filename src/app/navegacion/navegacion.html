@@ -93,7 +93,7 @@
       <ul class="navList">
         <li class="navList__heading">INVENTARIO<i
             class="far fa-file-alt"></i></li>
-        <li class="nav-item" [routerLink]="['/inicio']">
+        <li class="nav-item" [routerLink]="['/inicio']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-home-lg-alt"></i></span>
@@ -101,7 +101,7 @@
           </div>
         </li>
         <li *ngIf="tienePrivilegio('productos.ver')" class="nav-item"
-          [routerLink]="['/inventario']">
+          [routerLink]="['/inventario']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-box-open"></i></span>
@@ -110,7 +110,7 @@
         </li>
 
         <li *ngIf="tienePrivilegio('ubicaciones.ver')" class="nav-item"
-          [routerLink]="['/ubicacion']">
+          [routerLink]="['/ubicacion']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-school"></i></span>
@@ -122,7 +122,7 @@
             class="far fa-image"></i></li>
 
         <li *ngIf="tienePrivilegio('trazabilidad.ver')" class="nav-item"
-          [routerLink]="['/trazabilidad']">
+          [routerLink]="['/trazabilidad']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-mountain"></i></span>
@@ -130,7 +130,7 @@
           </div>
         </li>
         <li *ngIf="tienePrivilegio('usuarios.ver')" class="nav-item"
-          [routerLink]="['/usuario']">
+          [routerLink]="['/usuario']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-users"></i></span>
@@ -138,7 +138,7 @@
           </div>
         </li>
         <li *ngIf="tienePrivilegio('roles.ver')" class="nav-item"
-          [routerLink]="['/rol']">
+          [routerLink]="['/rol']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-credit-card"></i></span>
@@ -146,7 +146,7 @@
           </div>
         </li>
         <li *ngIf="tienePrivilegio('configuraciones.ver')" class="nav-item"
-          [routerLink]="['/configuracion']">
+          [routerLink]="['/configuracion']"routerLinkActive="navList__subheading--active">
           <div class="navList__subheading row row--align-v-center">
             <span class="navList__subheading-icon"><i
                 class="fas fa-eye"></i></span>
