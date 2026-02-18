@@ -172,36 +172,36 @@ export class Inventario implements OnInit {
     this.mostrandoModalImportacion = true;
   }
   @ViewChild('archivoImportInput') archivoImportInput!: ElementRef<HTMLInputElement>;
-// Control de importación (múltiples archivos)
-archivosImportacion: File[] = [];          // Array de archivos seleccionados
-importando = false;
-resultadoImportacion: {
-  total: number;
-  creados: number;
-  errores: Array<{ archivo: string; fila: number; error: string }>;
-} | null = null;
+  // Control de importación (múltiples archivos)
+  archivosImportacion: File[] = [];          // Array de archivos seleccionados
+  importando = false;
+  resultadoImportacion: {
+    total: number;
+    creados: number;
+    errores: Array<{ archivo: string; fila: number; error: string }>;
+  } | null = null;
 
-progresoImportacion = {
-  archivoActual: 0,        // Índice del archivo que se está procesando
-  totalArchivos: 0,
-  archivoNombre: '',
-  filasProcesadas: 0,
-  totalFilas: 0,
-  porcentaje: 0
-};
+  progresoImportacion = {
+    archivoActual: 0,        // Índice del archivo que se está procesando
+    totalArchivos: 0,
+    archivoNombre: '',
+    filasProcesadas: 0,
+    totalFilas: 0,
+    porcentaje: 0
+  };
 
   // Asegúrate de que cerrarModalImportacion limpie todo:
   cerrarModalImportacion() {
-  this.mostrandoModalImportacion = false;
-  this.archivosImportacion = [];
-  this.resultadoImportacion = null;
-  this.importando = false;
-  this.progresoImportacion = { archivoActual: 0, totalArchivos: 0, filasProcesadas: 0, totalFilas: 0, porcentaje: 0, archivoNombre: '' };
-  if (this.archivoImportInput) {
-    this.archivoImportInput.nativeElement.value = '';
+    this.mostrandoModalImportacion = false;
+    this.archivosImportacion = [];
+    this.resultadoImportacion = null;
+    this.importando = false;
+    this.progresoImportacion = { archivoActual: 0, totalArchivos: 0, filasProcesadas: 0, totalFilas: 0, porcentaje: 0, archivoNombre: '' };
+    if (this.archivoImportInput) {
+      this.archivoImportInput.nativeElement.value = '';
+    }
   }
-}
-  archivoImportacion: File | null = null; 
+  archivoImportacion: File | null = null;
 
   // Propiedades para el modal de imagen
   imagenModal = {
@@ -297,35 +297,35 @@ progresoImportacion = {
     return !this.esImagen(url) && !this.esPdf(url);
   }
 
-onArchivoImportacionSelected(event: any) {
-  const files = event.target.files;
-  if (!files || files.length === 0) return;
+  onArchivoImportacionSelected(event: any) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-  const archivosValidos: File[] = [];
+    const archivosValidos: File[] = [];
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    // Validar extensión
-    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    if (!['.xlsx', '.xls'].includes(extension)) {
-      this.mostrarAlerta(`El archivo "${file.name}" no es un Excel válido`, 'error');
-      continue;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // Validar extensión
+      const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+      if (!['.xlsx', '.xls'].includes(extension)) {
+        this.mostrarAlerta(`El archivo "${file.name}" no es un Excel válido`, 'error');
+        continue;
+      }
+      // Validar tamaño (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        this.mostrarAlerta(`El archivo "${file.name}" excede los 10MB`, 'error');
+        continue;
+      }
+      archivosValidos.push(file);
     }
-    // Validar tamaño (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      this.mostrarAlerta(`El archivo "${file.name}" excede los 10MB`, 'error');
-      continue;
+
+    this.archivosImportacion = archivosValidos;
+    this.resultadoImportacion = null;
+
+    if (archivosValidos.length > 0) {
+      console.log(`📂 ${archivosValidos.length} archivo(s) seleccionado(s)`);
     }
-    archivosValidos.push(file);
   }
-
-  this.archivosImportacion = archivosValidos;
-  this.resultadoImportacion = null;
-
-  if (archivosValidos.length > 0) {
-    console.log(`📂 ${archivosValidos.length} archivo(s) seleccionado(s)`);
-  }
-}
 
   // Método para descargar plantilla
   async descargarPlantilla() {
@@ -344,92 +344,92 @@ onArchivoImportacionSelected(event: any) {
   // En tu inventario.component.ts
 
   // Modifica el método ejecutarImportacion:
- async ejecutarImportacion() {
-  if (this.archivosImportacion.length === 0) {
-    this.mostrarAlerta('Selecciona al menos un archivo Excel', 'error');
-    return;
-  }
-
-  try {
-    this.importando = true;
-    this.loading = true;
-
-    // Inicializar progreso global
-    this.progresoImportacion = {
-      archivoActual: 0,
-      totalArchivos: this.archivosImportacion.length,
-      archivoNombre: '',
-      filasProcesadas: 0,
-      totalFilas: 0,
-      porcentaje: 0
-    };
-
-    let totalCreados = 0;
-    let totalRegistros = 0;
-    let totalErrores: Array<{ archivo: string; fila: number; error: string }> = [];
-
-    // Procesar cada archivo
-    for (let i = 0; i < this.archivosImportacion.length; i++) {
-      const archivo = this.archivosImportacion[i];
-
-      this.progresoImportacion.archivoActual = i + 1;
-      this.progresoImportacion.archivoNombre = archivo.name;
-      this.progresoImportacion.filasProcesadas = 0;
-      this.progresoImportacion.totalFilas = 0;
-      this.progresoImportacion.porcentaje = 0;
-
-      console.log(`📄 Procesando archivo ${i + 1}/${this.archivosImportacion.length}: ${archivo.name}`);
-
-     const resultadoArchivo = await this.productosService.importarDesdeExcel(
-  archivo,
-  (procesadas, total) => {
-  this.progresoImportacion.filasProcesadas = procesadas;
-  this.progresoImportacion.totalFilas = total;
-  this.cdRef.detectChanges();   // 👈 Forzar actualización
-}
-);
-
-      // Acumular resultados
-      totalCreados += resultadoArchivo.creados;
-      totalRegistros += resultadoArchivo.total;
-      totalErrores = [
-        ...totalErrores,
-        ...resultadoArchivo.errores.map(e => ({
-          archivo: archivo.name,
-          fila: e.fila,
-          error: e.error
-        }))
-      ];
+  async ejecutarImportacion() {
+    if (this.archivosImportacion.length === 0) {
+      this.mostrarAlerta('Selecciona al menos un archivo Excel', 'error');
+      return;
     }
 
-    // Resultado final
-    this.resultadoImportacion = {
-      total: totalRegistros,
-      creados: totalCreados,
-      errores: totalErrores
-    };
+    try {
+      this.importando = true;
+      this.loading = true;
 
-    // Recargar datos
-    await this.cargarProductos();
-    await this.cargarEstadisticas();
+      // Inicializar progreso global
+      this.progresoImportacion = {
+        archivoActual: 0,
+        totalArchivos: this.archivosImportacion.length,
+        archivoNombre: '',
+        filasProcesadas: 0,
+        totalFilas: 0,
+        porcentaje: 0
+      };
 
-    this.mostrarAlerta(
-      `✅ Importación completada: ${totalCreados} repuestos creados en ${this.archivosImportacion.length} archivo(s).`,
-      'success'
-    );
+      let totalCreados = 0;
+      let totalRegistros = 0;
+      let totalErrores: Array<{ archivo: string; fila: number; error: string }> = [];
 
-    // Cerrar modal después de 4 segundos
-    setTimeout(() => this.cerrarModalImportacion(), 4000);
+      // Procesar cada archivo
+      for (let i = 0; i < this.archivosImportacion.length; i++) {
+        const archivo = this.archivosImportacion[i];
 
-  } catch (error: any) {
-    console.error('❌ Error en importación:', error);
-    this.mostrarAlerta(`Error al importar: ${error.message}`, 'error');
-    setTimeout(() => this.cerrarModalImportacion(), 4000);
-  } finally {
-    this.importando = false;
-    this.loading = false;
+        this.progresoImportacion.archivoActual = i + 1;
+        this.progresoImportacion.archivoNombre = archivo.name;
+        this.progresoImportacion.filasProcesadas = 0;
+        this.progresoImportacion.totalFilas = 0;
+        this.progresoImportacion.porcentaje = 0;
+
+        console.log(`📄 Procesando archivo ${i + 1}/${this.archivosImportacion.length}: ${archivo.name}`);
+
+        const resultadoArchivo = await this.productosService.importarDesdeExcel(
+          archivo,
+          (procesadas, total) => {
+            this.progresoImportacion.filasProcesadas = procesadas;
+            this.progresoImportacion.totalFilas = total;
+            this.cdRef.detectChanges();   // 👈 Forzar actualización
+          }
+        );
+
+        // Acumular resultados
+        totalCreados += resultadoArchivo.creados;
+        totalRegistros += resultadoArchivo.total;
+        totalErrores = [
+          ...totalErrores,
+          ...resultadoArchivo.errores.map(e => ({
+            archivo: archivo.name,
+            fila: e.fila,
+            error: e.error
+          }))
+        ];
+      }
+
+      // Resultado final
+      this.resultadoImportacion = {
+        total: totalRegistros,
+        creados: totalCreados,
+        errores: totalErrores
+      };
+
+      // Recargar datos
+      await this.cargarProductos();
+      await this.cargarEstadisticas();
+
+      this.mostrarAlerta(
+        `✅ Importación completada: ${totalCreados} repuestos creados en ${this.archivosImportacion.length} archivo(s).`,
+        'success'
+      );
+
+      // Cerrar modal después de 4 segundos
+      setTimeout(() => this.cerrarModalImportacion(), 4000);
+
+    } catch (error: any) {
+      console.error('❌ Error en importación:', error);
+      this.mostrarAlerta(`Error al importar: ${error.message}`, 'error');
+      setTimeout(() => this.cerrarModalImportacion(), 4000);
+    } finally {
+      this.importando = false;
+      this.loading = false;
+    }
   }
-}
   // Método para cancelar importación
   cancelarImportacion() {
     this.archivoImportacion = null;
@@ -555,7 +555,7 @@ onArchivoImportacionSelected(event: any) {
           case 'NUEVO':
             this.estadisticasPorEstado.NUEVO++;
             break;
-          case 'UTIL':
+          case 'ÚTIL':
             this.estadisticasPorEstado.UTIL++;
             break;
           case 'MANTENIMIENTO BANCO DE PRUEBAS':
@@ -667,21 +667,21 @@ onArchivoImportacionSelected(event: any) {
 
 
 
-onUbicacionChange(event: any) {
-  // Convertir el valor a número
-  this.formProducto.ubicacion_id = Number(event);
-   
-}
+  onUbicacionChange(event: any) {
+    // Convertir el valor a número
+    this.formProducto.ubicacion_id = Number(event);
 
- 
+  }
+
+
   validarYGuardar(event: Event) {
     // Validaciones rápidas antes de enviar
     const errores: string[] = [];
 
- // Validar estantería para BODEGA QUITO
-  if (this.formProducto.ubicacion_id === 9 && !this.formProducto.estanteria?.trim()) {
-    errores.push('Estantería (obligatoria para BODEGA QUITO)');
-  }
+    // Validar estantería para BODEGA QUITO
+    if (this.formProducto.ubicacion_id === 9 && !this.formProducto.estanteria?.trim()) {
+      errores.push('Estantería (obligatoria para BODEGA QUITO)');
+    }
 
     // Validaciones para no seriados
     if (!this.esRepuestoSeriado) {
@@ -729,43 +729,43 @@ onUbicacionChange(event: any) {
   ubicaciones: any[] = [];
 
   // Filtros
-filtros = {
-  search: '',
-  estado: 'todos',
-  criticidad: 'todos',
-  ubicacion_id: 0,
-  componente: 'todos',      // ← NUEVA LÍNEA
-  bajo_stock: false,
-  page: 1,
-  limit: 10,
-  orderBy: 'id',
-  orderDir: 'desc' as 'asc' | 'desc'
-};
-componentesDisponibles: string[] = [
-  'RA',
-  'GAREX/SCV',
-  'MYC',
-  'SATCOM',
-  'COMMS',
-  'CAMIONES',
-  'AA',
-  'GENERADORES',
-  'UPS'
-];
+  filtros = {
+    search: '',
+    estado: 'todos',
+    criticidad: 'todos',
+    ubicacion_id: 0,
+    componente: 'todos',      // ← NUEVA LÍNEA
+    bajo_stock: false,
+    page: 1,
+    limit: 10,
+    orderBy: 'id',
+    orderDir: 'desc' as 'asc' | 'desc'
+  };
+  componentesDisponibles: string[] = [
+    'RA',
+    'GAREX/SCV',
+    'MYC',
+    'SATCOM',
+    'COMMS',
+    'CAMIONES',
+    'AA',
+    'GENERADORES',
+    'UPS'
+  ];
   // Paginación
   totalProductos = 0;
   totalPaginas = 0;
   paginas: number[] = [];
 
   // Estadísticas
-estadisticas = {
-  total: 0,
-  activos: 0,
-  bajoStock: 0,
-  agotados: 0,
-  valorTotal: 0,
-  criticos: 0   // ← agregar esta línea
-};
+  estadisticas = {
+    total: 0,
+    activos: 0,
+    bajoStock: 0,
+    agotados: 0,
+    valorTotal: 0,
+    criticos: 0   // ← agregar esta línea
+  };
 
   // Formulario de producto
   formProducto = {
@@ -777,7 +777,7 @@ estadisticas = {
     part_number: '',
     codigo: '',
     serial_number: '',
-    estado: 'NUEVO' as 'NUEVO' | 'UTIL' | 'MANTENIMIENTO BANCO DE PRUEBAS' | 'MANTENIMIENTO FÁBRICA' | 'PROCESO DE EXPORTACIÓN (MODALTRADE)' | 'CUARENTENA BODEGA' | 'CONDENADO',
+    estado: 'NUEVO' as 'NUEVO' | 'ÚTIL' | 'MANTENIMIENTO BANCO DE PRUEBAS' | 'MANTENIMIENTO FÁBRICA' | 'PROCESO DE EXPORTACIÓN (MODALTRADE)' | 'CUARENTENA BODEGA' | 'CONDENADO',
     cantidad_actual: 1,
     ubicacion_id: 0 as number | 0,
     estanteria: '',
@@ -792,31 +792,31 @@ estadisticas = {
 
 
   // Método para verificar si la ubicación destino es BODEGA QUITO
-esDestinoBodegaQuito(): boolean {
-  if (!this.formMovimiento.ubicacion_destino) {
-    return false;
+  esDestinoBodegaQuito(): boolean {
+    if (!this.formMovimiento.ubicacion_destino) {
+      return false;
+    }
+
+    // Buscar la ubicación por nombre
+    const ubicacion = this.ubicaciones.find(u => u.nombre === this.formMovimiento.ubicacion_destino);
+
+    // Si encontramos la ubicación y su id es 9, es BODEGA QUITO
+    return ubicacion ? ubicacion.id === 9 : false;
   }
-  
-  // Buscar la ubicación por nombre
-  const ubicacion = this.ubicaciones.find(u => u.nombre === this.formMovimiento.ubicacion_destino);
-  
-  // Si encontramos la ubicación y su id es 9, es BODEGA QUITO
-  return ubicacion ? ubicacion.id === 9 : false;
-}
   // Formulario movimiento COMPLETO
   // Formulario movimiento COMPLETO - AÑADE estanteria
-formMovimiento = {
-  tipo_evento: 'entrada' as 'entrada' | 'salida' | 'ajuste' | 'transferencia' | 'consumo' | 'devolucion',
-  producto_id: 0,
-  cantidad: 1,
-  estado_evento: 'completado' as 'completado' | 'pendiente' | 'cancelado',
-  motivo: 'S.M',
-  ubicacion_origen: '' as string | null,
-  ubicacion_destino: '' as string | null,
-  estanteria: '', // <-- NUEVO CAMPO AQUÍ
-  detalles: '',
-  observaciones: ''
-};
+  formMovimiento = {
+    tipo_evento: 'transferencia' as 'entrada' | 'salida' | 'ajuste' | 'transferencia' | 'consumo' | 'devolucion',
+    producto_id: 0,
+    cantidad: 1,
+    estado_evento: 'completado' as 'completado' | 'pendiente' | 'cancelado',
+    motivo: 'S.M',
+    ubicacion_origen: '' as string | null,
+    ubicacion_destino: '' as string | null,
+    estanteria: '', // <-- NUEVO CAMPO AQUÍ
+    detalles: '',
+    observaciones: ''
+  };
 
 
   // Loading
@@ -865,8 +865,8 @@ formMovimiento = {
       { id: 'estado', nombre: 'Estado', tipo: 'select', opciones: ['NUEVO', 'UTIL', 'MANTENIMIENTO BANCO DE PRUEBAS', 'MANTENIMIENTO FÁBRICA', 'PROCESO DE EXPORTACIÓN (MODALTRADE)', 'CUARENTENA BODEGA', 'CONDENADO'] },
       { id: 'criticidad', nombre: 'Criticidad', tipo: 'select', opciones: ['Bajo', 'Medio', 'Alto', 'Critico'] },
       { id: 'ubicacion_id', nombre: 'Ubicación', tipo: 'select', opciones: [] },
-     { id: 'estanteria', nombre: 'Estanteria', tipo: 'textarea', placeholder: 'Nueva estanteria' },
-     
+      { id: 'estanteria', nombre: 'Estanteria', tipo: 'textarea', placeholder: 'Nueva estanteria' },
+      { id: 'componente', nombre: 'Componente', tipo: 'select', opciones: ['RA', 'GAREX/SCV', 'MYC', 'SATCOM', 'COMMS', 'CAMIONES', 'AA', 'GENERADORES', 'UPS'] },
       // Campos de identificación
       { id: 'part_number', nombre: 'Part Number', tipo: 'text', placeholder: 'Ej: PN-12345' },
       { id: 'codigo', nombre: 'Código', tipo: 'text', placeholder: 'Nuevo código' },
@@ -1018,7 +1018,7 @@ formMovimiento = {
 
       // Recargar
       await this.cargarProductos();
-      await this.cargarEstadisticas(); 
+      await this.cargarEstadisticas();
 
     } catch (error: any) {
       console.error('❌ Error en edición múltiple:', error);
@@ -1165,7 +1165,7 @@ formMovimiento = {
 
       // Recargar datos
       await this.cargarProductos();
-      await this.cargarEstadisticas(); 
+      await this.cargarEstadisticas();
 
     } catch (error: any) {
       console.error('❌ Error en edición masiva:', error);
@@ -1245,7 +1245,7 @@ formMovimiento = {
     private productosService: ProductosService,
     private trazabilidadService: TrazabilidadService,
     private ubicacionesService: UbicacionesService,
-    private cdRef: ChangeDetectorRef 
+    private cdRef: ChangeDetectorRef
   ) { }
 
   async ngOnInit() {
@@ -1306,14 +1306,14 @@ formMovimiento = {
     try {
       // Obtener las estadísticas básicas del servicio
       const statsBasicas = await this.productosService.getEstadisticas();
-     this.estadisticas = {
-  total: statsBasicas.total,
-  activos: statsBasicas.activos,
-  bajoStock: statsBasicas.bajoStock,
-  agotados: statsBasicas.agotados,
-  valorTotal: statsBasicas.valorTotal,
-  criticos: statsBasicas.criticos ?? 0
-};
+      this.estadisticas = {
+        total: statsBasicas.total,
+        activos: statsBasicas.activos,
+        bajoStock: statsBasicas.bajoStock,
+        agotados: statsBasicas.agotados,
+        valorTotal: statsBasicas.valorTotal,
+        criticos: statsBasicas.criticos ?? 0
+      };
 
       // Calcular estadísticas por estado
       this.calcularEstadisticasPorEstado();
@@ -1357,13 +1357,13 @@ formMovimiento = {
       this.loading = true;
 
       const filtrosExportacion = {
-  search: this.filtros.search,
-  estado: this.filtros.estado !== 'todos' ? this.filtros.estado : undefined,
-  criticidad: this.filtros.criticidad !== 'todos' ? this.filtros.criticidad : undefined,
-  ubicacion_id: this.filtros.ubicacion_id || undefined,
-  componente: this.filtros.componente !== 'todos' ? this.filtros.componente : undefined, // ← NUEVO
-  bajo_stock: this.filtros.bajo_stock || undefined
-};
+        search: this.filtros.search,
+        estado: this.filtros.estado !== 'todos' ? this.filtros.estado : undefined,
+        criticidad: this.filtros.criticidad !== 'todos' ? this.filtros.criticidad : undefined,
+        ubicacion_id: this.filtros.ubicacion_id || undefined,
+        componente: this.filtros.componente !== 'todos' ? this.filtros.componente : undefined, // ← NUEVO
+        bajo_stock: this.filtros.bajo_stock || undefined
+      };
 
       console.log('📤 Exportando inventario a Excel con filtros:', filtrosExportacion);
 
@@ -1406,21 +1406,21 @@ formMovimiento = {
     this.cargarProductos();
   }
 
-limpiarFiltros() {
-  this.filtros = {
-    search: '',
-    estado: 'todos',
-    criticidad: 'todos',
-    ubicacion_id: 0,
-    componente: 'todos',     // ← NUEVA LÍNEA
-    bajo_stock: false,
-    page: 1,
-    limit: 10,
-    orderBy: 'id',
-    orderDir: 'desc'
-  };
-  this.cargarProductos();
-}
+  limpiarFiltros() {
+    this.filtros = {
+      search: '',
+      estado: 'todos',
+      criticidad: 'todos',
+      ubicacion_id: 0,
+      componente: 'todos',     // ← NUEVA LÍNEA
+      bajo_stock: false,
+      page: 1,
+      limit: 10,
+      orderBy: 'id',
+      orderDir: 'desc'
+    };
+    this.cargarProductos();
+  }
   // Agrega este método a tu componente
   getEstadoClase(estado: string): string {
     if (!estado) return '';
@@ -1543,24 +1543,24 @@ limpiarFiltros() {
   async guardarProducto() {
     // ============ VALIDACIONES GENERALES ============
 
-   
-  // 1. Validar Part Number (obligatorio para todos)
-  if (!this.formProducto.part_number?.trim()) {
-    this.mostrarAlerta('El Part Number es obligatorio', 'error');
-    return;
-  }
 
-  // 2. Validar estantería para BODEGA QUITO (id=9)
-  if (this.formProducto.ubicacion_id === 9 && !this.formProducto.estanteria?.trim()) {
-    this.mostrarAlerta('La estantería es obligatoria para BODEGA QUITO', 'error');
-    return;
-  }
+    // 1. Validar Part Number (obligatorio para todos)
+    if (!this.formProducto.part_number?.trim()) {
+      this.mostrarAlerta('El Part Number es obligatorio', 'error');
+      return;
+    }
 
-  // 3. Validaciones específicas para productos no seriados
-  if (!this.formProducto.codigo?.trim()) {
-    this.mostrarAlerta('El código es obligatorio', 'error');
-    return;
-  }
+    // 2. Validar estantería para BODEGA QUITO (id=9)
+    if (this.formProducto.ubicacion_id === 9 && !this.formProducto.estanteria?.trim()) {
+      this.mostrarAlerta('La estantería es obligatoria para BODEGA QUITO', 'error');
+      return;
+    }
+
+    // 3. Validaciones específicas para productos no seriados
+    if (!this.formProducto.codigo?.trim()) {
+      this.mostrarAlerta('El código es obligatorio', 'error');
+      return;
+    }
 
     // 3. Validaciones específicas para repuestos seriados
     if (this.esRepuestoSeriado) {
@@ -1717,22 +1717,28 @@ limpiarFiltros() {
   }
 
   async eliminarProducto(producto: any) {
+    if (producto.estado?.toUpperCase() !== 'CONDENADO') {
+      this.mostrarAlerta(
+        `El producto no está en estado CONDENADO (estado actual: ${producto.estado || 'sin estado'}). No se puede eliminar.`,
+        'warning'
+      );
+      return;
+    }
     if (confirm(`¿Está seguro de eliminar el producto "${producto.nombre}"?`)) {
       try {
         this.loading = true;
-        await this.productosService.desactivarProducto(producto.id);
-        this.mostrarAlerta('Producto eliminado exitosamente', 'success');
+        await this.productosService.eliminarProductoPermanente(producto.id);
+        this.mostrarAlerta('✅ Producto eliminado definitivamente (era CONDENADO)', 'success');
 
         // Recargar productos primero
         await this.cargarProductos();
-
         // Luego recargar estadísticas
-        await this.cargarEstadisticas(); 
+        await this.cargarEstadisticas();
 
       } catch (error: any) {
-        this.mostrarAlerta(`Error: ${error.message}`, 'error');
+        this.mostrarAlerta(error.message || 'Error al eliminar producto', 'warning');
       } finally {
-        this.loading = false;
+        this.loading = false; // ← Esto desactiva el spinner general
       }
     }
   }
@@ -1807,20 +1813,20 @@ limpiarFiltros() {
   }
   // Método para resetear el formulario de movimiento
   resetFormularioMovimiento() {
-  this.formMovimiento = {
-    tipo_evento: 'entrada',
-    producto_id: this.productoSeleccionado?.id || 0,
-    cantidad: 1,
-    estado_evento: 'completado',
-    motivo: 'S.M',
-    ubicacion_origen: '',
-    ubicacion_destino: '',
-    estanteria: '', // <-- AÑADIDO AQUÍ
-    detalles: '',
-    observaciones: ''
-  };
-  this.productoEsSeriado = false;
-}
+    this.formMovimiento = {
+      tipo_evento: 'transferencia',
+      producto_id: this.productoSeleccionado?.id || 0,
+      cantidad: 1,
+      estado_evento: 'completado',
+      motivo: 'S.M',
+      ubicacion_origen: '',
+      ubicacion_destino: '',
+      estanteria: '', // <-- AÑADIDO AQUÍ
+      detalles: '',
+      observaciones: ''
+    };
+    this.productoEsSeriado = false;
+  }
 
   // NUEVO: Método para obtener ubicación por nombre
   // NUEVO: Método para obtener ubicación por nombre
@@ -1904,7 +1910,7 @@ limpiarFiltros() {
 
   onTipoEventoChange() {
     // Opcional: resetear ubicaciones cuando cambia el tipo
-    if (this.formMovimiento.tipo_evento === 'entrada') {
+    if (this.formMovimiento.tipo_evento === 'transferencia') {
       this.formMovimiento.ubicacion_origen = null;
     } else if (this.formMovimiento.tipo_evento === 'salida') {
       this.formMovimiento.ubicacion_destino = null;
@@ -1936,10 +1942,10 @@ limpiarFiltros() {
       return;
     }
     // ===== NUEVA VALIDACIÓN: Estantería para BODEGA QUITO =====
-  if (this.esDestinoBodegaQuito() && !this.formMovimiento.estanteria?.trim()) {
-    this.mostrarAlerta('La estantería es obligatoria para BODEGA QUITO', 'error');
-    return;
-  }
+    if (this.esDestinoBodegaQuito() && !this.formMovimiento.estanteria?.trim()) {
+      this.mostrarAlerta('La estantería es obligatoria para BODEGA QUITO', 'error');
+      return;
+    }
 
     // ===== VALIDACIÓN DE CANTIDAD PARA PRODUCTOS NO SERIADOS =====
     if (!this.productoEsSeriado) {
@@ -2052,173 +2058,174 @@ limpiarFiltros() {
 
   // En el método manejarMovimientoNoSeriado():
   async manejarMovimientoNoSeriado(): Promise<number> { // ← Retorna el ID del producto actualizado
-  console.log('🔄 Procesando movimiento de producto NO SERIADO');
+    console.log('🔄 Procesando movimiento de producto NO SERIADO');
 
-  const ubicacionDestinoId = this.getUbicacionIdPorNombre(this.formMovimiento.ubicacion_destino);
+    const ubicacionDestinoId = this.getUbicacionIdPorNombre(this.formMovimiento.ubicacion_destino);
 
-  if (!ubicacionDestinoId) {
-    throw new Error('Ubicación destino no válida');
-  }
+    if (!ubicacionDestinoId) {
+      throw new Error('Ubicación destino no válida');
+    }
 
-  // 1. Buscar si ya existe un producto con el mismo código en la ubicación destino
-  let productoEnDestino = null;
-  if (this.productoSeleccionado.codigo) {
-    productoEnDestino = await this.buscarProductoPorCodigoYUbicacion(
-      this.productoSeleccionado.codigo,
-      ubicacionDestinoId
-    );
-  }
+    // 1. Buscar si ya existe un producto con el mismo código en la ubicación destino
+    let productoEnDestino = null;
+    if (this.productoSeleccionado.codigo) {
+      productoEnDestino = await this.buscarProductoPorCodigoYUbicacion(
+        this.productoSeleccionado.codigo,
+        ubicacionDestinoId
+      );
+    }
 
-  // 2. Calcular nueva cantidad para el producto original
-  const nuevaCantidadOriginal = this.productoSeleccionado.cantidad_actual - this.formMovimiento.cantidad;
+    // 2. Calcular nueva cantidad para el producto original
+    const nuevaCantidadOriginal = this.productoSeleccionado.cantidad_actual - this.formMovimiento.cantidad;
 
-  // 3. Manejar el producto original
-let productoIdParaVerificar = this.productoSeleccionado.id;
+    // 3. Manejar el producto original
+    let productoIdParaVerificar = this.productoSeleccionado.id;
 
-if (nuevaCantidadOriginal > 0) {
-  // CASO A: Cantidad parcial - Actualizar cantidad del producto original
-  // NO MODIFICAR ESTANTERÍA - dejar como está
-  await this.productosService.updateProducto(this.productoSeleccionado.id, {
-    cantidad_actual: nuevaCantidadOriginal
-    // NO tocar estanteria aquí
-  });
-} else {
-  // CASO B: Cantidad total (nuevaCantidadOriginal <= 0)
-  const productoOriginal = await this.productosService.getProductoById(this.productoSeleccionado.id);
+    if (nuevaCantidadOriginal > 0) {
+      // CASO A: Cantidad parcial - Actualizar cantidad del producto original
+      // NO MODIFICAR ESTANTERÍA - dejar como está
+      await this.productosService.updateProducto(this.productoSeleccionado.id, {
+        cantidad_actual: nuevaCantidadOriginal
+        // NO tocar estanteria aquí
+      });
+    } else {
+      // CASO B: Cantidad total (nuevaCantidadOriginal <= 0)
+      const productoOriginal = await this.productosService.getProductoById(this.productoSeleccionado.id);
 
-  if (productoOriginal.ubicacion_id === 9) {
-    // Si está en BODEGA QUITO, actualizar a 0
-    // NO MODIFICAR ESTANTERÍA - dejar como está
-    await this.productosService.updateProducto(this.productoSeleccionado.id, {
-      cantidad_actual: 0
-      // NO tocar estanteria aquí
-    });
-  } else {
-    // Si NO está en BODEGA QUITO, desactivar
-    await this.productosService.desactivarProducto(
-      this.productoSeleccionado.id,
-      `Producto movido completamente a ${this.formMovimiento.ubicacion_destino}`
-    );
-    productoIdParaVerificar = null;
-  }
-}
+      if (productoOriginal.ubicacion_id === 9) {
+        // Si está en BODEGA QUITO, actualizar a 0
+        // NO MODIFICAR ESTANTERÍA - dejar como está
+        await this.productosService.updateProducto(this.productoSeleccionado.id, {
+          cantidad_actual: 0
+          // NO tocar estanteria aquí
+        });
+      } else {
+        // Si NO está en BODEGA QUITO, desactivar
+        await this.productosService.desactivarProducto(
+          this.productoSeleccionado.id,
+          `Producto movido completamente a ${this.formMovimiento.ubicacion_destino}`
+        );
+        productoIdParaVerificar = null;
+      }
+    }
 
-  // 4. Manejar el producto en la ubicación destino
-  if (productoEnDestino) {
-    // CASO A: Producto existe en destino - Sumar la cantidad
-    const nuevaCantidadDestino = productoEnDestino.cantidad_actual + this.formMovimiento.cantidad;
-    
-    const updateDestino: any = {
-      cantidad_actual: nuevaCantidadDestino
+    // 4. Manejar el producto en la ubicación destino
+    if (productoEnDestino) {
+      // CASO A: Producto existe en destino - Sumar la cantidad
+      const nuevaCantidadDestino = productoEnDestino.cantidad_actual + this.formMovimiento.cantidad;
+
+      const updateDestino: any = {
+        cantidad_actual: nuevaCantidadDestino
+      };
+
+      // Si el destino es BODEGA QUITO, actualizar la estantería
+      if (ubicacionDestinoId === 9 && this.formMovimiento.estanteria) {
+        updateDestino.estanteria = this.formMovimiento.estanteria;
+      }
+
+      await this.productosService.updateProducto(productoEnDestino.id, updateDestino);
+
+      // Si el producto original fue desactivado, verificamos el producto en destino
+      if (!productoIdParaVerificar) {
+        productoIdParaVerificar = productoEnDestino.id;
+      }
+    } else {
+      // CASO B: Producto NO existe en destino - Crear nuevo producto
+      const nuevoProducto = {
+        nombre: this.productoSeleccionado.nombre,
+        descripcion: this.productoSeleccionado.descripcion,
+        componente: this.productoSeleccionado.componente,
+        criticidad: this.productoSeleccionado.criticidad,
+        part_number: this.productoSeleccionado.part_number,
+        codigo: this.productoSeleccionado.codigo,
+        serial_number: '',
+        estado: this.productoSeleccionado.estado,
+        cantidad_actual: this.formMovimiento.cantidad,
+        ubicacion_id: ubicacionDestinoId,
+
+        // IMPORTANTE: Solo asignar estantería si el destino es BODEGA QUITO
+        estanteria: ubicacionDestinoId === 9 ? this.formMovimiento.estanteria : '',
+
+        precio: this.productoSeleccionado.precio,
+        fecha_adquisicion: new Date().toISOString().split('T')[0],
+        orden_envio: null,
+        factura: null,
+        observaciones: `Creado por movimiento desde producto ID: ${this.productoSeleccionado.id}`
+      };
+
+      const productoNuevo = await this.productosService.createProducto(nuevoProducto);
+
+      // Si el producto original fue desactivado, verificamos el nuevo producto
+      if (!productoIdParaVerificar) {
+        productoIdParaVerificar = productoNuevo.id;
+      }
+    }
+
+    // 5. Registrar movimiento
+    const movimientoData = {
+      tipo_evento: this.formMovimiento.tipo_evento,
+      producto_id: this.productoSeleccionado.id,
+      cantidad: this.formMovimiento.cantidad,
+      estado_evento: this.formMovimiento.estado_evento,
+      motivo: this.formMovimiento.motivo,
+      ubicacion_origen: this.formMovimiento.ubicacion_origen || this.productoSeleccionado.ubicacion_nombre,
+      ubicacion_destino: this.formMovimiento.ubicacion_destino,
+      detalles: this.formMovimiento.detalles,
+      observaciones: this.formMovimiento.observaciones
     };
 
-    // Si el destino es BODEGA QUITO, actualizar la estantería
-    if (ubicacionDestinoId === 9 && this.formMovimiento.estanteria) {
-      updateDestino.estanteria = this.formMovimiento.estanteria;
-    }
+    await this.trazabilidadService.registrarMovimiento(movimientoData);
 
-    await this.productosService.updateProducto(productoEnDestino.id, updateDestino);
+    console.log('✅ Producto NO seriado movido a nueva ubicación con estantería actualizada');
 
-    // Si el producto original fue desactivado, verificamos el producto en destino
-    if (!productoIdParaVerificar) {
-      productoIdParaVerificar = productoEnDestino.id;
-    }
-  } else {
-    // CASO B: Producto NO existe en destino - Crear nuevo producto
-    const nuevoProducto = {
-      nombre: this.productoSeleccionado.nombre,
-      descripcion: this.productoSeleccionado.descripcion,
-      componente: this.productoSeleccionado.componente,
-      criticidad: this.productoSeleccionado.criticidad,
-      part_number: this.productoSeleccionado.part_number,
-      codigo: this.productoSeleccionado.codigo,
-      serial_number: '',
-      estado: this.productoSeleccionado.estado,
-      cantidad_actual: this.formMovimiento.cantidad,
-      ubicacion_id: ubicacionDestinoId,
-      
-      // IMPORTANTE: Solo asignar estantería si el destino es BODEGA QUITO
-      estanteria: ubicacionDestinoId === 9 ? this.formMovimiento.estanteria : '',
-      
-      precio: this.productoSeleccionado.precio,
-      fecha_adquisicion: new Date().toISOString().split('T')[0],
-      orden_envio: null,
-      factura: null,
-      observaciones: `Creado por movimiento desde producto ID: ${this.productoSeleccionado.id}`
-    };
-
-    const productoNuevo = await this.productosService.createProducto(nuevoProducto);
-
-    // Si el producto original fue desactivado, verificamos el nuevo producto
-    if (!productoIdParaVerificar) {
-      productoIdParaVerificar = productoNuevo.id;
-    }
+    return productoIdParaVerificar || this.productoSeleccionado.id;
   }
-
-  // 5. Registrar movimiento
-  const movimientoData = {
-    tipo_evento: this.formMovimiento.tipo_evento,
-    producto_id: this.productoSeleccionado.id,
-    cantidad: this.formMovimiento.cantidad,
-    estado_evento: this.formMovimiento.estado_evento,
-    motivo: this.formMovimiento.motivo,
-    ubicacion_origen: this.formMovimiento.ubicacion_origen || this.productoSeleccionado.ubicacion_nombre,
-    ubicacion_destino: this.formMovimiento.ubicacion_destino,
-    detalles: this.formMovimiento.detalles,
-    observaciones: this.formMovimiento.observaciones
-  };
-
-  await this.trazabilidadService.registrarMovimiento(movimientoData);
-
-  console.log('✅ Producto NO seriado movido a nueva ubicación con estantería actualizada');
-
-  return productoIdParaVerificar || this.productoSeleccionado.id;}
 
   manejarClickBoton() {
-  console.log('Botón clickeado');
+    console.log('Botón clickeado');
 
-  // Verificar si debería estar "deshabilitado" - AÑADE la validación de estantería
-  const estaDeshabilitado = this.loading ||
-    !this.formMovimiento.motivo ||
-    this.formMovimiento.cantidad <= 0 ||
-    (!this.productoEsSeriado && this.formMovimiento.cantidad > this.productoSeleccionado?.cantidad_actual) ||
-    !this.formMovimiento.ubicacion_destino ||
-    (this.esDestinoBodegaQuito() && !this.formMovimiento.estanteria?.trim()); // <-- NUEVA CONDICIÓN
+    // Verificar si debería estar "deshabilitado" - AÑADE la validación de estantería
+    const estaDeshabilitado = this.loading ||
+      !this.formMovimiento.motivo ||
+      this.formMovimiento.cantidad <= 0 ||
+      (!this.productoEsSeriado && this.formMovimiento.cantidad > this.productoSeleccionado?.cantidad_actual) ||
+      !this.formMovimiento.ubicacion_destino ||
+      (this.esDestinoBodegaQuito() && !this.formMovimiento.estanteria?.trim()); // <-- NUEVA CONDICIÓN
 
-  if (estaDeshabilitado) {
-    console.log('Mostrando mensaje de campos faltantes');
+    if (estaDeshabilitado) {
+      console.log('Mostrando mensaje de campos faltantes');
 
-    // Mostrar mensaje específico
-    let mensaje = 'Complete los siguientes campos:\n';
+      // Mostrar mensaje específico
+      let mensaje = 'Complete los siguientes campos:\n';
 
-    if (!this.formMovimiento.motivo) {
-      mensaje += '• Motivo\n';
+      if (!this.formMovimiento.motivo) {
+        mensaje += '• Motivo\n';
+      }
+
+      if (this.formMovimiento.cantidad <= 0) {
+        mensaje += '• Cantidad mayor a 0\n';
+      }
+
+      if (!this.productoEsSeriado && this.formMovimiento.cantidad > this.productoSeleccionado?.cantidad_actual) {
+        mensaje += `• Cantidad no exceda stock (${this.productoSeleccionado?.cantidad_actual})\n`;
+      }
+
+      if (!this.formMovimiento.ubicacion_destino) {
+        mensaje += '• Ubicación destino\n';
+      }
+
+      // NUEVO: Mensaje para estantería
+      if (this.esDestinoBodegaQuito() && !this.formMovimiento.estanteria?.trim()) {
+        mensaje += '• Estantería (obligatoria para BODEGA QUITO)\n';
+      }
+
+      this.mostrarAlerta(mensaje, 'warning');
+    } else {
+      // Si no está deshabilitado, ejecutar movimiento
+      console.log('Ejecutando movimiento...');
+      this.ejecutarMovimiento();
     }
-
-    if (this.formMovimiento.cantidad <= 0) {
-      mensaje += '• Cantidad mayor a 0\n';
-    }
-
-    if (!this.productoEsSeriado && this.formMovimiento.cantidad > this.productoSeleccionado?.cantidad_actual) {
-      mensaje += `• Cantidad no exceda stock (${this.productoSeleccionado?.cantidad_actual})\n`;
-    }
-
-    if (!this.formMovimiento.ubicacion_destino) {
-      mensaje += '• Ubicación destino\n';
-    }
-
-    // NUEVO: Mensaje para estantería
-    if (this.esDestinoBodegaQuito() && !this.formMovimiento.estanteria?.trim()) {
-      mensaje += '• Estantería (obligatoria para BODEGA QUITO)\n';
-    }
-
-    this.mostrarAlerta(mensaje, 'warning');
-  } else {
-    // Si no está deshabilitado, ejecutar movimiento
-    console.log('Ejecutando movimiento...');
-    this.ejecutarMovimiento();
   }
-}
   // Método para buscar producto por código y ubicación específica
   async buscarProductoPorCodigoYUbicacion(codigo: string, ubicacionId: number): Promise<any> {
     try {
@@ -2269,50 +2276,50 @@ if (nuevaCantidadOriginal > 0) {
 
 
   // ESCENARIO 1: Manejar movimiento de producto seriado - VERSIÓN FINAL
-async manejarMovimientoSeriado() {
-  console.log('🔄 Procesando movimiento de producto SERIADO');
+  async manejarMovimientoSeriado() {
+    console.log('🔄 Procesando movimiento de producto SERIADO');
 
-  const ubicacionDestinoId = this.getUbicacionIdPorNombre(this.formMovimiento.ubicacion_destino);
+    const ubicacionDestinoId = this.getUbicacionIdPorNombre(this.formMovimiento.ubicacion_destino);
 
-  if (!ubicacionDestinoId) {
-    throw new Error('Ubicación destino no válida');
+    if (!ubicacionDestinoId) {
+      throw new Error('Ubicación destino no válida');
+    }
+
+    // Preparar datos de actualización - AÑADIR estanteria
+    const updateData: any = {
+      ubicacion_id: ubicacionDestinoId
+    };
+
+    // IMPORTANTE: Si el destino es BODEGA QUITO, actualizar estantería
+    if (ubicacionDestinoId === 9) {
+      updateData.estanteria = this.formMovimiento.estanteria;
+    } else {
+      // Si NO es BODEGA QUITO, limpiar la estantería
+      updateData.estanteria = '';
+    }
+
+    console.log('📝 Actualizando producto seriado con:', updateData);
+
+    // 1. Actualizar producto con los nuevos datos
+    await this.productosService.updateProducto(this.productoSeleccionado.id, updateData);
+
+    // 2. Registrar movimiento
+    const movimientoData = {
+      tipo_evento: this.formMovimiento.tipo_evento,
+      producto_id: this.productoSeleccionado.id,
+      cantidad: 1,
+      estado_evento: this.formMovimiento.estado_evento,
+      motivo: this.formMovimiento.motivo,
+      ubicacion_origen: this.formMovimiento.ubicacion_origen || this.productoSeleccionado.ubicacion_nombre,
+      ubicacion_destino: this.formMovimiento.ubicacion_destino,
+      detalles: this.formMovimiento.detalles,
+      observaciones: this.formMovimiento.observaciones
+    };
+
+    await this.trazabilidadService.registrarMovimiento(movimientoData);
+
+    console.log('✅ Producto seriado movido y estantería actualizada');
   }
-
-  // Preparar datos de actualización - AÑADIR estanteria
-  const updateData: any = {
-    ubicacion_id: ubicacionDestinoId
-  };
-
-  // IMPORTANTE: Si el destino es BODEGA QUITO, actualizar estantería
-  if (ubicacionDestinoId === 9) {
-    updateData.estanteria = this.formMovimiento.estanteria;
-  } else {
-    // Si NO es BODEGA QUITO, limpiar la estantería
-    updateData.estanteria = '';
-  }
-
-  console.log('📝 Actualizando producto seriado con:', updateData);
-
-  // 1. Actualizar producto con los nuevos datos
-  await this.productosService.updateProducto(this.productoSeleccionado.id, updateData);
-
-  // 2. Registrar movimiento
-  const movimientoData = {
-    tipo_evento: this.formMovimiento.tipo_evento,
-    producto_id: this.productoSeleccionado.id,
-    cantidad: 1,
-    estado_evento: this.formMovimiento.estado_evento,
-    motivo: this.formMovimiento.motivo,
-    ubicacion_origen: this.formMovimiento.ubicacion_origen || this.productoSeleccionado.ubicacion_nombre,
-    ubicacion_destino: this.formMovimiento.ubicacion_destino,
-    detalles: this.formMovimiento.detalles,
-    observaciones: this.formMovimiento.observaciones
-  };
-
-  await this.trazabilidadService.registrarMovimiento(movimientoData);
-
-  console.log('✅ Producto seriado movido y estantería actualizada');
-}
   // ESCENARIO 2: Producto NO seriado en BODEGA QUITO
   async manejarMovimientoDesdeBodegaQuito() {
     console.log('🔄 Procesando movimiento desde BODEGA QUITO');
@@ -2336,7 +2343,7 @@ async manejarMovimientoSeriado() {
       estado: this.productoSeleccionado.estado,
       cantidad_actual: this.formMovimiento.cantidad,
       ubicacion_id: ubicacionDestinoId,
-      
+
       estanteria: this.productoSeleccionado.estanteria,
       precio: this.productoSeleccionado.precio,
       fecha_adquisicion: new Date().toISOString().split('T')[0], // Fecha actual
@@ -2439,7 +2446,7 @@ async manejarMovimientoSeriado() {
         estado: this.productoSeleccionado.estado,
         cantidad_actual: this.formMovimiento.cantidad, // Usar la cantidad movida, no la original
         ubicacion_id: 9, // BODEGA QUITO
-        
+
         estanteria: this.productoSeleccionado.estanteria,
         precio: this.productoSeleccionado.precio,
         fecha_adquisicion: new Date().toISOString().split('T')[0],

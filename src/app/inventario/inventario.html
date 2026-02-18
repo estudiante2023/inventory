@@ -41,7 +41,7 @@
       </button>
 
       <!-- Botón para edición masiva -->
-      <button class="inventario-btn inventario-btn-info ms-2"
+      <button *ngIf="tienePrivilegio('eliminar.todo')" class="inventario-btn inventario-btn-info ms-2"
         (click)="abrirModalImportacion()"
         [disabled]="loading">
         <i class="bi bi-upload"></i> Importar Excel
@@ -253,13 +253,15 @@
 </select>
 
         <select class="inventario-filter-select"
-          [(ngModel)]="filtros.ubicacion_id" (change)="buscarProductos()">
-          <option [ngValue]="0">Todas ubicaciones</option>
-          <option *ngFor="let ubicacion of ubicaciones"
-            [ngValue]="ubicacion.id">
-            {{ ubicacion.nombre }}
-          </option>
-        </select>
+  [(ngModel)]="filtros.ubicacion_id"
+  (change)="buscarProductos()"
+  [disabled]="filtros.bajo_stock">   <!-- ← Esta es la única línea que agregas -->
+  <option [ngValue]="0">Todas ubicaciones</option>
+  <option *ngFor="let ubicacion of ubicaciones"
+    [ngValue]="ubicacion.id">
+    {{ ubicacion.nombre }}
+  </option>
+</select>
 
         <div class="inventario-filter-switch">
           <input type="checkbox"
@@ -268,7 +270,7 @@
             [(ngModel)]="filtros.bajo_stock"
             (change)="buscarProductos()">
           <label class="inventario-switch-label" for="bajoStock">Bajo
-            stock</label>
+            Stock Bodega Quito</label>
         </div>
         <button
           class="inventario-btn inventario-btn-outline inventario-btn-sm"
@@ -561,15 +563,15 @@
         <div class="inventario-form-group">
           <label class="inventario-form-label">Tipo de Evento *</label>
           <select class="inventario-form-select"
-            [(ngModel)]="formMovimiento.tipo_evento"
-            name="tipo_evento"
-            required>
-            <option value="entrada">Entrada</option>
-            <option value="salida">Salida</option>
-            <option value="transferencia">Transferencia</option>
-            <option value="consumo">Consumo</option>
-            <option value="devolucion">Devolución</option>
-          </select>
+  [(ngModel)]="formMovimiento.tipo_evento"
+  name="tipo_evento"
+  required>
+  <option value="entrada" disabled>Entrada</option>
+  <option value="salida" disabled>Salida</option>
+  <option value="consumo" disabled>Consumo</option>
+  <option value="transferencia">Transferencia</option>
+  <option value="devolucion">Devolución</option>
+</select>
         </div>
 
         <!-- Producto (auto-seleccionado) -->
@@ -1469,22 +1471,25 @@
               </select>
             </div>
 
-            <div class="col-md-5">
-              <label class="form-label small">Nuevo valor</label>
+          <!-- En el modal de edición multicampo, dentro del bucle *ngFor="let item of formEdicionMultiCampo.campos" -->
+<div class="col-md-5">
+  <label class="form-label small">Nuevo valor</label>
 
-              <!-- Diferentes tipos de inputs según el campo -->
-              <input
-                *ngIf="item.campo && (item.campo === 'nombre' || item.campo === 'componente' || 
-                       item.campo === 'part_number' || item.campo === 'codigo' || 
-                       item.campo === 'serial_number')"
-                type="text"
-                class="form-control"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                [placeholder]="getPlaceholderCampo(item.campo)"
-                required>
+  <!-- Diferentes tipos de inputs según el campo -->
+  <!-- Inputs para texto -->
+  <input
+    *ngIf="item.campo && (item.campo === 'nombre' ||  
+           item.campo === 'part_number' || item.campo === 'codigo' || 
+           item.campo === 'serial_number')"
+    type="text"
+    class="form-control"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    [placeholder]="getPlaceholderCampo(item.campo)"
+    required>
 
-              <input
+  <!-- Input numérico para cantidad -->
+  <input
     *ngIf="item.campo && item.campo === 'cantidad_actual'"
     type="number"
     class="form-control"
@@ -1494,67 +1499,81 @@
     [min]="0"
     required>
 
-              <input *ngIf="item.campo === 'precio'"
-                type="number"
-                class="form-control"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                [step]="0.01"
-                [min]="0"
-                required>
+  <!-- Input numérico para precio -->
+  <input *ngIf="item.campo === 'precio'"
+    type="number"
+    class="form-control"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    [step]="0.01"
+    [min]="0"
+    required>
 
-              <select *ngIf="item.campo === 'estado'"
-                class="form-select"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                required>
-                <option value>Seleccionar estado...</option>
-                <option *ngFor="let opcion of getOpcionesCampo('estado')"
-                  [value]="opcion">
-                  {{ opcion | titlecase }}
-                </option>
-              </select>
+  <!-- SELECT para ESTADO (corregido) -->
+  <select *ngIf="item.campo === 'estado'"
+    class="form-select"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    required>
+    <option value="">Seleccionar estado...</option>
+    <option *ngFor="let opcion of getOpcionesCampo('estado')" [value]="opcion">
+      {{ opcion }}
+    </option>
+  </select>
+  
 
-              <select *ngIf="item.campo === 'criticidad'"
-                class="form-select"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                required>
-                <option value>Seleccionar criticidad...</option>
-                <option *ngFor="let opcion of getOpcionesCampo('criticidad')"
-                  [value]="opcion">
-                  {{ opcion | titlecase }}
-                </option>
-              </select>
+  <!-- SELECT para CRITICIDAD -->
+  <select *ngIf="item.campo === 'criticidad'"
+    class="form-select"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    required>
+    <option value="">Seleccionar criticidad...</option>
+    <option *ngFor="let opcion of getOpcionesCampo('criticidad')" [value]="opcion">
+      {{ opcion }}
+    </option>
+  </select>
 
-              <select *ngIf="item.campo === 'ubicacion_id'"
-                class="form-select"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                required>
-                <option value>Seleccionar ubicación...</option>
-                <option *ngFor="let ubicacion of ubicaciones"
-                  [value]="ubicacion.id">
-                  {{ ubicacion.nombre }}
-                </option>
-              </select>
+  <!-- SELECT para UBICACIÓN -->
+  <select *ngIf="item.campo === 'ubicacion_id'"
+    class="form-select"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    required>
+    <option value="">Seleccionar ubicación...</option>
+    <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
+      {{ ubicacion.nombre }}
+    </option>
+  </select>
+<!-- SELECT para COMPONENTE -->
+<select *ngIf="item.campo === 'componente'"
+  class="form-select"
+  [(ngModel)]="item.valor"
+  [name]="'valor' + i"
+  required>
+  <option value="">Seleccionar componente...</option>
+  <option *ngFor="let opcion of componentesDisponibles" [value]="opcion">
+    {{ opcion }}
+  </option>
+</select>
+  <!-- Input de fecha -->
+  <input *ngIf="item.campo === 'fecha_adquisicion'"
+    type="date"
+    class="form-control"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    required>
 
-              <input *ngIf="item.campo === 'fecha_adquisicion'"
-                type="date"
-                class="form-control"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                required>
-
-              <textarea
-                *ngIf="item.campo && (item.campo === 'descripcion' || item.campo === 'estanteria'|| item.campo === 'observaciones')"
-                class="form-control"
-                rows="2"
-                [(ngModel)]="item.valor"
-                [name]="'valor' + i"
-                [placeholder]="getPlaceholderCampo(item.campo)"
-                required></textarea>
-            </div>
+  <!-- Textarea para descripción, estantería, observaciones -->
+  <textarea
+    *ngIf="item.campo && (item.campo === 'descripcion' || item.campo === 'estanteria'|| item.campo === 'observaciones')"
+    class="form-control"
+    rows="2"
+    [(ngModel)]="item.valor"
+    [name]="'valor' + i"
+    [placeholder]="getPlaceholderCampo(item.campo)"
+    required></textarea>
+</div>
 
             <div class="col-md-2">
               <button type="button" class="btn btn-outline-danger w-100"

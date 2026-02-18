@@ -11,29 +11,16 @@ export class EmailService {
   constructor() { 
   }
 
-  async obtenerCorreosUsuarios(): Promise<string[]> {
-    try {
-      const { data: perfiles, error } = await supabase
-        .from('perfiles')
-        .select('telefono')
-        .eq('estado', 'activo');
-
-      if (error) throw error;
-
-      const correos = perfiles
-        ?.map(perfil => perfil.telefono)
-        .filter(correo => {
-          if (!correo) return false;
-          return correo.includes('@') && correo.includes('.');
-        }) || [];
- 
-      return correos;
-
-    } catch (error) {
-      console.error('Error obteniendo correos:', error);
-      return [];
-    }
+async obtenerCorreosUsuarios(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.rpc('get_all_active_emails');
+    if (error) throw error;
+    return (data || []).map((item: { email: string }) => item.email);
+  } catch (error) {
+    console.error('Error obteniendo correos:', error);
+    return [];
   }
+}
 
   // En email.service.ts - CORREGIDO
 async enviarAlertaStockBajo(productos: any[]): Promise<{success: boolean, message: string}> {

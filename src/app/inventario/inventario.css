@@ -184,6 +184,7 @@
 .inventario-btn-sm {
   padding: 4px 8px;
   font-size: 12px;
+  margin-left: 1% !important;
 }
 
 .inventario-btn-icon {

@@ -8,7 +8,7 @@ export interface Producto {
   part_number: string | null;
   codigo: string | null;
   serial_number: string | null;
-  estado: 'NUEVO'| 'UTIL'| 'MANTENIMIENTO BANCO DE PRUEBAS'| 'MANTENIMIENTO FÁBRICA'| 'PROCESO DE EXPORTACIÓN (MODALTRADE)'| 'CUARENTENA BODEGA'| 'CONDENADO';
+  estado: 'NUEVO'| 'ÚTIL'| 'MANTENIMIENTO BANCO DE PRUEBAS'| 'MANTENIMIENTO FÁBRICA'| 'PROCESO DE EXPORTACIÓN (MODALTRADE)'| 'CUARENTENA BODEGA'| 'CONDENADO';
   cantidad_actual: number; 
   ubicacion_id: number | null;
   estanteria: string | null;
