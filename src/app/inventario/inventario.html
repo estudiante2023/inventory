@@ -142,12 +142,12 @@
   </div>
 </div>
 
-<!-- UTIL -->
+<!-- ÚTIL -->
 <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
   <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
   <div class="stat-content">
     <div class="stat-value">{{ estadisticasPorEstado.UTIL || 0 }}</div>
-    <div class="stat-label">UTIL</div>
+    <div class="stat-label">ÚTIL</div>
   </div>
 </div>
 
@@ -222,7 +222,7 @@
           (change)="buscarProductos()">
           <option value="todos">Todos los estados</option>
           <option value="NUEVO">NUEVO</option>
-          <option value="UTIL">UTIL</option>
+          <option value="ÚTIL">ÚTIL</option>
           <option value="MANTENIMIENTO BANCO DE PRUEBAS">MANTENIMIENTO BANCO DE
             PRUEBAS</option>
           <option value="MANTENIMIENTO FÁBRICA">MANTENIMIENTO FÁBRICA</option>
@@ -371,10 +371,10 @@
 
               <!-- Estado -->
               <td>
-                <span [class]="getEstadoClase(producto.estado)">
-                  {{ getEstadoTexto(producto.estado) }}
-                </span>
-              </td>
+  <span [class]="getEstadoClase(producto.estado)" style="text-transform: uppercase;">
+    {{ getEstadoTexto(producto.estado) }}
+  </span>
+</td>
 
               <!-- Criticidad -->
               <td>
@@ -1003,7 +1003,7 @@
               name="estado">
               <option value="todos">Todos los estados</option>
               <option value="NUEVO">NUEVO</option>
-              <option value="UTIL">UTIL</option>
+              <option value="ÚTIL">ÚTIL</option>
               <option value="MANTENIMIENTO BANCO DE PRUEBAS">MANTENIMIENTO BANCO
                 DE
                 PRUEBAS</option>
@@ -1419,13 +1419,24 @@
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
-        <h5 class="modal-title">
-          <i class="bi bi-list-check me-2"></i>
-          Edición Masiva de Múltiples Campos
-        </h5>
-        <button type="button" class="btn-close btn-close-white"
-          (click)="cerrarEdicionMultiCampo()"></button>
-      </div>
+  <h5 class="modal-title">
+    <i class="bi bi-list-check me-2"></i>
+    Edición Masiva de Múltiples Campos
+  </h5>
+  <div class="d-flex align-items-center gap-2">
+    <!-- NUEVO BOTÓN DE ELIMINACIÓN MASIVA -->
+    <button *ngIf="tienePrivilegio('eliminar.todo')" 
+            type="button" 
+            class="btn btn-sm btn-danger me-2"
+            (click)="eliminarMasivoCondicional()"
+            [disabled]="loading || eliminandoMasivo">
+      <span *ngIf="eliminandoMasivo" class="spinner-border spinner-border-sm me-1"></span>
+      <i class="bi bi-trash3"></i> Eliminar seleccionados (solo CONDENADOS)
+    </button>
+    <button type="button" class="btn-close btn-close-white" 
+            (click)="cerrarEdicionMultiCampo()"></button>
+  </div>
+</div>
 
       <div class="modal-body">
         <!-- Resumen -->

@@ -23,8 +23,42 @@ export class ProductosService {
     private emailService: EmailService
   ) {
   }
-
-
+async getProductosPorPartNumber(partNumber: string, excludeId?: number, includeId?: number): Promise<any[]> {
+  try {
+    let query = supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('part_number', partNumber)
+      .eq('esta_activo', true);
+    
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    if (includeId) {
+      query = query.eq('id', includeId); // Esto es para casos específicos, normalmente no se usa con exclude
+    }
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error obteniendo productos por part number:', error);
+    return [];
+  }
+}
+async obtenerUmbralStockMinimo(): Promise<number> {
+  try {
+    const { data, error } = await supabase
+      .from('configuraciones')
+      .select('valor')
+      .eq('clave', 'cantidad_minima')
+      .single();
+    if (error) throw error;
+    return data ? parseInt(data.valor) : 5;
+  } catch {
+    return 5; // valor por defecto
+  }
+}
 
   // ==================== MÉTODOS AUXILIARES PARA TRAZABILIDAD ====================
 
@@ -904,7 +938,7 @@ export class ProductosService {
         .eq('esta_activo', true);
       // Productos críticos (ALTA + CRÍTICO)
       const criticos = todosProductos?.filter(p =>
-        p.criticidad === 'ALTA' || p.criticidad === 'CRÍTICO'
+          p.criticidad === 'CRÍTICO'
       ).length || 0;
       if (errorProductos) {
         console.error('Error obteniendo productos totales:', errorProductos);

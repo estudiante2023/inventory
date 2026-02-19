@@ -25,10 +25,94 @@ export class TruncatePipe implements PipeTransform {
   imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class Inventario implements OnInit {
-
+eliminandoMasivo = false;
 
   // Agrega en las propiedades
+async eliminarMasivoCondicional() {
+  try {
+    // 1. Determinar qué IDs procesar
+    let idsAEvaluar: number[] = [];
 
+    if (this.formEdicionMultiCampo.aplicarATodos) {
+      idsAEvaluar = await this.obtenerTodosLosIdsFiltrados();
+      if (idsAEvaluar.length === 0) {
+        this.mostrarAlerta('No hay productos con los filtros actuales', 'warning');
+        return;
+      }
+    } else {
+      idsAEvaluar = Array.from(this.productosSeleccionados);
+      if (idsAEvaluar.length === 0) {
+        this.mostrarAlerta('Selecciona al menos un producto', 'warning');
+        return;
+      }
+    }
+
+    this.eliminandoMasivo = true;
+
+    // 2. Obtener los productos completos
+    const productosCompletos = await Promise.all(
+      idsAEvaluar.map(id => this.productosService.getProductoById(id).catch(() => null))
+    );
+
+    // 3. Filtrar solo los que tienen estado CONDENADO
+    const productosCondenados = productosCompletos.filter(p => p && p.estado?.toUpperCase() === 'CONDENADO');
+
+    if (productosCondenados.length === 0) {
+      this.mostrarAlerta('Ninguno de los productos seleccionados tiene estado CONDENADO', 'warning');
+      return;
+    }
+
+    const omitidos = idsAEvaluar.length - productosCondenados.length;
+    const mensajeConfirm = `Se eliminarán ${productosCondenados.length} producto(s) con estado CONDENADO.` +
+      (omitidos > 0 ? ` ${omitidos} producto(s) no se eliminarán por no estar CONDENADOS.` : '') +
+      '\n\n¿Continuar?';
+
+    if (!confirm(mensajeConfirm)) {
+      return;
+    }
+
+    // 4. Procesar eliminaciones SECUENCIALMENTE
+    this.loading = true;
+    let exitosos = 0;
+    let fallidos = 0;
+    let alertasEnviadas = 0;
+
+    for (const producto of productosCondenados) {
+      try {
+        const resultado = await this.eliminarUnProductoConVerificacion(producto);
+        exitosos++;
+        if (resultado.alertaEnviada) alertasEnviadas++;
+      } catch (error) {
+        console.error(`Error eliminando producto ${producto?.id}:`, error);
+        fallidos++;
+      }
+    }
+
+    // 5. Mostrar resultado
+    this.mostrarAlerta(
+      `✅ Eliminados: ${exitosos} producto(s) CONDENADO${exitosos !== 1 ? 's' : ''}. ` +
+      (fallidos > 0 ? `❌ Fallos: ${fallidos}.` : '') +
+      (omitidos > 0 ? ` ⏭️ Omitidos (no CONDENADOS): ${omitidos}.` : '') +
+      (alertasEnviadas > 0 ? ` 📧 Alertas enviadas: ${alertasEnviadas}.` : ''),
+      fallidos > 0 ? 'warning' : 'success'
+    );
+
+    // 6. Limpiar selección y cerrar modal
+    this.productosSeleccionados.clear();
+    this.cerrarEdicionMultiCampo();
+
+    // 7. Recargar datos
+    await this.cargarProductos();
+    await this.cargarEstadisticas();
+
+  } catch (error: any) {
+    console.error('❌ Error en eliminación masiva:', error);
+    this.mostrarAlerta(`Error: ${error.message}`, 'error');
+  } finally {
+    this.eliminandoMasivo = false;
+    this.loading = false;
+  }
+}
 
 
   productoEsSeriado: boolean = false;
@@ -1716,33 +1800,78 @@ export class Inventario implements OnInit {
     }
   }
 
-  async eliminarProducto(producto: any) {
-    if (producto.estado?.toUpperCase() !== 'CONDENADO') {
-      this.mostrarAlerta(
-        `El producto no está en estado CONDENADO (estado actual: ${producto.estado || 'sin estado'}). No se puede eliminar.`,
-        'warning'
-      );
-      return;
+async eliminarProducto(producto: any) {
+  if (producto.estado?.toUpperCase() !== 'CONDENADO') {
+    this.mostrarAlerta(
+      `El producto no está en estado CONDENADO (estado actual: ${producto.estado || 'sin estado'}). No se puede eliminar.`,
+      'warning'
+    );
+    return;
+  }
+  if (!confirm(`¿Está seguro de eliminar el producto "${producto.nombre}"?`)) return;
+
+  try {
+    this.loading = true;
+    const resultado = await this.eliminarUnProductoConVerificacion(producto);
+    this.mostrarAlerta(
+      `✅ Producto eliminado definitivamente. ${resultado.alertaEnviada ? 'Alerta enviada.' : ''}`,
+      'success'
+    );
+    // Recargar datos
+    await this.cargarProductos();
+    await this.cargarEstadisticas();
+  } catch (error: any) {
+    this.mostrarAlerta(error.message || 'Error al eliminar producto', 'error');
+  } finally {
+    this.loading = false;
+  }
+}
+private async eliminarUnProductoConVerificacion(producto: any): Promise<{ eliminado: boolean, alertaEnviada: boolean }> {
+  try {
+    // Guardar datos necesarios antes de eliminar
+    const esSeriado = !!producto.serial_number;
+    let stockAntes = 0;
+    let umbral = 5;
+
+    if (esSeriado && producto.part_number) {
+      const productosAntes = await this.productosService.getProductosPorPartNumber(producto.part_number);
+      stockAntes = productosAntes.reduce((sum, p) => sum + (p.cantidad_actual || 1), 0);
+      umbral = await this.productosService.obtenerUmbralStockMinimo();
     }
-    if (confirm(`¿Está seguro de eliminar el producto "${producto.nombre}"?`)) {
-      try {
-        this.loading = true;
-        await this.productosService.eliminarProductoPermanente(producto.id);
-        this.mostrarAlerta('✅ Producto eliminado definitivamente (era CONDENADO)', 'success');
 
-        // Recargar productos primero
-        await this.cargarProductos();
-        // Luego recargar estadísticas
-        await this.cargarEstadisticas();
+    // Ejecutar eliminación
+    await this.productosService.eliminarProductoPermanente(producto.id);
 
-      } catch (error: any) {
-        this.mostrarAlerta(error.message || 'Error al eliminar producto', 'warning');
-      } finally {
-        this.loading = false; // ← Esto desactiva el spinner general
+    let alertaEnviada = false;
+    // Verificar después
+    if (esSeriado && producto.part_number) {
+      const productosDespues = await this.productosService.getProductosPorPartNumber(
+        producto.part_number,
+        producto.id
+      );
+      const stockDespues = productosDespues.reduce((sum, p) => sum + (p.cantidad_actual || 1), 0);
+
+      const estabaEnStockBajo = stockAntes <= umbral;
+      const ahoraEnStockBajo = stockDespues <= umbral;
+
+      if (!estabaEnStockBajo && ahoraEnStockBajo) {
+        let productoParaAlerta;
+        if (productosDespues.length > 0) {
+          productoParaAlerta = productosDespues[0];
+        } else {
+          productoParaAlerta = { ...producto, cantidad_actual: 0 };
+        }
+        await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
+        alertaEnviada = true;
       }
     }
-  }
 
+    return { eliminado: true, alertaEnviada };
+  } catch (error) {
+    console.error('Error eliminando producto individual:', error);
+    throw error;
+  }
+}
   resetFormulario() {
     // Obtener fecha actual en formato YYYY-MM-DD
     const today = new Date();
