@@ -46,6 +46,28 @@ async getProductosPorPartNumber(partNumber: string, excludeId?: number, includeI
     return [];
   }
 }
+
+
+// En productos.service.ts
+async getProductoAgrupadoPorPartNumber(partNumber: string): Promise<any | null> {
+  try {
+    const { data, error } = await supabase
+      .from(this.vistaSeriados)
+      .select('*')
+      .eq('part_number', partNumber)
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null; // no encontrado
+      throw error;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error obteniendo producto agrupado:', error);
+    return null;
+  }
+}
 async obtenerUmbralStockMinimo(): Promise<number> {
   try {
     const { data, error } = await supabase

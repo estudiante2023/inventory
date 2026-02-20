@@ -1854,16 +1854,23 @@ private async eliminarUnProductoConVerificacion(producto: any): Promise<{ elimin
       const estabaEnStockBajo = stockAntes <= umbral;
       const ahoraEnStockBajo = stockDespues <= umbral;
 
-      if (!estabaEnStockBajo && ahoraEnStockBajo) {
-        let productoParaAlerta;
-        if (productosDespues.length > 0) {
-          productoParaAlerta = productosDespues[0];
-        } else {
-          productoParaAlerta = { ...producto, cantidad_actual: 0 };
-        }
-        await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
-        alertaEnviada = true;
-      }
+     if (!estabaEnStockBajo && ahoraEnStockBajo) {
+  let productoParaAlerta;
+
+  // Obtener el producto agrupado (con stock total y seriales)
+  const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(producto.part_number);
+  if (agrupado) {
+    // 🔁 Aseguramos que serial_number contenga la lista concatenada
+    productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
+  } else if (productosDespues.length > 0) {
+    productoParaAlerta = productosDespues[0];
+  } else {
+    productoParaAlerta = { ...producto, cantidad_actual: 0 };
+  }
+
+  await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
+  alertaEnviada = true;
+}
     }
 
     return { eliminado: true, alertaEnviada };
@@ -2145,19 +2152,31 @@ private async eliminarUnProductoConVerificacion(producto: any): Promise<{ elimin
         productoId,
         this.cantidadAnterior
       );
+if (resultado.bajoStock && resultado.producto) {
+  console.log(`🚨 Enviando alerta para producto ID: ${productoId}`);
 
-      if (resultado.bajoStock && resultado.producto) {
-        console.log(`🚨 Enviando alerta para producto ID: ${productoId}`);
+  let productoParaAlerta = resultado.producto;
 
-        const exito = await this.productosService.enviarAlertaProductoIndividual(resultado.producto);
+  // Si es seriado, obtener el producto agrupado (con stock total y seriales)
+  if (resultado.producto.serial_number && resultado.producto.part_number) {
+    const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(
+      resultado.producto.part_number
+    );
+    if (agrupado) {
+      // Copiamos los seriales concatenados al campo 'serial_number'
+      productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
+    }
+  }
 
-        if (exito) {
-          this.mostrarAlerta(
-            `✅ Alerta enviada: "${resultado.producto.nombre}" pasó a stock bajo`,
-            'success'
-          );
-        }
-      } else {
+  const exito = await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
+
+  if (exito) {
+    this.mostrarAlerta(
+      `✅ Alerta enviada: "${productoParaAlerta.nombre}" (stock total: ${productoParaAlerta.cantidad_actual}) pasó a stock bajo`,
+      'success'
+    );
+  }
+}else {
         console.log(`✅ Producto ${productoId} no pasó a stock bajo, no se envía alerta`);
       }
       // ************** FIN NUEVA LÓGICA **************
