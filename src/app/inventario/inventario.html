@@ -46,6 +46,12 @@
         [disabled]="loading">
         <i class="bi bi-upload"></i> Importar Excel
       </button>
+      <!-- Después del botón de edición masiva, agrega: -->
+<button *ngIf="tienePrivilegio('productos.Editar') && productosSeleccionados.size > 0"
+  class="inventario-btn inventario-btn-primary ms-2"
+  (click)="abrirModalMovimientoGrupal()">
+  <i class="bi bi-arrow-right-circle"></i> Mover grupo (seriados)
+</button>
       <button
         *ngIf="tienePrivilegio('productos.Editar') && (productosSeleccionados.size > 0 || formEdicionMultiCampo.aplicarATodos)"
         class="inventario-btn inventario-btn-warning"
@@ -1820,7 +1826,64 @@
 
 
 
+<!-- Modal para movimiento grupal de seriados -->
+<div class="modal-backdrop fade show" *ngIf="mostrandoModalMovimientoGrupal" (click)="cerrarModalMovimientoGrupal()"></div>
+<div class="modal fade show" [class.show]="mostrandoModalMovimientoGrupal" [style.display]="mostrandoModalMovimientoGrupal ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-arrow-right-circle"></i> Mover productos seriados en grupo
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalMovimientoGrupal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info mb-3">
+          <i class="bi bi-info-circle"></i>
+          Se moverán <strong>{{ productosSeleccionados.size }}</strong> producto(s) seleccionado(s).
+          Solo los productos seriados serán procesados; los no seriados se omitirán automáticamente.
+        </div>
 
+        <div class="mb-3">
+          <label class="form-label">Ubicación destino <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="formMovimientoGrupal.ubicacion_destino" required>
+            <option value="">Seleccionar ubicación</option>
+            <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.nombre">
+              {{ ubicacion.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Estantería (solo si destino es BODEGA QUITO) -->
+        <div class="mb-3" *ngIf="formMovimientoGrupal.ubicacion_destino === 'BODEGA QUITO'">
+          <label class="form-label">Estantería <span class="text-danger">*</span></label>
+          <textarea class="form-control" rows="2"
+            [(ngModel)]="formMovimientoGrupal.estanteria"
+            placeholder="Estantería (obligatoria para BODEGA QUITO)"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Motivo <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="formMovimientoGrupal.motivo" placeholder="Ej: Reubicación masiva">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Observaciones</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="formMovimientoGrupal.observaciones" placeholder="Observaciones adicionales"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalMovimientoGrupal()" [disabled]="procesandoGrupo">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="moverGrupoSeriados()" [disabled]="procesandoGrupo || !formMovimientoGrupal.ubicacion_destino || !formMovimientoGrupal.motivo">
+          <span *ngIf="procesandoGrupo" class="spinner-border spinner-border-sm me-1"></span>
+          {{ procesandoGrupo ? 'Procesando...' : 'Mover grupo' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 

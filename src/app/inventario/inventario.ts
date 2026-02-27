@@ -6,7 +6,7 @@ import { ProductosService } from '../../services/productos.service';
 import { TrazabilidadService } from '../../services/trazabilidad.service';
 import { UbicacionesService } from '../../services/ubicaciones.service';
 import { Pipe, PipeTransform } from '@angular/core';
-
+import { NuevoMovimiento } from '../moldes/producto.model';
 @Pipe({
   name: 'truncate',
   standalone: true
@@ -25,94 +25,354 @@ export class TruncatePipe implements PipeTransform {
   imports: [CommonModule, FormsModule, ReactiveFormsModule]
 })
 export class Inventario implements OnInit {
-eliminandoMasivo = false;
 
-  // Agrega en las propiedades
-async eliminarMasivoCondicional() {
+
+
+
+  // En la sección de propiedades, añade:
+  mostrandoModalMovimientoGrupal = false;
+
+  formMovimientoGrupal = {
+    ubicacion_destino: '',
+    motivo: 'S.M',
+    observaciones: '',
+    estanteria: ''  // Solo si destino es BODEGA QUITO
+  };
+
+  procesandoGrupo = false;
+  resultadoGrupo = {
+    exitosos: 0,
+    fallidos: 0,
+    omitidos: 0,
+    errores: [] as string[]
+  };
+
+
+
+
+  private async procesarMovimientoSeriadoIndividualSinAlerta(
+    producto: any,
+    destino: string,
+    motivo: string,
+    observaciones: string,
+    estanteria: string
+  ): Promise<boolean> {
+    try {
+      // Validar que no se mueva a la misma ubicación
+      if (producto.ubicacion_nombre === destino) {
+        console.log(`⏭️ Producto ${producto.id} ya está en la ubicación destino, se omite`);
+        return false;
+      }
+
+      // Obtener ID de ubicación destino
+      const ubicacionDestinoId = this.getUbicacionIdPorNombre(destino);
+      if (!ubicacionDestinoId) throw new Error('Ubicación destino no válida');
+
+      // Preparar datos de actualización
+      const updateData: any = { ubicacion_id: ubicacionDestinoId };
+
+      // Manejar estantería si destino es BODEGA QUITO
+      if (ubicacionDestinoId === 9) {
+        if (!estanteria?.trim()) throw new Error('Estantería obligatoria para BODEGA QUITO');
+        updateData.estanteria = estanteria;
+      } else {
+        updateData.estanteria = '';
+      }
+
+      // Actualizar producto
+      await this.productosService.updateProducto(producto.id, updateData);
+
+      // Registrar movimiento
+      const movimientoData: NuevoMovimiento = {
+        tipo_evento: 'transferencia',
+        producto_id: producto.id,
+        cantidad: 1,
+        estado_evento: 'completado',
+        motivo: motivo,
+        ubicacion_origen: producto.ubicacion_nombre,
+        ubicacion_destino: destino,
+        detalles: 'Movimiento grupal de seriados',
+        observaciones: observaciones
+      };
+      await this.trazabilidadService.registrarMovimiento(movimientoData);
+
+      return true;
+    } catch (error) {
+      console.error(`❌ Error moviendo producto ${producto.id}:`, error);
+      throw error;
+    }
+  }
+
+async moverGrupoSeriados() {
   try {
-    // 1. Determinar qué IDs procesar
-    let idsAEvaluar: number[] = [];
-
-    if (this.formEdicionMultiCampo.aplicarATodos) {
-      idsAEvaluar = await this.obtenerTodosLosIdsFiltrados();
-      if (idsAEvaluar.length === 0) {
-        this.mostrarAlerta('No hay productos con los filtros actuales', 'warning');
-        return;
-      }
-    } else {
-      idsAEvaluar = Array.from(this.productosSeleccionados);
-      if (idsAEvaluar.length === 0) {
-        this.mostrarAlerta('Selecciona al menos un producto', 'warning');
-        return;
-      }
+    // Validaciones iniciales
+    const ids = Array.from(this.productosSeleccionados);
+    if (ids.length === 0) {
+      this.mostrarAlerta('Selecciona al menos un producto', 'warning');
+      return;
+    }
+    if (!this.formMovimientoGrupal.ubicacion_destino) {
+      this.mostrarAlerta('Selecciona una ubicación destino', 'error');
+      return;
+    }
+    if (!this.formMovimientoGrupal.motivo.trim()) {
+      this.mostrarAlerta('El motivo es obligatorio', 'error');
+      return;
+    }
+    const ubicacionDestinoId = this.getUbicacionIdPorNombre(this.formMovimientoGrupal.ubicacion_destino);
+    if (ubicacionDestinoId === 9 && !this.formMovimientoGrupal.estanteria?.trim()) {
+      this.mostrarAlerta('La estantería es obligatoria para BODEGA QUITO', 'error');
+      return;
     }
 
-    this.eliminandoMasivo = true;
+    this.procesandoGrupo = true;
+    this.resultadoGrupo = { exitosos: 0, fallidos: 0, omitidos: 0, errores: [] };
 
-    // 2. Obtener los productos completos
+    // Obtener productos completos
     const productosCompletos = await Promise.all(
-      idsAEvaluar.map(id => this.productosService.getProductoById(id).catch(() => null))
+      ids.map(id => this.productosService.getProductoById(id).catch(() => null))
     );
+    const productosSeriados = productosCompletos.filter(p => p && p.serial_number);
+    const omitidosNoSeriados = ids.length - productosSeriados.length;
 
-    // 3. Filtrar solo los que tienen estado CONDENADO
-    const productosCondenados = productosCompletos.filter(p => p && p.estado?.toUpperCase() === 'CONDENADO');
-
-    if (productosCondenados.length === 0) {
-      this.mostrarAlerta('Ninguno de los productos seleccionados tiene estado CONDENADO', 'warning');
+    if (productosSeriados.length === 0) {
+      this.mostrarAlerta('Ninguno de los productos seleccionados es seriado', 'warning');
+      this.procesandoGrupo = false;
       return;
     }
 
-    const omitidos = idsAEvaluar.length - productosCondenados.length;
-    const mensajeConfirm = `Se eliminarán ${productosCondenados.length} producto(s) con estado CONDENADO.` +
-      (omitidos > 0 ? ` ${omitidos} producto(s) no se eliminarán por no estar CONDENADOS.` : '') +
-      '\n\n¿Continuar?';
-
-    if (!confirm(mensajeConfirm)) {
-      return;
-    }
-
-    // 4. Procesar eliminaciones SECUENCIALMENTE
-    this.loading = true;
-    let exitosos = 0;
-    let fallidos = 0;
-    let alertasEnviadas = 0;
-
-    for (const producto of productosCondenados) {
-      try {
-        const resultado = await this.eliminarUnProductoConVerificacion(producto);
-        exitosos++;
-        if (resultado.alertaEnviada) alertasEnviadas++;
-      } catch (error) {
-        console.error(`Error eliminando producto ${producto?.id}:`, error);
-        fallidos++;
+    // ---- 1. Obtener stock inicial TOTAL en Bodega Quito para cada part number ----
+    const partNumbersUnicos = new Set<string>();
+    for (const producto of productosSeriados) {
+      if (producto?.part_number) {
+        partNumbersUnicos.add(producto.part_number);
       }
     }
 
-    // 5. Mostrar resultado
+    const stockInicialPorPartNumber = new Map<string, number>();
+    for (const partNumber of partNumbersUnicos) {
+      const productosPart = await this.productosService.getProductosPorPartNumber(partNumber);
+      const stockEnBodega = productosPart.filter(p => p.ubicacion_id === 9).length;
+      stockInicialPorPartNumber.set(partNumber, stockEnBodega);
+    }
+
+    // ---- 2. Confirmar con el usuario ----
+    const confirmMsg = `Se moverán ${productosSeriados.length} producto(s) seriado(s) a ${this.formMovimientoGrupal.ubicacion_destino}.` +
+      (omitidosNoSeriados > 0 ? `\n${omitidosNoSeriados} no seriados serán omitidos.` : '') +
+      '\n¿Continuar?';
+    if (!confirm(confirmMsg)) {
+      this.procesandoGrupo = false;
+      return;
+    }
+
+    // ---- 3. Procesar cada producto seriado (realizar los movimientos) ----
+    for (const producto of productosSeriados) {
+      try {
+        const exito = await this.procesarMovimientoSeriadoIndividualSinAlerta(
+          producto,
+          this.formMovimientoGrupal.ubicacion_destino,
+          this.formMovimientoGrupal.motivo,
+          this.formMovimientoGrupal.observaciones,
+          this.formMovimientoGrupal.estanteria
+        );
+        if (exito) {
+          this.resultadoGrupo.exitosos++;
+        } else {
+          this.resultadoGrupo.omitidos++;
+        }
+      } catch (error: any) {
+        this.resultadoGrupo.fallidos++;
+        this.resultadoGrupo.errores.push(`Producto ID ${producto?.id}: ${error.message}`);
+      }
+    }
+
+    // ---- 4. Verificación final de stock bajo en Bodega Quito ----
+    console.log('=== INICIO VERIFICACIÓN FINAL ===');
+    const umbral = await this.productosService.obtenerUmbralStockMinimo();
+
+    for (const [partNumber, stockInicial] of stockInicialPorPartNumber) {
+      // Obtener stock actual en Bodega Quito después de los movimientos
+      const productosPart = await this.productosService.getProductosPorPartNumber(partNumber);
+      const stockActual = productosPart.filter(p => p.ubicacion_id === 9).length;
+
+      console.log(`PartNumber ${partNumber}: inicial=${stockInicial}, actual=${stockActual}`);
+
+      // Solo enviar alerta si ANTES no estaba bajo y AHORA sí lo está
+      if (stockInicial > umbral && stockActual <= umbral) {
+        const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(partNumber);
+        if (!agrupado) {
+          console.warn(`No se pudo obtener agrupado para ${partNumber}`);
+          continue;
+        }
+
+        const productoReferencia = productosPart.find(p => p.ubicacion_id === 9) || productosPart[0] || agrupado;
+
+        const productoAlerta = {
+          id: productoReferencia.id,
+          nombre: productoReferencia.nombre,
+          codigo: productoReferencia.codigo,
+          part_number: partNumber,
+          serial_number: productosPart
+            .filter(p => p.ubicacion_id === 9)
+            .map(p => p.serial_number)
+            .filter(s => s)
+            .join(', '),
+          cantidad_actual: stockActual,
+          ubicacion_nombre: 'BODEGA QUITO',
+          precio: productoReferencia.precio,
+          criticidad: productoReferencia.criticidad,
+          componente: productoReferencia.componente,
+          fecha_adquisicion: productoReferencia.fecha_adquisicion,
+          orden_envio: productoReferencia.orden_envio,
+          factura: productoReferencia.factura,
+          observaciones: productoReferencia.observaciones,
+          cantidad_items: productosPart.length
+        };
+
+        console.log(`📧 Enviando alerta para ${partNumber}:`, productoAlerta);
+        await this.productosService.enviarAlertaProductoIndividual(productoAlerta);
+      } else {
+        console.log(`No alerta para ${partNumber}: inicial ${stockInicial}, actual ${stockActual}, umbral ${umbral}`);
+      }
+    }
+    console.log('=== FIN VERIFICACIÓN FINAL ===');
+
+    // ---- 5. Mostrar resultado y limpiar ----
     this.mostrarAlerta(
-      `✅ Eliminados: ${exitosos} producto(s) CONDENADO${exitosos !== 1 ? 's' : ''}. ` +
-      (fallidos > 0 ? `❌ Fallos: ${fallidos}.` : '') +
-      (omitidos > 0 ? ` ⏭️ Omitidos (no CONDENADOS): ${omitidos}.` : '') +
-      (alertasEnviadas > 0 ? ` 📧 Alertas enviadas: ${alertasEnviadas}.` : ''),
-      fallidos > 0 ? 'warning' : 'success'
+      `✅ Movidos: ${this.resultadoGrupo.exitosos} | ⏭️ Omitidos: ${this.resultadoGrupo.omitidos} | ❌ Fallos: ${this.resultadoGrupo.fallidos}`,
+      this.resultadoGrupo.fallidos > 0 ? 'warning' : 'success'
     );
 
-    // 6. Limpiar selección y cerrar modal
+    this.cerrarModalMovimientoGrupal();
     this.productosSeleccionados.clear();
-    this.cerrarEdicionMultiCampo();
-
-    // 7. Recargar datos
     await this.cargarProductos();
     await this.cargarEstadisticas();
 
   } catch (error: any) {
-    console.error('❌ Error en eliminación masiva:', error);
-    this.mostrarAlerta(`Error: ${error.message}`, 'error');
+    this.mostrarAlerta(`Error inesperado: ${error.message}`, 'error');
   } finally {
-    this.eliminandoMasivo = false;
-    this.loading = false;
+    this.procesandoGrupo = false;
   }
 }
+
+  // Métodos para abrir/cerrar el modal grupal
+  abrirModalMovimientoGrupal() {
+    if (this.productosSeleccionados.size === 0) {
+      this.mostrarAlerta('Selecciona al menos un producto', 'warning');
+      return;
+    }
+    this.mostrandoModalMovimientoGrupal = true;
+  }
+
+  cerrarModalMovimientoGrupal() {
+    this.mostrandoModalMovimientoGrupal = false;
+    this.formMovimientoGrupal = {
+      ubicacion_destino: '',
+      motivo: 'S.M',
+      observaciones: '',
+      estanteria: ''
+    };
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  eliminandoMasivo = false;
+
+  // Agrega en las propiedades
+  async eliminarMasivoCondicional() {
+    try {
+      // 1. Determinar qué IDs procesar
+      let idsAEvaluar: number[] = [];
+
+      if (this.formEdicionMultiCampo.aplicarATodos) {
+        idsAEvaluar = await this.obtenerTodosLosIdsFiltrados();
+        if (idsAEvaluar.length === 0) {
+          this.mostrarAlerta('No hay productos con los filtros actuales', 'warning');
+          return;
+        }
+      } else {
+        idsAEvaluar = Array.from(this.productosSeleccionados);
+        if (idsAEvaluar.length === 0) {
+          this.mostrarAlerta('Selecciona al menos un producto', 'warning');
+          return;
+        }
+      }
+
+      this.eliminandoMasivo = true;
+
+      // 2. Obtener los productos completos
+      const productosCompletos = await Promise.all(
+        idsAEvaluar.map(id => this.productosService.getProductoById(id).catch(() => null))
+      );
+
+      // 3. Filtrar solo los que tienen estado CONDENADO
+      const productosCondenados = productosCompletos.filter(p => p && p.estado?.toUpperCase() === 'CONDENADO');
+
+      if (productosCondenados.length === 0) {
+        this.mostrarAlerta('Ninguno de los productos seleccionados tiene estado CONDENADO', 'warning');
+        return;
+      }
+
+      const omitidos = idsAEvaluar.length - productosCondenados.length;
+      const mensajeConfirm = `Se eliminarán ${productosCondenados.length} producto(s) con estado CONDENADO.` +
+        (omitidos > 0 ? ` ${omitidos} producto(s) no se eliminarán por no estar CONDENADOS.` : '') +
+        '\n\n¿Continuar?';
+
+      if (!confirm(mensajeConfirm)) {
+        return;
+      }
+
+      // 4. Procesar eliminaciones SECUENCIALMENTE
+      this.loading = true;
+      let exitosos = 0;
+      let fallidos = 0;
+      let alertasEnviadas = 0;
+
+      for (const producto of productosCondenados) {
+        try {
+          const resultado = await this.eliminarUnProductoConVerificacion(producto);
+          exitosos++;
+          if (resultado.alertaEnviada) alertasEnviadas++;
+        } catch (error) {
+          console.error(`Error eliminando producto ${producto?.id}:`, error);
+          fallidos++;
+        }
+      }
+
+      // 5. Mostrar resultado
+      this.mostrarAlerta(
+        `✅ Eliminados: ${exitosos} producto(s) CONDENADO${exitosos !== 1 ? 's' : ''}. ` +
+        (fallidos > 0 ? `❌ Fallos: ${fallidos}.` : '') +
+        (omitidos > 0 ? ` ⏭️ Omitidos (no CONDENADOS): ${omitidos}.` : '') +
+        (alertasEnviadas > 0 ? ` 📧 Alertas enviadas: ${alertasEnviadas}.` : ''),
+        fallidos > 0 ? 'warning' : 'success'
+      );
+
+      // 6. Limpiar selección y cerrar modal
+      this.productosSeleccionados.clear();
+      this.cerrarEdicionMultiCampo();
+
+      // 7. Recargar datos
+      await this.cargarProductos();
+      await this.cargarEstadisticas();
+
+    } catch (error: any) {
+      console.error('❌ Error en eliminación masiva:', error);
+      this.mostrarAlerta(`Error: ${error.message}`, 'error');
+    } finally {
+      this.eliminandoMasivo = false;
+      this.loading = false;
+    }
+  }
 
 
   productoEsSeriado: boolean = false;
@@ -821,7 +1081,7 @@ async eliminarMasivoCondicional() {
     componente: 'todos',      // ← NUEVA LÍNEA
     bajo_stock: false,
     page: 1,
-    limit: 10,
+    limit: 20,
     orderBy: 'id',
     orderDir: 'desc' as 'asc' | 'desc'
   };
@@ -1499,7 +1759,7 @@ async eliminarMasivoCondicional() {
       componente: 'todos',     // ← NUEVA LÍNEA
       bajo_stock: false,
       page: 1,
-      limit: 10,
+      limit: 20,
       orderBy: 'id',
       orderDir: 'desc'
     };
@@ -1800,85 +2060,85 @@ async eliminarMasivoCondicional() {
     }
   }
 
-async eliminarProducto(producto: any) {
-  if (producto.estado?.toUpperCase() !== 'CONDENADO') {
-    this.mostrarAlerta(
-      `El producto no está en estado CONDENADO (estado actual: ${producto.estado || 'sin estado'}). No se puede eliminar.`,
-      'warning'
-    );
-    return;
-  }
-  if (!confirm(`¿Está seguro de eliminar el producto "${producto.nombre}"?`)) return;
-
-  try {
-    this.loading = true;
-    const resultado = await this.eliminarUnProductoConVerificacion(producto);
-    this.mostrarAlerta(
-      `✅ Producto eliminado definitivamente. ${resultado.alertaEnviada ? 'Alerta enviada.' : ''}`,
-      'success'
-    );
-    // Recargar datos
-    await this.cargarProductos();
-    await this.cargarEstadisticas();
-  } catch (error: any) {
-    this.mostrarAlerta(error.message || 'Error al eliminar producto', 'error');
-  } finally {
-    this.loading = false;
-  }
-}
-private async eliminarUnProductoConVerificacion(producto: any): Promise<{ eliminado: boolean, alertaEnviada: boolean }> {
-  try {
-    // Guardar datos necesarios antes de eliminar
-    const esSeriado = !!producto.serial_number;
-    let stockAntes = 0;
-    let umbral = 5;
-
-    if (esSeriado && producto.part_number) {
-      const productosAntes = await this.productosService.getProductosPorPartNumber(producto.part_number);
-      stockAntes = productosAntes.reduce((sum, p) => sum + (p.cantidad_actual || 1), 0);
-      umbral = await this.productosService.obtenerUmbralStockMinimo();
-    }
-
-    // Ejecutar eliminación
-    await this.productosService.eliminarProductoPermanente(producto.id);
-
-    let alertaEnviada = false;
-    // Verificar después
-    if (esSeriado && producto.part_number) {
-      const productosDespues = await this.productosService.getProductosPorPartNumber(
-        producto.part_number,
-        producto.id
+  async eliminarProducto(producto: any) {
+    if (producto.estado?.toUpperCase() !== 'CONDENADO') {
+      this.mostrarAlerta(
+        `El producto no está en estado CONDENADO (estado actual: ${producto.estado || 'sin estado'}). No se puede eliminar.`,
+        'warning'
       );
-      const stockDespues = productosDespues.reduce((sum, p) => sum + (p.cantidad_actual || 1), 0);
-
-      const estabaEnStockBajo = stockAntes <= umbral;
-      const ahoraEnStockBajo = stockDespues <= umbral;
-
-     if (!estabaEnStockBajo && ahoraEnStockBajo) {
-  let productoParaAlerta;
-
-  // Obtener el producto agrupado (con stock total y seriales)
-  const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(producto.part_number);
-  if (agrupado) {
-    // 🔁 Aseguramos que serial_number contenga la lista concatenada
-    productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
-  } else if (productosDespues.length > 0) {
-    productoParaAlerta = productosDespues[0];
-  } else {
-    productoParaAlerta = { ...producto, cantidad_actual: 0 };
-  }
-
-  await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
-  alertaEnviada = true;
-}
+      return;
     }
+    if (!confirm(`¿Está seguro de eliminar el producto "${producto.nombre}"?`)) return;
 
-    return { eliminado: true, alertaEnviada };
-  } catch (error) {
-    console.error('Error eliminando producto individual:', error);
-    throw error;
+    try {
+      this.loading = true;
+      const resultado = await this.eliminarUnProductoConVerificacion(producto);
+      this.mostrarAlerta(
+        `✅ Producto eliminado definitivamente. ${resultado.alertaEnviada ? 'Alerta enviada.' : ''}`,
+        'success'
+      );
+      // Recargar datos
+      await this.cargarProductos();
+      await this.cargarEstadisticas();
+    } catch (error: any) {
+      this.mostrarAlerta(error.message || 'Error al eliminar producto', 'error');
+    } finally {
+      this.loading = false;
+    }
   }
-}
+  private async eliminarUnProductoConVerificacion(producto: any): Promise<{ eliminado: boolean, alertaEnviada: boolean }> {
+    try {
+      // Guardar datos necesarios antes de eliminar
+      const esSeriado = !!producto.serial_number;
+      let stockAntes = 0;
+      let umbral = 5;
+
+      if (esSeriado && producto.part_number) {
+        const productosAntes = await this.productosService.getProductosPorPartNumber(producto.part_number);
+        stockAntes = productosAntes.reduce((sum, p) => sum + (p.cantidad_actual || 1), 0);
+        umbral = await this.productosService.obtenerUmbralStockMinimo();
+      }
+
+      // Ejecutar eliminación
+      await this.productosService.eliminarProductoPermanente(producto.id);
+
+      let alertaEnviada = false;
+      // Verificar después
+      if (esSeriado && producto.part_number) {
+        const productosDespues = await this.productosService.getProductosPorPartNumber(
+          producto.part_number,
+          producto.id
+        );
+        const stockDespues = productosDespues.reduce((sum, p) => sum + (p.cantidad_actual || 1), 0);
+
+        const estabaEnStockBajo = stockAntes <= umbral;
+        const ahoraEnStockBajo = stockDespues <= umbral;
+
+        if (!estabaEnStockBajo && ahoraEnStockBajo) {
+          let productoParaAlerta;
+
+          // Obtener el producto agrupado (con stock total y seriales)
+          const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(producto.part_number);
+          if (agrupado) {
+            // 🔁 Aseguramos que serial_number contenga la lista concatenada
+            productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
+          } else if (productosDespues.length > 0) {
+            productoParaAlerta = productosDespues[0];
+          } else {
+            productoParaAlerta = { ...producto, cantidad_actual: 0 };
+          }
+
+          await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
+          alertaEnviada = true;
+        }
+      }
+
+      return { eliminado: true, alertaEnviada };
+    } catch (error) {
+      console.error('Error eliminando producto individual:', error);
+      throw error;
+    }
+  }
   resetFormulario() {
     // Obtener fecha actual en formato YYYY-MM-DD
     const today = new Date();
@@ -2152,31 +2412,31 @@ private async eliminarUnProductoConVerificacion(producto: any): Promise<{ elimin
         productoId,
         this.cantidadAnterior
       );
-if (resultado.bajoStock && resultado.producto) {
-  console.log(`🚨 Enviando alerta para producto ID: ${productoId}`);
+      if (resultado.bajoStock && resultado.producto) {
+        console.log(`🚨 Enviando alerta para producto ID: ${productoId}`);
 
-  let productoParaAlerta = resultado.producto;
+        let productoParaAlerta = resultado.producto;
 
-  // Si es seriado, obtener el producto agrupado (con stock total y seriales)
-  if (resultado.producto.serial_number && resultado.producto.part_number) {
-    const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(
-      resultado.producto.part_number
-    );
-    if (agrupado) {
-      // Copiamos los seriales concatenados al campo 'serial_number'
-      productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
-    }
-  }
+        // Si es seriado, obtener el producto agrupado (con stock total y seriales)
+        if (resultado.producto.serial_number && resultado.producto.part_number) {
+          const agrupado = await this.productosService.getProductoAgrupadoPorPartNumber(
+            resultado.producto.part_number
+          );
+          if (agrupado) {
+            // Copiamos los seriales concatenados al campo 'serial_number'
+            productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
+          }
+        }
 
-  const exito = await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
+        const exito = await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
 
-  if (exito) {
-    this.mostrarAlerta(
-      `✅ Alerta enviada: "${productoParaAlerta.nombre}" (stock total: ${productoParaAlerta.cantidad_actual}) pasó a stock bajo`,
-      'success'
-    );
-  }
-}else {
+        if (exito) {
+          this.mostrarAlerta(
+            `✅ Alerta enviada: "${productoParaAlerta.nombre}" (stock total: ${productoParaAlerta.cantidad_actual}) pasó a stock bajo`,
+            'success'
+          );
+        }
+      } else {
         console.log(`✅ Producto ${productoId} no pasó a stock bajo, no se envía alerta`);
       }
       // ************** FIN NUEVA LÓGICA **************
