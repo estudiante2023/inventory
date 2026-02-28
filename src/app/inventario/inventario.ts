@@ -7,6 +7,8 @@ import { TrazabilidadService } from '../../services/trazabilidad.service';
 import { UbicacionesService } from '../../services/ubicaciones.service';
 import { Pipe, PipeTransform } from '@angular/core';
 import { NuevoMovimiento } from '../moldes/producto.model';
+import { UsuariosService } from '../../services/usuarios.service';
+import { AuthService } from '../../services/auth.service';
 @Pipe({
   name: 'truncate',
   standalone: true
@@ -26,9 +28,7 @@ export class TruncatePipe implements PipeTransform {
 })
 export class Inventario implements OnInit {
 
-
-
-
+  userName: string = 'Usuario';
   // En la sección de propiedades, añade:
   mostrandoModalMovimientoGrupal = false;
 
@@ -140,7 +140,7 @@ async moverGrupoSeriados() {
       this.procesandoGrupo = false;
       return;
     }
-
+const productosExitosos: any[] = [];
     // ---- 1. Obtener stock inicial TOTAL en Bodega Quito para cada part number ----
     const partNumbersUnicos = new Set<string>();
     for (const producto of productosSeriados) {
@@ -175,11 +175,12 @@ async moverGrupoSeriados() {
           this.formMovimientoGrupal.observaciones,
           this.formMovimientoGrupal.estanteria
         );
-        if (exito) {
-          this.resultadoGrupo.exitosos++;
-        } else {
-          this.resultadoGrupo.omitidos++;
-        }
+       if (exito) {
+  this.resultadoGrupo.exitosos++;
+  productosExitosos.push(producto); // <-- NUEVO
+} else {
+  this.resultadoGrupo.omitidos++;
+}
       } catch (error: any) {
         this.resultadoGrupo.fallidos++;
         this.resultadoGrupo.errores.push(`Producto ID ${producto?.id}: ${error.message}`);
@@ -236,7 +237,28 @@ async moverGrupoSeriados() {
       }
     }
     console.log('=== FIN VERIFICACIÓN FINAL ===');
-
+// Enviar reporte grupal si hay productos movidos
+if (productosExitosos.length > 0) {
+  const detalleMovimiento = {
+    tipo: 'Movimiento grupal de seriados',
+    motivo: this.formMovimientoGrupal.motivo,
+    observaciones: this.formMovimientoGrupal.observaciones,
+    usuario: this.userName,
+    productos: productosExitosos.map(p => ({
+      id: p.id,
+      nombre: p.nombre,
+      codigo: p.codigo,
+      part_number: p.part_number,
+      serial_number: p.serial_number,
+      cantidad: 1, // cada seriado se mueve de a 1
+      ubicacion_origen: p.ubicacion_nombre,
+      ubicacion_destino: this.formMovimientoGrupal.ubicacion_destino
+    }))
+  };
+  this.productosService.enviarReporteMovimiento(detalleMovimiento).catch(err =>
+    console.error('Error enviando reporte de movimiento grupal:', err)
+  );
+}
     // ---- 5. Mostrar resultado y limpiar ----
     this.mostrarAlerta(
       `✅ Movidos: ${this.resultadoGrupo.exitosos} | ⏭️ Omitidos: ${this.resultadoGrupo.omitidos} | ❌ Fallos: ${this.resultadoGrupo.fallidos}`,
@@ -273,6 +295,38 @@ async moverGrupoSeriados() {
       estanteria: ''
     };
   }
+async cargarUsuarioActual() {
+  try {
+
+
+      const session = await this.authService.getCurrentSession();
+       if (!session?.user) {
+        return;
+      }
+
+      const userId = session.user.id;
+     const perfil = await this.usuariosService.getUsuarioById(userId);
+
+      // Asignar el nombre
+      if (perfil?.nombre_completo) {
+        this.userName = perfil.nombre_completo;
+      }
+  } catch (error) {
+    console.error('Error cargando usuario actual:', error);
+  }
+}
+
+
+
+
+
+ 
+
+
+
+
+
+
 
 
 
@@ -1589,10 +1643,13 @@ async moverGrupoSeriados() {
     private productosService: ProductosService,
     private trazabilidadService: TrazabilidadService,
     private ubicacionesService: UbicacionesService,
+        private usuariosService: UsuariosService,
+            private authService: AuthService,
     private cdRef: ChangeDetectorRef
   ) { }
 
   async ngOnInit() {
+    await this.cargarUsuarioActual();
     await this.cargarDatosIniciales();
     this.loadUserPrivileges();
   }
@@ -2398,7 +2455,27 @@ async moverGrupoSeriados() {
       }
 
       this.mostrarAlerta('Movimiento registrado exitosamente', 'success');
+// Enviar reporte por correo (no bloqueante)
+const detalleMovimiento = {
+  tipo: this.productoEsSeriado ? 'Movimiento individual (seriado)' : 'Movimiento individual (no seriado)',
+  motivo: this.formMovimiento.motivo,
+  observaciones: this.formMovimiento.observaciones,
+  usuario: 'Usuario actual', // Opcional: obtener de localStorage o servicio de auth
+  productos: [{
+    id: this.productoSeleccionado.id,
+    nombre: this.productoSeleccionado.nombre,
+    codigo: this.productoSeleccionado.codigo,
+    part_number: this.productoSeleccionado.part_number,
+    serial_number: this.productoSeleccionado.serial_number,
+    cantidad: this.formMovimiento.cantidad,
+    ubicacion_origen: this.formMovimiento.ubicacion_origen || this.productoSeleccionado.ubicacion_nombre,
+    ubicacion_destino: this.formMovimiento.ubicacion_destino
+  }]
+};
 
+this.productosService.enviarReporteMovimiento(detalleMovimiento).catch(err => 
+  console.error('Error enviando reporte de movimiento individual:', err)
+);
       // Volver a la lista y restaurar paginación
       this.volver();
 

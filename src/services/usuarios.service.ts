@@ -14,21 +14,21 @@ export interface Usuario {
   email_confirmed_at: string | null;
   created_at: string;
   updated_at: string;
-  
+  email_activo?: boolean; // <-- NUEVO CAMPO
+
   // Información del rol
   rol_nombre?: string;
   rol_descripcion?: string;
   rol_nivel_permisos?: number;
 }
-
 export interface UpdateUsuarioData {
   nombre_completo?: string;
   role_id?: number | null;
   telefono?: string;
   avatar_url?: string;
   estado?: string;
+  email_activo?: boolean; // <-- NUEVO
 }
-
 @Injectable({
   providedIn: 'root'
 })
@@ -204,23 +204,24 @@ async obtenerNombreUsuario(userId: string): Promise<string> {
         // Crear perfil si no existe (puede pasar con usuarios recién registrados)
         
         const { data: perfil, error: perfilError } = await supabase
-          .from(this.tableName)
-          .insert([{
-            id: id,
-            nombre_completo: updates.nombre_completo || '',
-            role_id: updates.role_id || null,
-            telefono: updates.telefono || null,
-            avatar_url: updates.avatar_url || null,
-            estado: updates.estado || 'activo'
-          }])
-          .select(`
-            *,
-            roles:role_id (id, nombre, descripcion, nivel_permisos, esta_activo)
-          `)
-          .single();
+    .from(this.tableName)
+    .insert([{
+      id: id,
+      nombre_completo: updates.nombre_completo || '',
+      role_id: updates.role_id || null,
+      telefono: updates.telefono || null,
+      avatar_url: updates.avatar_url || null,
+      estado: updates.estado || 'activo',
+      email_activo: updates.email_activo // <-- NUEVO (opcional)
+    }])
+    .select(`
+      *,
+      roles:role_id (id, nombre, descripcion, nivel_permisos, esta_activo)
+    `)
+    .single();
 
-        if (perfilError) throw perfilError;
-        perfilActualizado = perfil;
+  if (perfilError) throw perfilError;
+  perfilActualizado = perfil;
       }
 
       // Obtener datos de auth para completar
@@ -523,27 +524,24 @@ async getUserPrivilegesList(userId: string): Promise<string[]> {
    * Nota: Esto requiere una función de Edge o RPC ya que no podemos acceder directamente a auth.users
    */
   private async enriquecerConDatosAuth(perfiles: any[]): Promise<Usuario[]> {
-    // Implementación básica - en una app real necesitarías una función de Edge
-    // Por ahora, devolvemos los perfiles con datos básicos
-    
-    return perfiles.map(perfil => ({
-      id: perfil.id,
-      email: 'email@no-disponible.com', // Placeholder - necesitas función de Edge
-      nombre_completo: perfil.nombre_completo,
-      role_id: perfil.role_id,
-      telefono: perfil.telefono,
-      avatar_url: perfil.avatar_url,
-      estado: perfil.estado || 'activo',
-      last_sign_in_at: null,
-      email_confirmed_at: null,
-      created_at: perfil.created_at,
-      updated_at: perfil.updated_at,
-      rol_nombre: perfil.roles?.nombre,
-      rol_descripcion: perfil.roles?.descripcion,
-      rol_nivel_permisos: perfil.roles?.nivel_permisos
-    }));
-  }
-
+  return perfiles.map(perfil => ({
+    id: perfil.id,
+    email: 'email@no-disponible.com', // Placeholder
+    nombre_completo: perfil.nombre_completo,
+    role_id: perfil.role_id,
+    telefono: perfil.telefono,
+    avatar_url: perfil.avatar_url,
+    estado: perfil.estado || 'activo',
+    last_sign_in_at: null,
+    email_confirmed_at: null,
+    created_at: perfil.created_at,
+    updated_at: perfil.updated_at,
+    email_activo: perfil.email_activo, // <-- NUEVO
+    rol_nombre: perfil.roles?.nombre,
+    rol_descripcion: perfil.roles?.descripcion,
+    rol_nivel_permisos: perfil.roles?.nivel_permisos
+  }));
+}
   /**
    * Obtener datos de auth para un usuario específico
    */

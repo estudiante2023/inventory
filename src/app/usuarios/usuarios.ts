@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuariosService, Usuario, UpdateUsuarioData } from '../../services/usuarios.service';
 import { RolesService, Rol } from '../../services/roles.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -13,7 +14,7 @@ import { RolesService, Rol } from '../../services/roles.service';
 export class Usuarios implements OnInit {
   @ViewChild('dialogUsuario') dialogUsuario!: ElementRef;
   @ViewChild('dialogConfirm') dialogConfirm!: ElementRef;
-
+  currentUserRoleId: number | null = null;
   // Lista de usuarios
   usuarios: Usuario[] = [];
   loading = true;
@@ -37,13 +38,14 @@ export class Usuarios implements OnInit {
   modoEdicion = false;
   
   // Formulario
-  usuarioForm: any = {
-    nombre_completo: '',
-    role_id: null,
-    telefono: '',
-    avatar_url: '',
-    estado: 'activo'
-  };
+ usuarioForm: any = {
+  nombre_completo: '',
+  role_id: null,
+  telefono: '',
+  avatar_url: '',
+  estado: 'activo',
+  email_activo: true   // <-- NUEVO, valor por defecto
+};
   submitted = false;
   
   // Usuario para eliminar
@@ -59,7 +61,8 @@ export class Usuarios implements OnInit {
 
   constructor(
     private usuariosService: UsuariosService,
-    private rolesService: RolesService
+    private rolesService: RolesService,
+                private authService: AuthService
   ) {
     console.log('✅ UsuariosComponent inicializado');
   }
@@ -67,7 +70,40 @@ export class Usuarios implements OnInit {
   async ngOnInit() {
     await this.cargarRoles();
     await this.cargarUsuarios();
+    
+    await this.cargarUsuarioActual();
   }
+
+async cargarUsuarioActual() {
+  try {
+
+
+      const session = await this.authService.getCurrentSession();
+       if (!session?.user) {
+        return;
+      }
+
+      const userId = session.user.id;
+     const perfil = await this.usuariosService.getUsuarioById(userId);
+
+      // Asignar el nombre
+      if (perfil?.nombre_completo) {
+        this.currentUserRoleId = perfil.role_id;
+      }
+  } catch (error) {
+    console.error('Error cargando usuario actual:', error);
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
   // ==================== CARGA DE DATOS ====================
 
@@ -127,20 +163,20 @@ export class Usuarios implements OnInit {
   }
 
   // ==================== CRUD USUARIOS ====================
-
-  abrirModalEditar(usuario: Usuario) {
-    this.modoEdicion = true;
-    this.usuarioSeleccionado = usuario;
-    this.usuarioForm = {
-      nombre_completo: usuario.nombre_completo || '',
-      role_id: usuario.role_id,
-      telefono: usuario.telefono || '',
-      avatar_url: usuario.avatar_url || '',
-      estado: usuario.estado || 'activo'
-    };
-    this.submitted = false;
-    this.mostrarModal('usuario');
-  }
+abrirModalEditar(usuario: Usuario) {
+  this.modoEdicion = true;
+  this.usuarioSeleccionado = usuario;
+  this.usuarioForm = {
+    nombre_completo: usuario.nombre_completo || '',
+    role_id: usuario.role_id,
+    telefono: usuario.telefono || '',
+    avatar_url: usuario.avatar_url || '',
+    estado: usuario.estado || 'activo',
+    email_activo: usuario.email_activo ?? true   // <-- NUEVO
+  };
+  this.submitted = false;
+  this.mostrarModal('usuario');
+}
 
   async guardarUsuario() {
     this.submitted = true;

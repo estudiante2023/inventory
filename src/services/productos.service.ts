@@ -1396,7 +1396,18 @@ async obtenerUmbralStockMinimo(): Promise<number> {
   }
 
 
-
+// productos.service.ts
+async enviarReporteMovimiento(detalle: any): Promise<boolean> {
+  try {
+    console.log('📧 Enviando reporte desde productos.service:', detalle);
+    const resultado = await this.emailService.enviarReporteMovimiento(detalle);
+    console.log('✅ Resultado del envío:', resultado);
+    return resultado.success;
+  } catch (error) {
+    console.error('❌ Error en productos.service al enviar reporte:', error);
+    return false;
+  }
+}
 
   // Método para enviar alerta de UN solo producto
   async enviarAlertaProductoIndividual(producto: any): Promise<boolean> {

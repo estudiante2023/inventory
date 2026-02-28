@@ -22,6 +22,23 @@ async obtenerCorreosUsuarios(): Promise<string[]> {
   }
 }
 
+
+/**
+ * Obtiene los correos electrónicos de los usuarios con rol 'admin' y activos.
+ * @returns Promise<string[]> - Lista de correos de administradores.
+ */
+async obtenerCorreosAdmin(): Promise<string[]> {
+  try {
+    // Opción 1: Usar una función RPC específica (si ya existe)
+    const { data, error } = await supabase.rpc('get_admin_emails'); 
+    if (error) throw error;
+    return (data || []).map((item: { email: string }) => item.email);
+  } catch (error) {
+    console.error('Error obteniendo correos de administradores:', error);
+    return [];
+  }
+}
+
   // En email.service.ts - CORREGIDO
 async enviarAlertaStockBajo(productos: any[]): Promise<{success: boolean, message: string}> {
   try { 
@@ -113,6 +130,116 @@ async enviarAlertaStockBajo(productos: any[]): Promise<{success: boolean, messag
     };
   }
 }
+
+// email.service.ts
+
+async enviarReporteMovimiento(detalleMovimiento: any): Promise<{success: boolean, message: string}> {
+  
+  try {
+    const correos = await this.obtenerCorreosAdmin();
+    if (correos.length === 0) {
+      return { success: false, message: 'No hay correos destinatarios' };
+    }
+
+    const asunto = `📦 Reporte de movimiento - ${new Date().toLocaleString()}`;
+    const html = this.generarReporteMovimientoHTML(detalleMovimiento);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const { data, error } = await supabase.functions.invoke('send-stock-alert', {
+      body: {
+        to: correos,
+        subject: asunto,
+        html: html,
+        motivo: 'Reporte de movimiento de inventario'
+      }
+    });
+
+    if (error) throw error;
+    return { success: true, message: 'Reporte enviado ffffffffffff' };
+  } catch (error) {
+    console.error('Error enviando reporte:', error);
+    return { success: false, message: 'Error al enviar reportefffffffffff' };
+  }
+}
+
+private generarReporteMovimientoHTML(detalle: any): string {
+  const fecha = new Date().toLocaleString('es-ES');
+  let productosHtml = '';
+
+  detalle.productos.forEach((p: any) => {
+    productosHtml += `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.nombre}</td>
+        <td>${p.codigo || '-'}</td>
+        <td>${p.part_number || '-'}</td>
+        <td>${p.serial_number || '-'}</td>
+        <td>${p.cantidad}</td>
+        <td>${p.ubicacion_origen}</td>
+        <td>${p.ubicacion_destino}</td>
+      </tr>
+    `;
+  });
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        h2 { color: #333; }
+      </style>
+    </head>
+    <body>
+      <h2>📋 Reporte de Movimiento de Inventario</h2>
+      <p><strong>Fecha:</strong> ${fecha}</p>
+      <p><strong>Tipo de movimiento:</strong> ${detalle.tipo}</p>
+      <p><strong>Motivo:</strong> ${detalle.motivo}</p>
+      <p><strong>Observaciones:</strong> ${detalle.observaciones || 'Ninguna'}</p>
+      <p><strong>Usuario:</strong> ${detalle.usuario || 'Sistema'}</p>
+      <h3>Productos movidos:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Código</th>
+            <th>Part Number</th>
+            <th>Serial</th>
+            <th>Cantidad</th>
+            <th>Origen</th>
+            <th>Destino</th>
+          </tr>
+        </thead>
+        <tbody>${productosHtml}</tbody>
+      </table>
+      <p><em>Fin del reporte</em></p>
+    </body>
+    </html>
+  `;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Método CORREGIDO para generar el cuerpo del email con TODAS las columnas
 // En email.service.ts - Método ACTUALIZADO con todos los campos

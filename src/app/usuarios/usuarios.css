@@ -890,3 +890,11 @@ input:focus {
     border: 1px solid #ddd;
   }
 }
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}

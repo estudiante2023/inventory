@@ -5,13 +5,10 @@
       <h1>
         <i class="icon-users"></i>
         Administración de Usuarios
-      </h1> 
+      </h1>
     </div>
-    
-     
-  </div>
 
- 
+  </div>
 
   <!-- Contenedor de tabla -->
   <div class="table-container">
@@ -22,8 +19,7 @@
         <span class="table-count">({{ totalUsuarios }} registros)</span>
       </h3>
       <div class="table-actions">
-       
-     
+
       </div>
     </div>
 
@@ -37,7 +33,8 @@
             <th>Email</th>
             <th>Rol</th>
             <th>Correo</th>
-            <th>Estado</th> 
+            <th>Estado</th>
+            <th *ngIf="currentUserRoleId === 1">Email Activo</th>
             <th>Registro</th>
             <th>Acciones</th>
           </tr>
@@ -56,7 +53,8 @@
             <td colspan="9" class="empty-cell">
               <i class="icon-empty"></i>
               <p>No se encontraron usuarios</p>
-              <button class="btn btn-small" (click)="filters.search = ''; filters.estado = 'todos'; filters.role_id = 0; cargarUsuarios()">
+              <button class="btn btn-small"
+                (click)="filters.search = ''; filters.estado = 'todos'; filters.role_id = 0; cargarUsuarios()">
                 Mostrar todos
               </button>
             </td>
@@ -66,35 +64,35 @@
           <tr *ngFor="let usuario of usuarios">
             <td class="cell-id" data-label="ID">
               {{ usuario.id.substring(0, 8) }}...
-               <div class="avatar-container" *ngIf="usuario.avatar_url">
+              <div class="avatar-container" *ngIf="usuario.avatar_url">
                 <img
-  [src]="usuario.avatar_url"
-  alt="Avatar"
-  class="avatar"
-  style="width:40px; height:40px; object-fit:cover; border-radius:50%;"
->
+                  [src]="usuario.avatar_url"
+                  alt="Avatar"
+                  class="avatar"
+                  style="width:40px; height:40px; object-fit:cover; border-radius:50%;">
 
               </div>
             </td>
             <td class="cell-nombre" data-label="Usuario">
               <strong>{{ usuario.nombre_completo || 'Sin nombre' }}</strong>
-               
+
             </td>
             <td class="cell-email" data-label="Email">
               {{ usuario.email }}
-              <span *ngIf="usuario.email_confirmed_at" class="email-confirmed" title="Email confirmado">
+              <span *ngIf="usuario.email_confirmed_at" class="email-confirmed"
+                title="Email confirmado">
                 ✓
               </span>
             </td>
             <td class="cell-rol" data-label="Rol">
               <div class="rol-selector">
-                <span class="rol-nombre">{{ getRolNombre(usuario.role_id) }}</span>
-                <select 
-                  class="rol-select" 
+                <span class="rol-nombre">{{ getRolNombre(usuario.role_id)
+                  }}</span>
+                <select
+                  class="rol-select"
                   [value]="usuario.role_id || 0"
-                 (change)="cambiarRolUsuario(usuario, $event)"
-                  title="Cambiar rol"
-                >
+                  (change)="cambiarRolUsuario(usuario, $event)"
+                  title="Cambiar rol">
                   <option [value]="null">Cambiar</option>
                   <option *ngFor="let rol of roles" [value]="rol.id">
                     {{ rol.nombre }}
@@ -110,22 +108,30 @@
                 {{ getEstadoTexto(usuario.estado) }}
               </span>
             </td> 
+            <!-- En el <tbody>, después de la celda de teléfono -->
+            <td *ngIf="currentUserRoleId === 1"class="cell-email-activo" data-label="Email Activo">
+              <span class="badge" [class.badge-success]="usuario.email_activo"
+                [class.badge-secondary]="!usuario.email_activo">
+                {{ usuario.email_activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
             <td class="cell-fecha" data-label="Registro">
               {{ formatearFecha(usuario.created_at) }}
             </td>
             <td class="cell-acciones" data-label="Acciones">
               <div class="action-buttons">
-                <button class="btn-action btn-edit" (click)="abrirModalEditar(usuario)" title="Editar usuario">
+                <button class="btn-action btn-edit"
+                  (click)="abrirModalEditar(usuario)" title="Editar usuario">
                   <i class="icon-edit"></i>
                 </button>
-                <button 
-                  class="btn-action" 
+                <button
+                  class="btn-action"
                   [class]="usuario.estado === 'activo' ? 'btn-deactivate' : 'btn-activate'"
                   (click)="cambiarEstadoUsuario(usuario)"
-                  [title]="usuario.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'"
-                >
-                  <i [class]="usuario.estado === 'activo' ? 'icon-pause' : 'icon-play'"></i>
-                </button> 
+                  [title]="usuario.estado === 'activo' ? 'Desactivar usuario' : 'Activar usuario'">
+                  <i
+                    [class]="usuario.estado === 'activo' ? 'icon-pause' : 'icon-play'"></i>
+                </button>
               </div>
             </td>
           </tr>
@@ -133,7 +139,6 @@
       </table>
     </div>
 
-    
   </div>
 </div>
 
@@ -150,35 +155,33 @@
         <i class="icon-close"></i>
       </button>
     </div>
-    
+
     <div class="modal-body">
       <form (ngSubmit)="guardarUsuario()">
         <div class="form-group">
           <label for="nombre_completo">Nombre Completo *</label>
-          <input 
-            type="text" 
-            id="nombre_completo" 
-            [(ngModel)]="usuarioForm.nombre_completo" 
+          <input
+            type="text"
+            id="nombre_completo"
+            [(ngModel)]="usuarioForm.nombre_completo"
             name="nombre_completo"
             placeholder="Ej: Juan Pérez"
             class="form-input"
-            required
-          />
+            required />
           <div class="form-errors">
             <span *ngIf="submitted && !usuarioForm.nombre_completo?.trim()">
               El nombre completo es obligatorio
             </span>
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="role_id">Rol</label>
-          <select 
-            id="role_id" 
-            [(ngModel)]="usuarioForm.role_id" 
+          <select
+            id="role_id"
+            [(ngModel)]="usuarioForm.role_id"
             name="role_id"
-            class="form-input"
-          >
+            class="form-input">
             <option [value]="null">Sin rol asignado</option>
             <option *ngFor="let rol of roles" [value]="rol.id">
               {{ rol.nombre }}
@@ -188,46 +191,43 @@
             Asigna un rol para definir los permisos del usuario
           </small>
         </div>
-        
+
         <div class="form-group">
           <label for="telefono">Correo</label>
-          <input 
-            type="tel" 
-            id="telefono" 
-            [(ngModel)]="usuarioForm.telefono" 
+          <input
+            type="tel"
+            id="telefono"
+            [(ngModel)]="usuarioForm.telefono"
             name="telefono"
             placeholder="Ej: +34 600 123 456"
-            class="form-input"
-          />
+            class="form-input" />
         </div>
-        
+
         <div class="form-group">
           <label for="avatar_url">URL del Avatar</label>
-          <input 
-            type="url" 
-            id="avatar_url" 
-            [(ngModel)]="usuarioForm.avatar_url" 
+          <input
+            type="url"
+            id="avatar_url"
+            [(ngModel)]="usuarioForm.avatar_url"
             name="avatar_url"
             placeholder="https://ejemplo.com/avatar.jpg"
-            class="form-input"
-          />
+            class="form-input" />
           <small class="form-hint">
             URL de la imagen de perfil (opcional)
           </small>
         </div>
-        
+
         <div class="form-group">
           <label>Estado del Usuario</label>
           <div class="form-checkbox">
-            <input 
-              type="checkbox" 
-              id="esta_activo" 
-              [(ngModel)]="usuarioForm.estado" 
+            <input
+              type="checkbox"
+              id="esta_activo"
+              [(ngModel)]="usuarioForm.estado"
               name="estado"
               [value]="'activo'"
               [checked]="usuarioForm.estado === 'activo'"
-              class="checkbox-input"
-            />
+              class="checkbox-input" />
             <label for="esta_activo" class="checkbox-label">
               Usuario activo
             </label>
@@ -236,9 +236,26 @@
             Los usuarios inactivos no pueden iniciar sesión
           </small>
         </div>
-        
+        <div *ngIf="currentUserRoleId === 1" class="form-group">
+          <label>Email Activo</label>
+          <div class="form-checkbox">
+            <input
+              type="checkbox"
+              id="email_activo"
+              [(ngModel)]="usuarioForm.email_activo"
+              name="email_activo"
+              class="checkbox-input" />
+            <label for="email_activo" class="checkbox-label">
+              El correo del usuario está activo para notificaciones
+            </label>
+          </div>
+          <small class="form-hint">
+            Si está inactivo, no recibirá alertas por correo de movimientos.
+          </small>
+        </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cerrarModal('usuario')">
+          <button type="button" class="btn btn-secondary"
+            (click)="cerrarModal('usuario')">
             Cancelar
           </button>
           <button type="submit" class="btn btn-primary">
@@ -264,22 +281,23 @@
         <i class="icon-close"></i>
       </button>
     </div>
-    
+
     <div class="modal-body">
       <div class="confirm-icon">
         <i class="icon-alert"></i>
       </div>
-      
+
       <div class="confirm-message" *ngIf="usuarioAEliminar">
-        ¿Estás seguro de eliminar al usuario 
+        ¿Estás seguro de eliminar al usuario
         <strong>"{{ usuarioAEliminar.nombre_completo || usuarioAEliminar.email }}"</strong>?
       </div>
-      
+
       <div class="confirm-warning">
         <i class="icon-warning"></i>
-        Esta acción eliminará el perfil del usuario pero NO su cuenta de autenticación.
+        Esta acción eliminará el perfil del usuario pero NO su cuenta de
+        autenticación.
       </div>
-      
+
       <div class="confirm-details" *ngIf="usuarioAEliminar">
         <div class="confirm-warning">
           <i class="icon-info"></i>
@@ -293,12 +311,14 @@
         </ul>
       </div>
     </div>
-    
+
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="cerrarModal('confirm')" [disabled]="eliminando">
+      <button type="button" class="btn btn-secondary"
+        (click)="cerrarModal('confirm')" [disabled]="eliminando">
         Cancelar
       </button>
-      <button type="button" class="btn btn-danger" (click)="eliminarUsuarioConfirmado()" [disabled]="eliminando">
+      <button type="button" class="btn btn-danger"
+        (click)="eliminarUsuarioConfirmado()" [disabled]="eliminando">
         <i class="icon-delete"></i>
         {{ eliminando ? 'Eliminando...' : 'Eliminar Usuario' }}
       </button>
@@ -307,7 +327,8 @@
 </div>
 
 <!-- Notificaciones -->
-<div class="notificacion" [class]="'notificacion ' + notificacion.tipo" [class.show]="notificacion.show">
+<div class="notificacion" [class]="'notificacion ' + notificacion.tipo"
+  [class.show]="notificacion.show">
   <span>{{ notificacion.mensaje }}</span>
   <button class="btn-close-small" (click)="notificacion.show = false">
     <i class="icon-close"></i>
