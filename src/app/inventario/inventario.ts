@@ -28,6 +28,8 @@ export class TruncatePipe implements PipeTransform {
 })
 export class Inventario implements OnInit {
 
+
+  eliminandoMasivo = false;
   userName: string = 'Usuario';
   // En la sección de propiedades, añade:
   mostrandoModalMovimientoGrupal = false;
@@ -338,8 +340,6 @@ async cargarUsuarioActual() {
 
 
 
-
-  eliminandoMasivo = false;
 
   // Agrega en las propiedades
   async eliminarMasivoCondicional() {
@@ -2504,7 +2504,10 @@ this.productosService.enviarReporteMovimiento(detalleMovimiento).catch(err =>
             productoParaAlerta = { ...agrupado, serial_number: agrupado.serial_numbers };
           }
         }
-
+productoParaAlerta = {
+  ...productoParaAlerta,
+  ubicacion_nombre: 'BODEGA QUITO'
+};
         const exito = await this.productosService.enviarAlertaProductoIndividual(productoParaAlerta);
 
         if (exito) {

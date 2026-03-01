@@ -416,6 +416,55 @@ generarRangoPaginas(): number[] {
   }
 }
 
+
+procesarDetalles(detalles: string | null): string {
+  if (!detalles) return '';
+  let resultado = detalles;
+
+  // 1. Reemplazar "ubicacion_id: NÚMERO"
+  resultado = resultado.replace(/ubicacion_id: (\d+)/g, (match, idStr) => {
+    const id = Number(idStr);
+    const ubicacion = this.ubicaciones.find(u => u.id === id);
+    return ubicacion ? `ubicacion_id: ${ubicacion.nombre}` : match;
+  });
+
+  // 2. Reemplazar "NÚMERO → NÚMERO" (ambos lados)
+  resultado = resultado.replace(/(\d+) → (\d+)/g, (match, id1, id2) => {
+    const u1 = this.ubicaciones.find(u => u.id === Number(id1));
+    const u2 = this.ubicaciones.find(u => u.id === Number(id2));
+    const nombre1 = u1 ? u1.nombre : id1;
+    const nombre2 = u2 ? u2.nombre : id2;
+    return `${nombre1} → ${nombre2}`;
+  });
+
+  // 3. Reemplazar "TEXTO → NÚMERO" (ej: BODEGA QUITO → 8)
+  resultado = resultado.replace(/([^\d]+) → (\d+)/g, (match, texto, idStr) => {
+    const id = Number(idStr);
+    const ubicacion = this.ubicaciones.find(u => u.id === id);
+    return ubicacion ? `${texto} → ${ubicacion.nombre}` : match;
+  });
+
+  // 4. Reemplazar "NÚMERO → TEXTO" (por si acaso)
+  resultado = resultado.replace(/(\d+) → ([^\d]+)/g, (match, idStr, texto) => {
+    const id = Number(idStr);
+    const ubicacion = this.ubicaciones.find(u => u.id === id);
+    return ubicacion ? `${ubicacion.nombre} → ${texto}` : match;
+  });
+
+  return resultado;
+}
+// Convierte un ID de ubicación a su nombre, o devuelve el texto original si no es un ID
+getUbicacionNombre(valor: string | null): string {
+  if (!valor) return '';
+  // Intentar convertir a número (ID)
+  const id = Number(valor);
+  if (!isNaN(id)) {
+    const ubicacion = this.ubicaciones.find(u => u.id === id);
+    if (ubicacion) return ubicacion.nombre;
+  }
+  // Si no es un número, asumimos que ya es el nombre (o está malformado)
+  return valor;
+}
 // Añade esta función de validación en tu clase:
 validarEstadoEvento(estado: string): 'completado' | 'pendiente' | 'cancelado' | undefined {
   const estadosValidos = ['completado', 'pendiente', 'cancelado'];

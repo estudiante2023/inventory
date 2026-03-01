@@ -567,7 +567,8 @@ async obtenerUmbralStockMinimo(): Promise<number> {
             `descripcion.ilike.%${filters.search}%,` +
             `codigo.ilike.%${filters.search}%,` +
             `part_number.ilike.%${filters.search}%,` +
-            `serial_number.ilike.%${filters.search}%`
+            `serial_number.ilike.%${filters.search}%,` +
+             `estanteria.ilike.%${filters.search}%`
           );
         }
       }
@@ -1411,6 +1412,7 @@ async enviarReporteMovimiento(detalle: any): Promise<boolean> {
 
   // Método para enviar alerta de UN solo producto
   async enviarAlertaProductoIndividual(producto: any): Promise<boolean> {
+    console.log('📧 Objeto a enviar:', JSON.stringify(producto, null, 2));
     try {
       console.log(`📧 Enviando alerta para producto individual: ${producto.nombre}`);
 

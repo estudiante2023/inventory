@@ -41,17 +41,19 @@
       </button>
 
       <!-- Botón para edición masiva -->
-      <button *ngIf="tienePrivilegio('eliminar.todo')" class="inventario-btn inventario-btn-info ms-2"
+      <button *ngIf="tienePrivilegio('eliminar.todo')"
+        class="inventario-btn inventario-btn-info ms-2"
         (click)="abrirModalImportacion()"
         [disabled]="loading">
         <i class="bi bi-upload"></i> Importar Excel
       </button>
       <!-- Después del botón de edición masiva, agrega: -->
-<button *ngIf="tienePrivilegio('productos.Editar') && productosSeleccionados.size > 0"
-  class="inventario-btn inventario-btn-primary ms-2"
-  (click)="abrirModalMovimientoGrupal()">
-  <i class="bi bi-arrow-right-circle"></i> Mover grupo (seriados)
-</button>
+      <button
+        *ngIf="tienePrivilegio('productos.Editar') && productosSeleccionados.size > 0"
+        class="inventario-btn inventario-btn-primary ms-2"
+        (click)="abrirModalMovimientoGrupal()">
+        <i class="bi bi-arrow-right-circle"></i> Mover grupo (seriados)
+      </button>
       <button
         *ngIf="tienePrivilegio('productos.Editar') && (productosSeleccionados.size > 0 || formEdicionMultiCampo.aplicarATodos)"
         class="inventario-btn inventario-btn-warning"
@@ -71,28 +73,24 @@
         </label>
       </div>
 
-
-
-
       <!-- En la sección de botones de acción -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <!-- Tus otros botones aquí -->
-  </div>
-  
-  <!-- Botón de eliminar todo (solo para admin) -->
-  <div *ngIf="tienePrivilegio('eliminar.todo')">
-    <button 
-      class="btn-eliminar-todo"
-      (click)="abrirConfirmacionEliminacion()"
-      [disabled]="loading">
-      <i class="bi bi-trash3"></i>
-      <span class="d-none d-md-inline">Limpiar Base de Datos</span>
-    </button>
-  </div>
-</div>
-    </div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <!-- Tus otros botones aquí -->
+        </div>
 
+        <!-- Botón de eliminar todo (solo para admin) -->
+        <div *ngIf="tienePrivilegio('eliminar.todo')">
+          <button
+            class="btn-eliminar-todo"
+            (click)="abrirConfirmacionEliminacion()"
+            [disabled]="loading">
+            <i class="bi bi-trash3"></i>
+            <span class="d-none d-md-inline">Limpiar Base de Datos</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Contenedor principal para estadísticas + imagen -->
     <div class="stats-banner-layout">
@@ -114,7 +112,7 @@
           </div>
           <div class="stat-content">
             <div class="stat-value">{{ estadisticas.criticos || 0 }}</div>
-    <div class="stat-label">Críticos</div>
+            <div class="stat-label">Críticos</div>
           </div>
         </div>
         <div class="stat-card bajo">
@@ -139,69 +137,83 @@
 
         <!-- Versión con nombres más cortos -->
 
-<!-- NUEVO -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-box-seam"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.NUEVO || 0 }}</div>
-    <div class="stat-label">NUEVO</div>
-  </div>
-</div>
+        <!-- NUEVO -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i class="bi bi-box-seam"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticasPorEstado.NUEVO || 0 }}</div>
+            <div class="stat-label">NUEVO</div>
+          </div>
+        </div>
 
-<!-- ÚTIL -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.UTIL || 0 }}</div>
-    <div class="stat-label">ÚTIL</div>
-  </div>
-</div>
+        <!-- ÚTIL -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticasPorEstado.UTIL || 0 }}</div>
+            <div class="stat-label">ÚTIL</div>
+          </div>
+        </div>
 
-<!-- MANT. BANCO -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-tools"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.MANTENIMIENTO_BANCO_DE_PRUEBAS || 0 }}</div>
-    <div class="stat-label">MANT. BANCO</div>
-  </div>
-</div>
+        <!-- MANT. BANCO -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i class="bi bi-tools"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{
+              estadisticasPorEstado.MANTENIMIENTO_BANCO_DE_PRUEBAS || 0 }}</div>
+            <div class="stat-label">MANT. BANCO</div>
+          </div>
+        </div>
 
-<!-- MANT. FÁBRICA -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-gear"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.MANTENIMIENTO_FABRICA || 0 }}</div>
-    <div class="stat-label">MANT. FÁBRICA</div>
-  </div>
-</div>
+        <!-- MANT. FÁBRICA -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i class="bi bi-gear"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{
+              estadisticasPorEstado.MANTENIMIENTO_FABRICA || 0 }}</div>
+            <div class="stat-label">MANT. FÁBRICA</div>
+          </div>
+        </div>
 
-<!-- EXPORTACIÓN -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-truck"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.PROCESO_DE_EXPORTACION_MODALTRADE || 0 }}</div>
-    <div class="stat-label">EXPORTACIÓN</div>
-  </div>
-</div>
+        <!-- EXPORTACIÓN -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i class="bi bi-truck"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{
+              estadisticasPorEstado.PROCESO_DE_EXPORTACION_MODALTRADE || 0
+              }}</div>
+            <div class="stat-label">EXPORTACIÓN</div>
+          </div>
+        </div>
 
-<!-- CUARENTENA -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-shield-exclamation"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.CUARENTENA_BODEGA || 0 }}</div>
-    <div class="stat-label">CUARENTENA</div>
-  </div>
-</div>
+        <!-- CUARENTENA -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i
+              class="bi bi-shield-exclamation"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticasPorEstado.CUARENTENA_BODEGA
+              || 0 }}</div>
+            <div class="stat-label">CUARENTENA</div>
+          </div>
+        </div>
 
-<!-- CONDENADO -->
-<div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
-  <div class="stat-card-icon"><i class="bi bi-x-circle"></i></div>
-  <div class="stat-content">
-    <div class="stat-value">{{ estadisticasPorEstado.CONDENADO || 0 }}</div>
-    <div class="stat-label">CONDENADO</div>
-  </div>
-</div>
-</div>
+        <!-- CONDENADO -->
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, #ffc107 0%, #ffc107 100%);">
+          <div class="stat-card-icon"><i class="bi bi-x-circle"></i></div>
+          <div class="stat-content">
+            <div class="stat-value">{{ estadisticasPorEstado.CONDENADO || 0
+              }}</div>
+            <div class="stat-label">CONDENADO</div>
+          </div>
+        </div>
+      </div>
       <!-- COLUMNA DERECHA: Imagen (3/4 del ancho) -->
       <div class="stats-banner">
         <img src="hi.jpg" alt="Banner estadísticas">
@@ -249,25 +261,26 @@
           <option value="CRÍTICO">CRÍTICO</option>
         </select>
         <!-- FILTRO POR COMPONENTE -->
-<select class="inventario-filter-select" 
-        [(ngModel)]="filtros.componente" 
-        (change)="buscarProductos()">
-  <option value="todos">Todos los componentes</option>
-  <option *ngFor="let comp of componentesDisponibles" [value]="comp">
-    {{ comp }}
-  </option>
-</select>
+        <select class="inventario-filter-select"
+          [(ngModel)]="filtros.componente"
+          (change)="buscarProductos()">
+          <option value="todos">Todos los componentes</option>
+          <option *ngFor="let comp of componentesDisponibles" [value]="comp">
+            {{ comp }}
+          </option>
+        </select>
 
         <select class="inventario-filter-select"
-  [(ngModel)]="filtros.ubicacion_id"
-  (change)="buscarProductos()"
-  [disabled]="filtros.bajo_stock">   <!-- ← Esta es la única línea que agregas -->
-  <option [ngValue]="0">Todas ubicaciones</option>
-  <option *ngFor="let ubicacion of ubicaciones"
-    [ngValue]="ubicacion.id">
-    {{ ubicacion.nombre }}
-  </option>
-</select>
+          [(ngModel)]="filtros.ubicacion_id"
+          (change)="buscarProductos()"
+          [disabled]="filtros.bajo_stock">
+          <!-- ← Esta es la única línea que agregas -->
+          <option [ngValue]="0">Todas ubicaciones</option>
+          <option *ngFor="let ubicacion of ubicaciones"
+            [ngValue]="ubicacion.id">
+            {{ ubicacion.nombre }}
+          </option>
+        </select>
 
         <div class="inventario-filter-switch">
           <input type="checkbox"
@@ -304,7 +317,7 @@
               <th>Código</th>
               <th>Part Number</th>
               <th>Serial</th>
-              <th>Stock</th> 
+              <th>Stock</th>
               <th>Estado</th>
               <th>Criticidad</th>
               <th>Componente</th>
@@ -373,14 +386,13 @@
                 </span>
               </td>
 
-               
-
               <!-- Estado -->
               <td>
-  <span [class]="getEstadoClase(producto.estado)" style="text-transform: uppercase;">
-    {{ getEstadoTexto(producto.estado) }}
-  </span>
-</td>
+                <span [class]="getEstadoClase(producto.estado)"
+                  style="text-transform: uppercase;">
+                  {{ getEstadoTexto(producto.estado) }}
+                </span>
+              </td>
 
               <!-- Criticidad -->
               <td>
@@ -538,13 +550,13 @@
     </div>
   </div>
 
- 
   <!-- VISTA DETALLE: FORMULARIO COMPLETO DE MOVIMIENTO -->
- <div *ngIf="vistaActual === 'detalle'">
-  <div class="inventario-form-card">
-    <form (ngSubmit)="ejecutarMovimiento()">
-      <div class="inventario-form-grid">
-        <div style="background: linear-gradient(135deg, #ffd146 0%, #ffc000 100%); 
+  <div *ngIf="vistaActual === 'detalle'">
+    <div class="inventario-form-card">
+      <form (ngSubmit)="ejecutarMovimiento()">
+        <div class="inventario-form-grid">
+          <div
+            style="background: linear-gradient(135deg, #ffd146 0%, #ffc000 100%); 
               color: white; 
               padding: 15px 20px; 
               margin-bottom: 20px; 
@@ -552,261 +564,290 @@
               font-size: 1.3rem; 
               font-weight: 600;
               box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <i class="bi bi-box-seam" style="margin-right: 10px;"></i>Registro Movimiento
-        </div>
-
-        <!-- Información del producto -->
-        <div class="inventario-form-group" style="grid-column: span 2;">
-          <div class="alert alert-info"> 
-            <strong>Repuesto:</strong> {{ productoSeleccionado.nombre }}<br>
-            <strong>Código:</strong> {{ productoSeleccionado.codigo || 'N/A' }}<br>
-            <strong>Ubicación actual:</strong> {{ productoSeleccionado.ubicacion_nombre }}<br>
-            <strong *ngIf="productoEsSeriado" class="text-warning">⚠️ REPUESTO SERIADO</strong>
+            <i class="bi bi-box-seam" style="margin-right: 10px;"></i>Registro
+            Movimiento
           </div>
-        </div>
 
-        <!-- Tipo de Evento -->
-        <div class="inventario-form-group">
-          <label class="inventario-form-label">Tipo de Evento *</label>
-          <select class="inventario-form-select"
-  [(ngModel)]="formMovimiento.tipo_evento"
-  name="tipo_evento"
-  required>
-  <option value="entrada" disabled>Entrada</option>
-  <option value="salida" disabled>Salida</option>
-  <option value="consumo" disabled>Consumo</option>
-  <option value="transferencia">Transferencia</option>
-  <option value="devolucion">Devolución</option>
-</select>
-        </div>
-
-        <!-- Producto (auto-seleccionado) -->
-        <div class="inventario-form-group" *ngIf="productoSeleccionado">
-          <label class="inventario-form-label">Producto *</label>
-          <div class="inventario-form-info">
-            <strong>{{ productoSeleccionado.nombre }}</strong> 
+          <!-- Información del producto -->
+          <div class="inventario-form-group" style="grid-column: span 2;">
+            <div class="alert alert-info">
+              <strong>Repuesto:</strong> {{ productoSeleccionado.nombre }}<br>
+              <strong>Código:</strong> {{ productoSeleccionado.codigo || 'N/A'
+              }}<br>
+              <strong>Ubicación actual:</strong> {{
+              productoSeleccionado.ubicacion_nombre }}<br>
+              <strong *ngIf="productoEsSeriado" class="text-warning">⚠️ REPUESTO
+                SERIADO</strong>
+            </div>
           </div>
-          <input type="hidden"
-            [(ngModel)]="formMovimiento.producto_id"
-            [value]="productoSeleccionado?.id"
-            name="producto_id">
-        </div>
 
-        <!-- Cantidad -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">Cantidad *</label>
-  <input type="number"
-    class="inventario-form-input"
-    [(ngModel)]="formMovimiento.cantidad"
-    name="cantidad"
-    [disabled]="productoEsSeriado"
-    [min]="1"
-    [max]="productoSeleccionado?.cantidad_actual"
-    [attr.max]="productoSeleccionado?.cantidad_actual"
-    required
-    #cantidadInput="ngModel"
-    (change)="validarCantidad()">
-  
-  <!-- Mostrar mensaje de error si cantidad excede stock -->
-  <div *ngIf="cantidadInput.errors && (cantidadInput.dirty || cantidadInput.touched)" class="text-danger small mt-1">
-    <div *ngIf="cantidadInput.errors['required']">La cantidad es requerida</div>
-    <div *ngIf="cantidadInput.errors['min']">La cantidad mínima es 1</div>
-    <div *ngIf="cantidadInput.errors['max']">Cantidad excede el stock disponible ({{productoSeleccionado?.cantidad_actual}})</div>
-  </div>
-  
-  <!-- Mensaje para productos seriados -->
-  <small *ngIf="productoEsSeriado" class="text-muted">
-    Repuestos seriados siempre tienen cantidad 1
-  </small>
-  
-  <!-- Mostrar stock disponible -->
-  <div *ngIf="!productoEsSeriado && productoSeleccionado" class="mt-2">
-    <small class="text-info">
-      <i class="bi bi-box"></i> 
-      Stock disponible: <strong>{{productoSeleccionado.cantidad_actual}}</strong>
-      <span *ngIf="formMovimiento.cantidad > productoSeleccionado.cantidad_actual" class="text-danger">
-        (Excede stock)
-      </span>
-    </small>
-  </div>
-</div>
+          <!-- Tipo de Evento -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Tipo de Evento *</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formMovimiento.tipo_evento"
+              name="tipo_evento"
+              required>
+              <option value="entrada" disabled>Entrada</option>
+              <option value="salida" disabled>Salida</option>
+              <option value="consumo" disabled>Consumo</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="devolucion">Devolución</option>
+            </select>
+          </div>
 
-        <!-- Estado del Evento -->
-        <div class="inventario-form-group">
-          <label class="inventario-form-label">Estado</label>
-          <select class="inventario-form-select"
-            [(ngModel)]="formMovimiento.estado_evento"
-            name="estado_evento">
-            <option value="completado">Completado</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
+          <!-- Producto (auto-seleccionado) -->
+          <div class="inventario-form-group" *ngIf="productoSeleccionado">
+            <label class="inventario-form-label">Producto *</label>
+            <div class="inventario-form-info">
+              <strong>{{ productoSeleccionado.nombre }}</strong>
+            </div>
+            <input type="hidden"
+              [(ngModel)]="formMovimiento.producto_id"
+              [value]="productoSeleccionado?.id"
+              name="producto_id">
+          </div>
 
-        <!-- Motivo -->
-        <div class="inventario-form-group" style="grid-column: span 2;">
-          <label class="inventario-form-label">Motivo *</label>
-          <input type="text"
-            class="inventario-form-input"
-            [(ngModel)]="formMovimiento.motivo"
-            name="motivo"
-            placeholder="Descripción del movimiento"
-             >
-        </div>
+          <!-- Cantidad -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Cantidad *</label>
+            <input type="number"
+              class="inventario-form-input"
+              [(ngModel)]="formMovimiento.cantidad"
+              name="cantidad"
+              [disabled]="productoEsSeriado"
+              [min]="1"
+              [max]="productoSeleccionado?.cantidad_actual"
+              [attr.max]="productoSeleccionado?.cantidad_actual"
+              required
+              #cantidadInput="ngModel"
+              (change)="validarCantidad()">
 
-        <!-- Ubicación Origen -->
-        <div class="inventario-form-group">
-          <label class="inventario-form-label">Ubicación Origen</label>
-          <select class="inventario-form-select"
-            [(ngModel)]="formMovimiento.ubicacion_origen"
-            name="ubicacion_origen"
-            [disabled]="true">
-            <option value>{{ productoSeleccionado?.ubicacion_nombre || 'Sin ubicación' }}</option>
-          </select> 
-          
-            <strong>Ubicación actual:</strong> {{ productoSeleccionado.ubicacion_nombre }}<br>
-        </div>
+            <!-- Mostrar mensaje de error si cantidad excede stock -->
+            <div
+              *ngIf="cantidadInput.errors && (cantidadInput.dirty || cantidadInput.touched)"
+              class="text-danger small mt-1">
+              <div *ngIf="cantidadInput.errors['required']">La cantidad es
+                requerida</div>
+              <div *ngIf="cantidadInput.errors['min']">La cantidad mínima es
+                1</div>
+              <div *ngIf="cantidadInput.errors['max']">Cantidad excede el stock
+                disponible ({{productoSeleccionado?.cantidad_actual}})</div>
+            </div>
 
-        <!-- Ubicación Destino -->
-       <!-- Ubicación Destino -->
-<!-- Ubicación Destino -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">Ubicación Destino *</label>
-  <select class="inventario-form-select"
-    [(ngModel)]="formMovimiento.ubicacion_destino"
-    name="ubicacion_destino"
-    required>
-    <option value>Seleccionar destino</option>
-    <option *ngFor="let ubicacion of ubicaciones" 
-            [value]="ubicacion.nombre"
-            [disabled]="ubicacion.nombre === productoSeleccionado?.ubicacion_nombre">
-      {{ ubicacion.nombre }}
-      <span *ngIf="ubicacion.nombre === productoSeleccionado?.ubicacion_nombre">
-        (ubicación actual)
-      </span>
-    </option>
-  </select>
-  
-  <!-- Mensaje informativo -->
-  <small *ngIf="productoSeleccionado?.ubicacion_nombre" class="text-muted mt-1 d-block">
-    <i class="bi bi-info-circle"></i> La ubicación "{{ productoSeleccionado.ubicacion_nombre }}" está desactivada para evitar movimientos a la misma ubicación.
-  </small>
-</div>
+            <!-- Mensaje para productos seriados -->
+            <small *ngIf="productoEsSeriado" class="text-muted">
+              Repuestos seriados siempre tienen cantidad 1
+            </small>
 
-<!-- Mensaje informativo según el escenario -->
-<div class="inventario-form-group" style="grid-column: span 2;" *ngIf="productoSeleccionado">
-  <div class="alert" [ngClass]="{
+            <!-- Mostrar stock disponible -->
+            <div *ngIf="!productoEsSeriado && productoSeleccionado"
+              class="mt-2">
+              <small class="text-info">
+                <i class="bi bi-box"></i>
+                Stock disponible:
+                <strong>{{productoSeleccionado.cantidad_actual}}</strong>
+                <span
+                  *ngIf="formMovimiento.cantidad > productoSeleccionado.cantidad_actual"
+                  class="text-danger">
+                  (Excede stock)
+                </span>
+              </small>
+            </div>
+          </div>
+
+          <!-- Estado del Evento -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Estado</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formMovimiento.estado_evento"
+              name="estado_evento">
+              <option value="completado">Completado</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+
+          <!-- Motivo -->
+          <div class="inventario-form-group" style="grid-column: span 2;">
+            <label class="inventario-form-label">Motivo *</label>
+            <input type="text"
+              class="inventario-form-input"
+              [(ngModel)]="formMovimiento.motivo"
+              name="motivo"
+              placeholder="Descripción del movimiento">
+          </div>
+
+          <!-- Ubicación Origen -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Ubicación Origen</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formMovimiento.ubicacion_origen"
+              name="ubicacion_origen"
+              [disabled]="true">
+              <option value>{{ productoSeleccionado?.ubicacion_nombre ||
+                'Sin ubicación' }}</option>
+            </select>
+
+            <strong>Ubicación actual:</strong> {{
+            productoSeleccionado.ubicacion_nombre }}<br>
+          </div>
+
+          <!-- Ubicación Destino -->
+          <!-- Ubicación Destino -->
+          <!-- Ubicación Destino -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Ubicación Destino *</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formMovimiento.ubicacion_destino"
+              name="ubicacion_destino"
+              required>
+              <option value>Seleccionar destino</option>
+              <option *ngFor="let ubicacion of ubicaciones"
+                [value]="ubicacion.nombre"
+                [disabled]="ubicacion.nombre === productoSeleccionado?.ubicacion_nombre">
+                {{ ubicacion.nombre }}
+                <span
+                  *ngIf="ubicacion.nombre === productoSeleccionado?.ubicacion_nombre">
+                  (ubicación actual)
+                </span>
+              </option>
+            </select>
+
+            <!-- Mensaje informativo -->
+            <small *ngIf="productoSeleccionado?.ubicacion_nombre"
+              class="text-muted mt-1 d-block">
+              <i class="bi bi-info-circle"></i> La ubicación
+              "{{ productoSeleccionado.ubicacion_nombre }}" está desactivada
+              para evitar movimientos a la misma ubicación.
+            </small>
+          </div>
+
+          <!-- Mensaje informativo según el escenario -->
+          <div class="inventario-form-group" style="grid-column: span 2;"
+            *ngIf="productoSeleccionado">
+            <div class="alert" [ngClass]="{
     'alert-info': productoEsSeriado,
     'alert-warning': !productoEsSeriado && productoSeleccionado.ubicacion_id === 9,
     'alert-success': !productoEsSeriado
   }">
-    <i class="bi" [ngClass]="{
+              <i class="bi" [ngClass]="{
       'bi-tag': productoEsSeriado,
       'bi-box-arrow-right': !productoEsSeriado && productoSeleccionado.ubicacion_id === 9,
       'bi-arrow-right-circle': !productoEsSeriado
     }"></i>
-    
-    <span *ngIf="productoEsSeriado">
-      <strong>Producto Seriado:</strong> Se moverá el repuesto completo a la nueva ubicación.
-    </span>
-    
-    <span *ngIf="!productoEsSeriado && productoSeleccionado.ubicacion_id === 9">
-      <strong>Desde BODEGA QUITO:</strong> Se creará un nuevo producto en la ubicación destino.
-    </span>
-    
-    <span *ngIf="!productoEsSeriado && productoSeleccionado.ubicacion_id !== 9">
-      <strong>Movimiento entre ubicaciones:</strong> Se buscará producto con mismo código en destino. Si existe, se sumará cantidad.
-    </span>
-  </div>
-</div>
 
+              <span *ngIf="productoEsSeriado">
+                <strong>Producto Seriado:</strong> Se moverá el repuesto
+                completo a la nueva ubicación.
+              </span>
 
-<!-- Estantería (solo para BODEGA QUITO como destino) -->
-<div class="inventario-form-group" *ngIf="esDestinoBodegaQuito()">
-  <label class="inventario-form-label">
-    Estantería <span class="text-danger">*</span>
-  </label>
-  <textarea class="inventario-form-textarea"
-    rows="2"
-    [(ngModel)]="formMovimiento.estanteria"
-    name="estanteria"
-    [required]="esDestinoBodegaQuito()"
-    placeholder="Estantería (obligatoria para BODEGA QUITO)">
+              <span
+                *ngIf="!productoEsSeriado && productoSeleccionado.ubicacion_id === 9">
+                <strong>Desde BODEGA QUITO:</strong> Se creará un nuevo producto
+                en la ubicación destino.
+              </span>
+
+              <span
+                *ngIf="!productoEsSeriado && productoSeleccionado.ubicacion_id !== 9">
+                <strong>Movimiento entre ubicaciones:</strong> Se buscará
+                producto con mismo código en destino. Si existe, se sumará
+                cantidad.
+              </span>
+            </div>
+          </div>
+
+          <!-- Estantería (solo para BODEGA QUITO como destino) -->
+          <div class="inventario-form-group" *ngIf="esDestinoBodegaQuito()">
+            <label class="inventario-form-label">
+              Estantería <span class="text-danger">*</span>
+            </label>
+            <textarea class="inventario-form-textarea"
+              rows="2"
+              [(ngModel)]="formMovimiento.estanteria"
+              name="estanteria"
+              [required]="esDestinoBodegaQuito()"
+              placeholder="Estantería (obligatoria para BODEGA QUITO)">
   </textarea>
-  
-  <div *ngIf="esDestinoBodegaQuito() && !formMovimiento.estanteria?.trim()" 
-       class="text-danger small mt-1">
-    ⚠️ La estantería es obligatoria para BODEGA QUITO
-  </div>
-</div>
 
-        <!-- Detalles -->
-        <div class="inventario-form-group" style="grid-column: span 2;">
-          <label class="inventario-form-label">Detalles</label>
-          <textarea class="inventario-form-textarea"
-            rows="3"
-            [(ngModel)]="formMovimiento.detalles"
-            name="detalles"
-            placeholder="Detalles adicionales del movimiento"></textarea>
-        </div>
+            <div
+              *ngIf="esDestinoBodegaQuito() && !formMovimiento.estanteria?.trim()"
+              class="text-danger small mt-1">
+              ⚠️ La estantería es obligatoria para BODEGA QUITO
+            </div>
+          </div>
 
-        <!-- Observaciones -->
-        <div class="inventario-form-group" style="grid-column: span 2;">
-          <label class="inventario-form-label">Observaciones</label>
-          <textarea class="inventario-form-textarea"
-            rows="2"
-            [(ngModel)]="formMovimiento.observaciones"
-            name="observaciones"
-            placeholder="Observaciones adicionales"></textarea>
-        </div>
+          <!-- Detalles -->
+          <div class="inventario-form-group" style="grid-column: span 2;">
+            <label class="inventario-form-label">Detalles</label>
+            <textarea class="inventario-form-textarea"
+              rows="3"
+              [(ngModel)]="formMovimiento.detalles"
+              name="detalles"
+              placeholder="Detalles adicionales del movimiento"></textarea>
+          </div>
 
-        <!-- Resumen del Movimiento -->
-        <div class="inventario-card-header" style="grid-column: span 2;">
-          <h5><i class="bi bi-info-circle"></i> Resumen del Movimiento</h5>
-        </div>
-        <div class="inventario-card-body" style="grid-column: span 2;">
-          <p><strong>Repuestos:</strong> {{ productoSeleccionado.nombre }}</p>
-          <p><strong>Tipo:</strong> {{ getTipoMovimientoTexto(formMovimiento.tipo_evento) }}</p>
-          <p><strong>Cantidad:</strong> {{ formMovimiento.cantidad }}</p>
-          <p><strong>Origen:</strong> {{ formMovimiento.ubicacion_origen || productoSeleccionado?.ubicacion_nombre }}</p>
-          <p><strong>Destino:</strong> {{ formMovimiento.ubicacion_destino }}</p>
-          <p><strong>Stock después:</strong>
-            <span [ngClass]="{
+          <!-- Observaciones -->
+          <div class="inventario-form-group" style="grid-column: span 2;">
+            <label class="inventario-form-label">Observaciones</label>
+            <textarea class="inventario-form-textarea"
+              rows="2"
+              [(ngModel)]="formMovimiento.observaciones"
+              name="observaciones"
+              placeholder="Observaciones adicionales"></textarea>
+          </div>
+
+          <!-- Resumen del Movimiento -->
+          <div class="inventario-card-header" style="grid-column: span 2;">
+            <h5><i class="bi bi-info-circle"></i> Resumen del Movimiento</h5>
+          </div>
+          <div class="inventario-card-body" style="grid-column: span 2;">
+            <p><strong>Repuestos:</strong> {{ productoSeleccionado.nombre }}</p>
+            <p><strong>Tipo:</strong> {{
+              getTipoMovimientoTexto(formMovimiento.tipo_evento) }}</p>
+            <p><strong>Cantidad:</strong> {{ formMovimiento.cantidad }}</p>
+            <p><strong>Origen:</strong> {{ formMovimiento.ubicacion_origen ||
+              productoSeleccionado?.ubicacion_nombre }}</p>
+            <p><strong>Destino:</strong> {{ formMovimiento.ubicacion_destino
+              }}</p>
+            <p><strong>Stock después:</strong>
+              <span [ngClass]="{
               'text-success': getStockDespues() > 0,
               'text-danger': getStockDespues() <= 0
             }">
-              {{ getStockDespues() }}
-            </span>
-          </p>
-          
-          <div class="inventario-form-actions">
-            <button type="button"
-              class="inventario-btn inventario-btn-outline"
-              (click)="volver()">
-              Cancelar
-            </button>
-            
-<!-- Botón de ejecutar movimiento - Deshabilitado si cantidad es 0 o excede stock -->
-<!-- HTML - Deja el botón así: -->
-<button type="button"
-  class="inventario-btn inventario-btn-primary"
-  [class.inventario-btn-deshabilitado]="loading || !formMovimiento.motivo || formMovimiento.cantidad <= 0 || 
+                {{ getStockDespues() }}
+              </span>
+            </p>
+
+            <div class="inventario-form-actions">
+              <button type="button"
+                class="inventario-btn inventario-btn-outline"
+                (click)="volver()">
+                Cancelar
+              </button>
+
+              <!-- Botón de ejecutar movimiento - Deshabilitado si cantidad es 0 o excede stock -->
+              <!-- HTML - Deja el botón así: -->
+              <button type="button"
+                class="inventario-btn inventario-btn-primary"
+                [class.inventario-btn-deshabilitado]="loading || !formMovimiento.motivo || formMovimiento.cantidad <= 0 || 
               (!productoEsSeriado && formMovimiento.cantidad > productoSeleccionado?.cantidad_actual) || 
               !formMovimiento.ubicacion_destino"
-  (click)="manejarClickBoton()">
-  <span *ngIf="loading" class="inventario-spinner"></span>
-  Ejecutar Movimiento
-</button>
+                (click)="manejarClickBoton()">
+                <span *ngIf="loading" class="inventario-spinner"></span>
+                Ejecutar Movimiento
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
   <!-- AQUÍ AYUDAME EN ALGO PORFAVOR ... -->
-<div *ngIf="vistaActual === 'formulario'">
-  <div class="inventario-form-card">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #114762 100%); 
+  <div *ngIf="vistaActual === 'formulario'">
+    <div class="inventario-form-card">
+      <div
+        style="background: linear-gradient(135deg, #667eea 0%, #114762 100%); 
                 color: white; 
                 padding: 15px 20px; 
                 margin-bottom: 20px; 
@@ -814,193 +855,201 @@
                 font-size: 1.3rem; 
                 font-weight: 600;
                 box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      <i class="bi bi-box-seam" style="margin-right: 10px;"></i>Registro Repuesto
-    </div>
-    <form (ngSubmit)="guardarProducto()">
-      <div class="inventario-form-grid">
-        
-        <!-- Checkbox Repuesto Seriado (NUEVO) -->
-        <div class="inventario-form-group" style="grid-column: span 2;">
-          <label class="inventario-form-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <input type="checkbox" 
-                   [(ngModel)]="esRepuestoSeriado"
-                   name="esRepuestoSeriado"
-                   (change)="onRepuestoSeriadoChange()">
-            <span style="font-weight: 500;">Repuesto seriado</span>
-          </label>
-          <small class="text-muted" *ngIf="esRepuestoSeriado">
-            Al marcar esta opción, puedes buscar un repuesto existente por Part Number y clonar sus datos.
-          </small>
-        </div>
+        <i class="bi bi-box-seam" style="margin-right: 10px;"></i>Registro
+        Repuesto
+      </div>
+      <form (ngSubmit)="guardarProducto()">
+        <div class="inventario-form-grid">
 
-        <!-- Campo para buscar Part Number existente (solo visible si es repuesto seriado) -->
-        <div class="inventario-form-group" *ngIf="esRepuestoSeriado" style="grid-column: span 2;">
-          <label class="inventario-form-label">Buscar Part Number existente</label>
-          <div style="display: flex; gap: 10px;">
-            <input type="text"
-                   class="inventario-form-input"
-                   [(ngModel)]="partNumberBuscar"
-                   name="partNumberBuscar"
-                   placeholder="Ingresa el Part Number para buscar repuestos existentes"
-                   style="flex: 1;">
-            <button type="button" 
-                    class="inventario-btn inventario-btn-secondary"
-                    (click)="buscarPorPartNumber()"
-                    [disabled]="!partNumberBuscar.trim() || buscandoProducto">
-              <span *ngIf="buscandoProducto" class="inventario-spinner"></span>
-              {{ buscandoProducto ? 'Buscando...' : 'Buscar' }}
-            </button>
+          <!-- Checkbox Repuesto Seriado (NUEVO) -->
+          <div class="inventario-form-group" style="grid-column: span 2;">
+            <label class="inventario-form-label"
+              style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+              <input type="checkbox"
+                [(ngModel)]="esRepuestoSeriado"
+                name="esRepuestoSeriado"
+                (change)="onRepuestoSeriadoChange()">
+              <span style="font-weight: 500;">Repuesto seriado</span>
+            </label>
+            <small class="text-muted" *ngIf="esRepuestoSeriado">
+              Al marcar esta opción, puedes buscar un repuesto existente por
+              Part Number y clonar sus datos.
+            </small>
           </div>
-          
-          <!-- Mensaje de confirmación simple -->
-<div *ngIf="clonandoDeProductoExistente" 
-     class="mt-3 p-3 border border-success rounded bg-success bg-opacity-10 position-relative">
-  <div style="position: absolute; top: 10px; right: 10px;">
-    <button type="button" 
-            class="btn-close"
-            (click)="clonandoDeProductoExistente = false"
-            aria-label="Cerrar"></button>
-  </div>
-  
-  <div class="d-flex align-items-center">
-    <i class="bi bi-check-circle-fill text-success me-2 fs-4"></i>
-    <div>
-      <strong>¡Repuesto clonado!</strong>
-       
-    </div>
-  </div>
-</div>
-        </div>
 
-        <!-- Nombre -->
-        <div class="inventario-form-group">
-          <label class="inventario-form-label">Nombre *</label>
-          <input type="text"
-            class="inventario-form-input"
-            [(ngModel)]="formProducto.nombre"
-            name="nombre"
-            placeholder="Nombre del repuesto"
-            required>
-        </div>
+          <!-- Campo para buscar Part Number existente (solo visible si es repuesto seriado) -->
+          <div class="inventario-form-group" *ngIf="esRepuestoSeriado"
+            style="grid-column: span 2;">
+            <label class="inventario-form-label">Buscar Part Number
+              existente</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="text"
+                class="inventario-form-input"
+                [(ngModel)]="partNumberBuscar"
+                name="partNumberBuscar"
+                placeholder="Ingresa el Part Number para buscar repuestos existentes"
+                style="flex: 1;">
+              <button type="button"
+                class="inventario-btn inventario-btn-secondary"
+                (click)="buscarPorPartNumber()"
+                [disabled]="!partNumberBuscar.trim() || buscandoProducto">
+                <span *ngIf="buscandoProducto"
+                  class="inventario-spinner"></span>
+                {{ buscandoProducto ? 'Buscando...' : 'Buscar' }}
+              </button>
+            </div>
 
-        <!-- Descripción -->
-        <div class="inventario-form-group">
-          <label class="inventario-form-label">Descripción</label>
-          <textarea class="inventario-form-textarea"
-            rows="2"
-            [(ngModel)]="formProducto.descripcion"
-            name="descripcion"
-            placeholder="Descripción del repuesto"></textarea>
-        </div>
+            <!-- Mensaje de confirmación simple -->
+            <div *ngIf="clonandoDeProductoExistente"
+              class="mt-3 p-3 border border-success rounded bg-success bg-opacity-10 position-relative">
+              <div style="position: absolute; top: 10px; right: 10px;">
+                <button type="button"
+                  class="btn-close"
+                  (click)="clonandoDeProductoExistente = false"
+                  aria-label="Cerrar"></button>
+              </div>
 
-        <!-- Componente -->
-        <!-- Componente - CON VALOR POR DEFECTO "RA" -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">Componente</label>
-  <select class="inventario-form-select"
-    [(ngModel)]="formProducto.componente"
-    name="componente">
-    <option value="RA" selected>RA</option>
-    <option value="GAREX/SCV">GAREX/SCV</option>
-    <option value="MYC">MYC</option>
-    <option value="SATCOM">SATCOM</option>
-    <option value="COMMS">COMMS</option>
-    <option value="CAMIONES">CAMIONES</option>
-    <option value="AA">AA</option>
-    <option value="GENERADORES">GENERADORES</option>
-    <option value="UPS">UPS</option>
-  </select>
-</div>
+              <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill text-success me-2 fs-4"></i>
+                <div>
+                  <strong>¡Repuesto clonado!</strong>
 
-        <!-- Criticidad -->
-        <div class="inventario-form-group">
-          <label class="inventario-form-label">Criticidad</label>
-          <select class="inventario-form-select"
-            [(ngModel)]="formProducto.criticidad"
-            name="criticidad">
-            <option value="BAJA">BAJA</option>
-            <option value="MEDIA">MEDIA</option>
-            <option value="ALTA">ALTA</option>
-            <option value="CRÍTICO">CRÍTICO</option>
-          </select>
-        </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- Part Number -->
-        <!-- Part Number - AHORA OBLIGATORIO PARA TODOS -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">
-    Part Number <span class="text-danger">*</span>
-  </label>
-  <input type="text"
-    class="inventario-form-input"
-    [(ngModel)]="formProducto.part_number"
-    name="part_number"
-    required
-    #partNumberInput="ngModel"
-    placeholder="Número de parte">
-  
-  <!-- Mensaje de validación -->
-  <div *ngIf="partNumberInput.invalid && (partNumberInput.dirty || partNumberInput.touched)" 
-       class="text-danger small mt-1">
-    <div *ngIf="partNumberInput.errors?.['required']">
-      El Part Number es obligatorio
-    </div>
-  </div>
-  
-  <small class="text-muted">
-    Identificador único del repuesto
-  </small>
-</div>
+          <!-- Nombre -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Nombre *</label>
+            <input type="text"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.nombre"
+              name="nombre"
+              placeholder="Nombre del repuesto"
+              required>
+          </div>
 
-        <!-- Código -->
-       <!-- Código -->
-<!-- Código - AHORA OBLIGATORIO PARA TODOS -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">
-    Código <span class="text-danger">*</span>
-  </label>
-  <input type="text"
-    class="inventario-form-input"
-    [(ngModel)]="formProducto.codigo"
-    name="codigo"
-    required
-    #codigoInput="ngModel"
-    placeholder="Código interno">
-  
-  <!-- Mensaje de validación -->
-  <div *ngIf="codigoInput.invalid && (codigoInput.dirty || codigoInput.touched)" 
-       class="text-danger small mt-1">
-    <div *ngIf="codigoInput.errors?.['required']">
-      El código es obligatorio
-    </div>
-  </div>
-</div>
+          <!-- Descripción -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Descripción</label>
+            <textarea class="inventario-form-textarea"
+              rows="2"
+              [(ngModel)]="formProducto.descripcion"
+              name="descripcion"
+              placeholder="Descripción del repuesto"></textarea>
+          </div>
 
-        <!-- Serial Number - Solo requerido y habilitado para repuestos seriados -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">
-    Serial Number 
-    <span *ngIf="esRepuestoSeriado" class="text-danger">*</span>
-  </label>
-  <input type="text"
-    class="inventario-form-input"
-    [(ngModel)]="formProducto.serial_number"
-    name="serial_number"
-    [required]="esRepuestoSeriado"
-    [disabled]="!esRepuestoSeriado"
-    placeholder="Número de serie">
-  
-  <small *ngIf="esRepuestoSeriado" class="text-muted">
-    Este campo es obligatorio para repuestos seriados
-  </small>
-  
-  <small *ngIf="!esRepuestoSeriado" class="text-muted">
-    Solo para repuestos seriados
-  </small>
-</div>
+          <!-- Componente -->
+          <!-- Componente - CON VALOR POR DEFECTO "RA" -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Componente</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formProducto.componente"
+              name="componente">
+              <option value="RA" selected>RA</option>
+              <option value="GAREX/SCV">GAREX/SCV</option>
+              <option value="MYC">MYC</option>
+              <option value="SATCOM">SATCOM</option>
+              <option value="COMMS">COMMS</option>
+              <option value="CAMIONES">CAMIONES</option>
+              <option value="AA">AA</option>
+              <option value="GENERADORES">GENERADORES</option>
+              <option value="UPS">UPS</option>
+            </select>
+          </div>
 
-        <!-- El resto de los campos se mantienen igual -->
-        <!-- ... resto del formulario ... -->
+          <!-- Criticidad -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Criticidad</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formProducto.criticidad"
+              name="criticidad">
+              <option value="BAJA">BAJA</option>
+              <option value="MEDIA">MEDIA</option>
+              <option value="ALTA">ALTA</option>
+              <option value="CRÍTICO">CRÍTICO</option>
+            </select>
+          </div>
+
+          <!-- Part Number -->
+          <!-- Part Number - AHORA OBLIGATORIO PARA TODOS -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">
+              Part Number <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.part_number"
+              name="part_number"
+              required
+              #partNumberInput="ngModel"
+              placeholder="Número de parte">
+
+            <!-- Mensaje de validación -->
+            <div
+              *ngIf="partNumberInput.invalid && (partNumberInput.dirty || partNumberInput.touched)"
+              class="text-danger small mt-1">
+              <div *ngIf="partNumberInput.errors?.['required']">
+                El Part Number es obligatorio
+              </div>
+            </div>
+
+            <small class="text-muted">
+              Identificador único del repuesto
+            </small>
+          </div>
+
+          <!-- Código -->
+          <!-- Código -->
+          <!-- Código - AHORA OBLIGATORIO PARA TODOS -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">
+              Código <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.codigo"
+              name="codigo"
+              required
+              #codigoInput="ngModel"
+              placeholder="Código interno">
+
+            <!-- Mensaje de validación -->
+            <div
+              *ngIf="codigoInput.invalid && (codigoInput.dirty || codigoInput.touched)"
+              class="text-danger small mt-1">
+              <div *ngIf="codigoInput.errors?.['required']">
+                El código es obligatorio
+              </div>
+            </div>
+          </div>
+
+          <!-- Serial Number - Solo requerido y habilitado para repuestos seriados -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">
+              Serial Number
+              <span *ngIf="esRepuestoSeriado" class="text-danger">*</span>
+            </label>
+            <input type="text"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.serial_number"
+              name="serial_number"
+              [required]="esRepuestoSeriado"
+              [disabled]="!esRepuestoSeriado"
+              placeholder="Número de serie">
+
+            <small *ngIf="esRepuestoSeriado" class="text-muted">
+              Este campo es obligatorio para repuestos seriados
+            </small>
+
+            <small *ngIf="!esRepuestoSeriado" class="text-muted">
+              Solo para repuestos seriados
+            </small>
+          </div>
+
+          <!-- El resto de los campos se mantienen igual -->
+          <!-- ... resto del formulario ... -->
           <!-- Estado -->
           <div class="inventario-form-group">
             <label class="inventario-form-label">Estado</label>
@@ -1024,85 +1073,94 @@
             </select>
           </div>
 
-<!-- Cantidad Actual - CORREGIDO -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">Cantidad *</label>
-  <input type="number"
-    class="inventario-form-input"
-    [(ngModel)]="formProducto.cantidad_actual"
-    name="cantidad_actual"
-    [min]="esRepuestoSeriado ? 1 : 1"
-    [max]="esRepuestoSeriado ? 1 : null"
-    [required]="!esRepuestoSeriado"
-    [readonly]="esRepuestoSeriado"
-    #cantidadInput="ngModel">
-  
-  <div *ngIf="cantidadInput.invalid && (cantidadInput.dirty || cantidadInput.touched)" class="text-danger small mt-1">
-    <div *ngIf="cantidadInput.errors?.['required']">La cantidad es requerida</div>
-    <div *ngIf="cantidadInput.errors?.['min']">La cantidad mínima es 1</div>
-  </div>
-  
-  <small class="text-muted" *ngIf="esRepuestoSeriado">
-    Los repuestos seriados siempre tienen cantidad 1
-  </small>
-</div>
+          <!-- Cantidad Actual - CORREGIDO -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Cantidad *</label>
+            <input type="number"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.cantidad_actual"
+              name="cantidad_actual"
+              [min]="esRepuestoSeriado ? 1 : 1"
+              [max]="esRepuestoSeriado ? 1 : null"
+              [required]="!esRepuestoSeriado"
+              [readonly]="esRepuestoSeriado"
+              #cantidadInput="ngModel">
+
+            <div
+              *ngIf="cantidadInput.invalid && (cantidadInput.dirty || cantidadInput.touched)"
+              class="text-danger small mt-1">
+              <div *ngIf="cantidadInput.errors?.['required']">La cantidad es
+                requerida</div>
+              <div *ngIf="cantidadInput.errors?.['min']">La cantidad mínima es
+                1</div>
+            </div>
+
+            <small class="text-muted" *ngIf="esRepuestoSeriado">
+              Los repuestos seriados siempre tienen cantidad 1
+            </small>
+          </div>
 
           <!-- Ubicación -->
           <!-- Ubicación -->
-<!-- Ubicación -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">Ubicación</label>
-  <select class="inventario-form-select"
-    [(ngModel)]="formProducto.ubicacion_id"
-    name="ubicacion_id"
-    (ngModelChange)="onUbicacionChange($event)"> <!-- Solo ngModelChange -->
-    <option value="">Seleccionar ubicación</option>
-    <option *ngFor="let ubicacion of ubicaciones"
-      [value]="ubicacion.id">
-      {{ ubicacion.nombre }}
-    </option>
-  </select>
-</div>
+          <!-- Ubicación -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Ubicación</label>
+            <select class="inventario-form-select"
+              [(ngModel)]="formProducto.ubicacion_id"
+              name="ubicacion_id"
+              (ngModelChange)="onUbicacionChange($event)">
+              <!-- Solo ngModelChange -->
+              <option value>Seleccionar ubicación</option>
+              <option *ngFor="let ubicacion of ubicaciones"
+                [value]="ubicacion.id">
+                {{ ubicacion.nombre }}
+              </option>
+            </select>
+          </div>
 
-<!-- Estantería -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">
-    Estantería
-    <span *ngIf="formProducto.ubicacion_id === 9" class="text-danger"> *</span>
-  </label>
-  <textarea class="inventario-form-textarea"
-    rows="2"
-    [(ngModel)]="formProducto.estanteria"
-    name="estanteria"
-    [required]="formProducto.ubicacion_id === 9"
-    [placeholder]="formProducto.ubicacion_id === 9 ? 'Estantería (obligatoria)' : 'Estantería (opcional)'">
+          <!-- Estantería -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">
+              Estantería
+              <span *ngIf="formProducto.ubicacion_id === 9" class="text-danger">
+                *</span>
+            </label>
+            <textarea class="inventario-form-textarea"
+              rows="2"
+              [(ngModel)]="formProducto.estanteria"
+              name="estanteria"
+              [required]="formProducto.ubicacion_id === 9"
+              [placeholder]="formProducto.ubicacion_id === 9 ? 'Estantería (obligatoria)' : 'Estantería (opcional)'">
   </textarea>
-  
-  <!-- Mensaje dinámico -->
-  <div *ngIf="formProducto.ubicacion_id === 9 && !formProducto.estanteria?.trim()" 
-       class="text-danger small mt-1">
-    ⚠️ La estantería es obligatoria para BODEGA QUITO
-  </div>
-</div>
+
+            <!-- Mensaje dinámico -->
+            <div
+              *ngIf="formProducto.ubicacion_id === 9 && !formProducto.estanteria?.trim()"
+              class="text-danger small mt-1">
+              ⚠️ La estantería es obligatoria para BODEGA QUITO
+            </div>
+          </div>
 
           <!-- Precio -->
-       <!-- Precio -->
-<div class="inventario-form-group">
-  <label class="inventario-form-label">Precio *</label>
-  <input type="number"
-    class="inventario-form-input"
-    [(ngModel)]="formProducto.precio"
-    name="precio"
-    min="0.01"
-    step="0.01"
-    required
-    #precioInput="ngModel"
-    placeholder="0.00">
-  
-  <div *ngIf="precioInput.invalid && (precioInput.dirty || precioInput.touched)" class="text-danger small mt-1">
-     
-  </div>
-</div>
+          <!-- Precio -->
+          <div class="inventario-form-group">
+            <label class="inventario-form-label">Precio *</label>
+            <input type="number"
+              class="inventario-form-input"
+              [(ngModel)]="formProducto.precio"
+              name="precio"
+              min="0.01"
+              step="0.01"
+              required
+              #precioInput="ngModel"
+              placeholder="0.00">
+
+            <div
+              *ngIf="precioInput.invalid && (precioInput.dirty || precioInput.touched)"
+              class="text-danger small mt-1">
+
+            </div>
+          </div>
 
           <!-- Fecha Adquisición -->
           <div class="inventario-form-group">
@@ -1173,13 +1231,14 @@
             (click)="volver()">
             Cancelar
           </button>
-          <button type="submit" 
-        class="inventario-btn inventario-btn-primary"
-        [disabled]="loading"
-        (click)="validarYGuardar($event)">
-  <span *ngIf="loading" class="inventario-spinner"></span>
-  {{ modoFormulario === 'crear' ? 'Crear Repuesto' : 'Actualizar Repuesto' }}
-</button>
+          <button type="submit"
+            class="inventario-btn inventario-btn-primary"
+            [disabled]="loading"
+            (click)="validarYGuardar($event)">
+            <span *ngIf="loading" class="inventario-spinner"></span>
+            {{ modoFormulario === 'crear' ? 'Crear Repuesto' :
+            'Actualizar Repuesto' }}
+          </button>
         </div>
       </form>
     </div>
@@ -1425,24 +1484,26 @@
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
-  <h5 class="modal-title">
-    <i class="bi bi-list-check me-2"></i>
-    Edición Masiva de Múltiples Campos
-  </h5>
-  <div class="d-flex align-items-center gap-2">
-    <!-- NUEVO BOTÓN DE ELIMINACIÓN MASIVA -->
-    <button *ngIf="tienePrivilegio('eliminar.todo')" 
-            type="button" 
+        <h5 class="modal-title">
+          <i class="bi bi-list-check me-2"></i>
+          Edición Masiva de Múltiples Campos
+        </h5>
+        <div class="d-flex align-items-center gap-2">
+          <!-- NUEVO BOTÓN DE ELIMINACIÓN MASIVA -->
+          <button
+            type="button"
             class="btn btn-sm btn-danger me-2"
             (click)="eliminarMasivoCondicional()"
             [disabled]="loading || eliminandoMasivo">
-      <span *ngIf="eliminandoMasivo" class="spinner-border spinner-border-sm me-1"></span>
-      <i class="bi bi-trash3"></i> Eliminar seleccionados (solo CONDENADOS)
-    </button>
-    <button type="button" class="btn-close btn-close-white" 
+            <span *ngIf="eliminandoMasivo"
+              class="spinner-border spinner-border-sm me-1"></span>
+            <i class="bi bi-trash3"></i> Eliminar seleccionados (solo
+            CONDENADOS)
+          </button>
+          <button type="button" class="btn-close btn-close-white"
             (click)="cerrarEdicionMultiCampo()"></button>
-  </div>
-</div>
+        </div>
+      </div>
 
       <div class="modal-body">
         <!-- Resumen -->
@@ -1488,109 +1549,112 @@
               </select>
             </div>
 
-          <!-- En el modal de edición multicampo, dentro del bucle *ngFor="let item of formEdicionMultiCampo.campos" -->
-<div class="col-md-5">
-  <label class="form-label small">Nuevo valor</label>
+            <!-- En el modal de edición multicampo, dentro del bucle *ngFor="let item of formEdicionMultiCampo.campos" -->
+            <div class="col-md-5">
+              <label class="form-label small">Nuevo valor</label>
 
-  <!-- Diferentes tipos de inputs según el campo -->
-  <!-- Inputs para texto -->
-  <input
-    *ngIf="item.campo && (item.campo === 'nombre' ||  
+              <!-- Diferentes tipos de inputs según el campo -->
+              <!-- Inputs para texto -->
+              <input
+                *ngIf="item.campo && (item.campo === 'nombre' ||  
            item.campo === 'part_number' || item.campo === 'codigo' || 
            item.campo === 'serial_number')"
-    type="text"
-    class="form-control"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    [placeholder]="getPlaceholderCampo(item.campo)"
-    required>
+                type="text"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [placeholder]="getPlaceholderCampo(item.campo)"
+                required>
 
-  <!-- Input numérico para cantidad -->
-  <input
-    *ngIf="item.campo && item.campo === 'cantidad_actual'"
-    type="number"
-    class="form-control"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    [step]="1"
-    [min]="0"
-    required>
+              <!-- Input numérico para cantidad -->
+              <input
+                *ngIf="item.campo && item.campo === 'cantidad_actual'"
+                type="number"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [step]="1"
+                [min]="0"
+                required>
 
-  <!-- Input numérico para precio -->
-  <input *ngIf="item.campo === 'precio'"
-    type="number"
-    class="form-control"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    [step]="0.01"
-    [min]="0"
-    required>
+              <!-- Input numérico para precio -->
+              <input *ngIf="item.campo === 'precio'"
+                type="number"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [step]="0.01"
+                [min]="0"
+                required>
 
-  <!-- SELECT para ESTADO (corregido) -->
-  <select *ngIf="item.campo === 'estado'"
-    class="form-select"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    required>
-    <option value="">Seleccionar estado...</option>
-    <option *ngFor="let opcion of getOpcionesCampo('estado')" [value]="opcion">
-      {{ opcion }}
-    </option>
-  </select>
-  
+              <!-- SELECT para ESTADO (corregido) -->
+              <select *ngIf="item.campo === 'estado'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar estado...</option>
+                <option *ngFor="let opcion of getOpcionesCampo('estado')"
+                  [value]="opcion">
+                  {{ opcion }}
+                </option>
+              </select>
 
-  <!-- SELECT para CRITICIDAD -->
-  <select *ngIf="item.campo === 'criticidad'"
-    class="form-select"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    required>
-    <option value="">Seleccionar criticidad...</option>
-    <option *ngFor="let opcion of getOpcionesCampo('criticidad')" [value]="opcion">
-      {{ opcion }}
-    </option>
-  </select>
+              <!-- SELECT para CRITICIDAD -->
+              <select *ngIf="item.campo === 'criticidad'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar criticidad...</option>
+                <option *ngFor="let opcion of getOpcionesCampo('criticidad')"
+                  [value]="opcion">
+                  {{ opcion }}
+                </option>
+              </select>
 
-  <!-- SELECT para UBICACIÓN -->
-  <select *ngIf="item.campo === 'ubicacion_id'"
-    class="form-select"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    required>
-    <option value="">Seleccionar ubicación...</option>
-    <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">
-      {{ ubicacion.nombre }}
-    </option>
-  </select>
-<!-- SELECT para COMPONENTE -->
-<select *ngIf="item.campo === 'componente'"
-  class="form-select"
-  [(ngModel)]="item.valor"
-  [name]="'valor' + i"
-  required>
-  <option value="">Seleccionar componente...</option>
-  <option *ngFor="let opcion of componentesDisponibles" [value]="opcion">
-    {{ opcion }}
-  </option>
-</select>
-  <!-- Input de fecha -->
-  <input *ngIf="item.campo === 'fecha_adquisicion'"
-    type="date"
-    class="form-control"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    required>
+              <!-- SELECT para UBICACIÓN -->
+              <select *ngIf="item.campo === 'ubicacion_id'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar ubicación...</option>
+                <option *ngFor="let ubicacion of ubicaciones"
+                  [value]="ubicacion.id">
+                  {{ ubicacion.nombre }}
+                </option>
+              </select>
+              <!-- SELECT para COMPONENTE -->
+              <select *ngIf="item.campo === 'componente'"
+                class="form-select"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
+                <option value>Seleccionar componente...</option>
+                <option *ngFor="let opcion of componentesDisponibles"
+                  [value]="opcion">
+                  {{ opcion }}
+                </option>
+              </select>
+              <!-- Input de fecha -->
+              <input *ngIf="item.campo === 'fecha_adquisicion'"
+                type="date"
+                class="form-control"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                required>
 
-  <!-- Textarea para descripción, estantería, observaciones -->
-  <textarea
-    *ngIf="item.campo && (item.campo === 'descripcion' || item.campo === 'estanteria'|| item.campo === 'observaciones')"
-    class="form-control"
-    rows="2"
-    [(ngModel)]="item.valor"
-    [name]="'valor' + i"
-    [placeholder]="getPlaceholderCampo(item.campo)"
-    required></textarea>
-</div>
+              <!-- Textarea para descripción, estantería, observaciones -->
+              <textarea
+                *ngIf="item.campo && (item.campo === 'descripcion' || item.campo === 'estanteria'|| item.campo === 'observaciones')"
+                class="form-control"
+                rows="2"
+                [(ngModel)]="item.valor"
+                [name]="'valor' + i"
+                [placeholder]="getPlaceholderCampo(item.campo)"
+                required></textarea>
+            </div>
 
             <div class="col-md-2">
               <button type="button" class="btn btn-outline-danger w-100"
@@ -1656,23 +1720,30 @@
 </div>
 
 <!-- Modal de Importación - SIN BOOTSTRAP, CSS PURO -->
-<div class="modal-overlay" *ngIf="mostrandoModalImportacion" (click)="cerrarModalImportacion()"></div>
-<div class="modal-container" *ngIf="mostrandoModalImportacion" [class.show]="mostrandoModalImportacion">
+<div class="modal-overlay" *ngIf="mostrandoModalImportacion"
+  (click)="cerrarModalImportacion()"></div>
+<div class="modal-container" *ngIf="mostrandoModalImportacion"
+  [class.show]="mostrandoModalImportacion">
   <div class="modal-content">
     <div class="modal-header bg-primary">
       <h5 class="modal-title">Importar repuestos desde Excel</h5>
-      <button type="button" class="btn-close" (click)="cerrarModalImportacion()">×</button>
+      <button type="button" class="btn-close"
+        (click)="cerrarModalImportacion()">×</button>
     </div>
 
     <div class="modal-body">
       <!-- INSTRUCCIONES -->
       <div class="alert alert-light border">
-        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Importación automática:</h6>
+        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Importación
+          automática:</h6>
         <ul>
-          <li><strong class="text-danger">Antes de importar se eliminarán TODOS los registros actuales</strong> (productos y trazabilidad).</li>
-          <li>Todos los repuestos del Excel se insertarán como nuevos (sin verificar duplicados).</li>
+          <li><strong class="text-danger">Antes de importar se eliminarán TODOS
+              los registros actuales</strong> (productos y trazabilidad).</li>
+          <li>Todos los repuestos del Excel se insertarán como nuevos (sin
+            verificar duplicados).</li>
           <li>Las ubicaciones se crearán automáticamente si no existen.</li>
-          <li>Puedes seleccionar múltiples archivos Excel; se procesarán en orden.</li>
+          <li>Puedes seleccionar múltiples archivos Excel; se procesarán en
+            orden.</li>
           <li>El modal se cerrará automáticamente al finalizar.</li>
         </ul>
       </div>
@@ -1681,27 +1752,31 @@
       <div class="card mb-4">
         <div class="card-body">
           <div *ngIf="archivosImportacion.length === 0">
-            <p>Selecciona uno o más archivos Excel (.xlsx o .xls) con los repuestos a importar.</p>
+            <p>Selecciona uno o más archivos Excel (.xlsx o .xls) con los
+              repuestos a importar.</p>
             <div class="d-grid">
-              <button class="btn btn-primary btn-lg" (click)="archivoImportInput.click()" [disabled]="importando">
+              <button class="btn btn-primary btn-lg"
+                (click)="archivoImportInput.click()" [disabled]="importando">
                 <i class="bi bi-folder-plus"></i> Seleccionar archivo(s) Excel
               </button>
             </div>
-            <div class="form-text">Formatos: .xlsx, .xls (máximo 10MB cada uno)</div>
+            <div class="form-text">Formatos: .xlsx, .xls (máximo 10MB cada
+              uno)</div>
           </div>
 
           <div *ngIf="archivosImportacion.length > 0" class="alert alert-info">
             <div class="d-flex justify-content-between">
               <div>
                 <i class="bi bi-files"></i>
-                <strong>{{ archivosImportacion.length }} archivo(s) listo(s):</strong>
+                <strong>{{ archivosImportacion.length }} archivo(s)
+                  listo(s):</strong>
                 <ul>
                   <li *ngFor="let file of archivosImportacion">
                     {{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)
                   </li>
                 </ul>
               </div>
-              <button class="btn btn-sm btn-outline-danger" 
+              <button class="btn btn-sm btn-outline-danger"
                 (click)="archivosImportacion = []; archivoImportInput.value = ''"
                 [disabled]="importando">
                 <i class="bi bi-x-circle"></i> Cambiar
@@ -1712,19 +1787,23 @@
       </div>
 
       <!-- BOTÓN DE IMPORTAR (solo si hay archivos) -->
-      <div class="card" *ngIf="archivosImportacion.length > 0 && !resultadoImportacion">
+      <div class="card"
+        *ngIf="archivosImportacion.length > 0 && !resultadoImportacion">
         <div class="card-body">
-          <h6 class="card-title"><i class="bi bi-play-circle text-success"></i> Paso 3: Ejecutar importación</h6>
-          <p>Al ejecutar, los repuestos se procesarán y el modal se cerrará automáticamente.</p>
+          <h6 class="card-title"><i class="bi bi-play-circle text-success"></i>
+            Paso 3: Ejecutar importación</h6>
+          <p>Al ejecutar, los repuestos se procesarán y el modal se cerrará
+            automáticamente.</p>
           <div class="d-grid gap-2">
-            <button class="btn btn-success btn-lg" 
-              (click)="ejecutarImportacion()" 
+            <button class="btn btn-success btn-lg"
+              (click)="ejecutarImportacion()"
               [disabled]="importando">
               <span *ngIf="importando" class="spinner-pequeno"></span>
               <i class="bi bi-play-circle"></i>
               {{ importando ? 'Importando...' : 'Ejecutar Importación' }}
             </button>
-            <button class="btn btn-outline-secondary" (click)="cerrarModalImportacion()">Cancelar</button>
+            <button class="btn btn-outline-secondary"
+              (click)="cerrarModalImportacion()">Cancelar</button>
           </div>
         </div>
       </div>
@@ -1736,17 +1815,23 @@
             <i class="bi bi-arrow-repeat"></i> Importando archivos...
           </div>
           <div class="progreso-archivo-info">
-            <span>Archivo {{ progresoImportacion.archivoActual }} de {{ progresoImportacion.totalArchivos }}</span>
-            <span class="progreso-archivo-nombre">{{ progresoImportacion.archivoNombre }}</span>
+            <span>Archivo {{ progresoImportacion.archivoActual }} de {{
+              progresoImportacion.totalArchivos }}</span>
+            <span class="progreso-archivo-nombre">{{
+              progresoImportacion.archivoNombre }}</span>
           </div>
-          <div class="progreso-barra-wrapper" *ngIf="progresoImportacion.totalFilas > 0">
-            <div class="progreso-barra-fill" 
-                 [style.width.%]="(progresoImportacion.filasProcesadas / progresoImportacion.totalFilas) * 100">
-              {{ ((progresoImportacion.filasProcesadas / progresoImportacion.totalFilas) * 100).toFixed(0) }}%
+          <div class="progreso-barra-wrapper"
+            *ngIf="progresoImportacion.totalFilas > 0">
+            <div class="progreso-barra-fill"
+              [style.width.%]="(progresoImportacion.filasProcesadas / progresoImportacion.totalFilas) * 100">
+              {{ ((progresoImportacion.filasProcesadas /
+              progresoImportacion.totalFilas) * 100).toFixed(0) }}%
             </div>
           </div>
-          <div class="progreso-texto" *ngIf="progresoImportacion.totalFilas > 0">
-            {{ progresoImportacion.filasProcesadas }} / {{ progresoImportacion.totalFilas }} filas
+          <div class="progreso-texto"
+            *ngIf="progresoImportacion.totalFilas > 0">
+            {{ progresoImportacion.filasProcesadas }} / {{
+            progresoImportacion.totalFilas }} filas
           </div>
           <div class="progreso-texto" *ngIf="!progresoImportacion.totalFilas">
             <span class="spinner-pequeno"></span> Leyendo archivo...
@@ -1757,9 +1842,11 @@
       <!-- RESULTADOS -->
       <div *ngIf="resultadoImportacion" class="mt-4">
         <div class="alert alert-success">
-          <h5><i class="bi bi-check-circle-fill"></i> Importación Completada</h5>
+          <h5><i class="bi bi-check-circle-fill"></i> Importación
+            Completada</h5>
           <div class="alert alert-warning">
-            <i class="bi bi-clock"></i> Cerrando en <span class="badge bg-danger">4</span> segundos...
+            <i class="bi bi-clock"></i> Cerrando en <span
+              class="badge bg-danger">4</span> segundos...
           </div>
           <div class="row mt-3">
             <div class="col">
@@ -1776,8 +1863,9 @@
             </div>
             <div class="col">
               <div class="bg-light rounded p-3 text-center">
-                <h2 [class.text-danger]="resultadoImportacion.errores.length > 0" 
-                    [class.text-success]="resultadoImportacion.errores.length === 0">
+                <h2
+                  [class.text-danger]="resultadoImportacion.errores.length > 0"
+                  [class.text-success]="resultadoImportacion.errores.length === 0">
                   {{ resultadoImportacion.errores.length }}
                 </h2>
                 <small>Errores</small>
@@ -1786,7 +1874,8 @@
           </div>
           <div *ngIf="resultadoImportacion.errores.length > 0" class="mt-4">
             <hr>
-            <h6><i class="bi bi-exclamation-triangle text-warning"></i> Se encontraron {{ resultadoImportacion.errores.length }} errores</h6>
+            <h6><i class="bi bi-exclamation-triangle text-warning"></i> Se
+              encontraron {{ resultadoImportacion.errores.length }} errores</h6>
             <div class="table-responsive">
               <table class="table table-sm table-bordered">
                 <thead>
@@ -1799,7 +1888,8 @@
                 <tbody>
                   <tr *ngFor="let error of resultadoImportacion.errores">
                     <td>{{ error.archivo || '-' }}</td>
-                    <td><span class="badge bg-danger">{{ error.fila }}</span></td>
+                    <td><span class="badge bg-danger">{{ error.fila
+                        }}</span></td>
                     <td>{{ error.error }}</td>
                   </tr>
                 </tbody>
@@ -1813,71 +1903,85 @@
 </div>
 
 <!-- INPUT OCULTO PARA ARCHIVOS -->
-<input #archivoImportInput type="file" 
-       id="archivoImportacion"
-       accept=".xlsx,.xls"
-       multiple
-       (change)="onArchivoImportacionSelected($event)"
-       style="display: none">
-
-
-
-
-
-
+<input #archivoImportInput type="file"
+  id="archivoImportacion"
+  accept=".xlsx,.xls"
+  multiple
+  (change)="onArchivoImportacionSelected($event)"
+  style="display: none">
 
 <!-- Modal para movimiento grupal de seriados -->
-<div class="modal-backdrop fade show" *ngIf="mostrandoModalMovimientoGrupal" (click)="cerrarModalMovimientoGrupal()"></div>
-<div class="modal fade show" [class.show]="mostrandoModalMovimientoGrupal" [style.display]="mostrandoModalMovimientoGrupal ? 'block' : 'none'">
+<div class="modal-backdrop fade show" *ngIf="mostrandoModalMovimientoGrupal"
+  (click)="cerrarModalMovimientoGrupal()"></div>
+<div class="modal fade show" [class.show]="mostrandoModalMovimientoGrupal"
+  [style.display]="mostrandoModalMovimientoGrupal ? 'block' : 'none'">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">
-          <i class="bi bi-arrow-right-circle"></i> Mover productos seriados en grupo
+          <i class="bi bi-arrow-right-circle"></i> Mover productos seriados en
+          grupo
         </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalMovimientoGrupal()"></button>
+        <button type="button" class="btn-close btn-close-white"
+          (click)="cerrarModalMovimientoGrupal()"></button>
       </div>
       <div class="modal-body">
         <div class="alert alert-info mb-3">
           <i class="bi bi-info-circle"></i>
-          Se moverán <strong>{{ productosSeleccionados.size }}</strong> producto(s) seleccionado(s).
-          Solo los productos seriados serán procesados; los no seriados se omitirán automáticamente.
+          Se moverán <strong>{{ productosSeleccionados.size }}</strong>
+          producto(s) seleccionado(s).
+          Solo los productos seriados serán procesados; los no seriados se
+          omitirán automáticamente.
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Ubicación destino <span class="text-danger">*</span></label>
-          <select class="form-select" [(ngModel)]="formMovimientoGrupal.ubicacion_destino" required>
-            <option value="">Seleccionar ubicación</option>
-            <option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.nombre">
+          <label class="form-label">Ubicación destino <span
+              class="text-danger">*</span></label>
+          <select class="form-select"
+            [(ngModel)]="formMovimientoGrupal.ubicacion_destino" required>
+            <option value>Seleccionar ubicación</option>
+            <option *ngFor="let ubicacion of ubicaciones"
+              [value]="ubicacion.nombre">
               {{ ubicacion.nombre }}
             </option>
           </select>
         </div>
 
         <!-- Estantería (solo si destino es BODEGA QUITO) -->
-        <div class="mb-3" *ngIf="formMovimientoGrupal.ubicacion_destino === 'BODEGA QUITO'">
-          <label class="form-label">Estantería <span class="text-danger">*</span></label>
+        <div class="mb-3"
+          *ngIf="formMovimientoGrupal.ubicacion_destino === 'BODEGA QUITO'">
+          <label class="form-label">Estantería <span
+              class="text-danger">*</span></label>
           <textarea class="form-control" rows="2"
             [(ngModel)]="formMovimientoGrupal.estanteria"
             placeholder="Estantería (obligatoria para BODEGA QUITO)"></textarea>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Motivo <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="formMovimientoGrupal.motivo" placeholder="Ej: Reubicación masiva">
+          <label class="form-label">Motivo <span
+              class="text-danger">*</span></label>
+          <input type="text" class="form-control"
+            [(ngModel)]="formMovimientoGrupal.motivo"
+            placeholder="Ej: Reubicación masiva">
         </div>
 
         <div class="mb-3">
           <label class="form-label">Observaciones</label>
-          <textarea class="form-control" rows="2" [(ngModel)]="formMovimientoGrupal.observaciones" placeholder="Observaciones adicionales"></textarea>
+          <textarea class="form-control" rows="2"
+            [(ngModel)]="formMovimientoGrupal.observaciones"
+            placeholder="Observaciones adicionales"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModalMovimientoGrupal()" [disabled]="procesandoGrupo">
+        <button type="button" class="btn btn-secondary"
+          (click)="cerrarModalMovimientoGrupal()" [disabled]="procesandoGrupo">
           Cancelar
         </button>
-        <button type="button" class="btn btn-primary" (click)="moverGrupoSeriados()" [disabled]="procesandoGrupo || !formMovimientoGrupal.ubicacion_destino || !formMovimientoGrupal.motivo">
-          <span *ngIf="procesandoGrupo" class="spinner-border spinner-border-sm me-1"></span>
+        <button type="button" class="btn btn-primary"
+          (click)="moverGrupoSeriados()"
+          [disabled]="procesandoGrupo || !formMovimientoGrupal.ubicacion_destino || !formMovimientoGrupal.motivo">
+          <span *ngIf="procesandoGrupo"
+            class="spinner-border spinner-border-sm me-1"></span>
           {{ procesandoGrupo ? 'Procesando...' : 'Mover grupo' }}
         </button>
       </div>
@@ -1885,48 +1989,46 @@
   </div>
 </div>
 
-
-
-
-
-
-
-
-  <!-- Agrega esto al final del archivo, antes del cierre del componente -->
+<!-- Agrega esto al final del archivo, antes del cierre del componente -->
 
 <!-- Modal de confirmación para eliminar todos los registros -->
 <div *ngIf="confirmacionEliminacion.mostrar" class="modal-overlay-danger">
   <div class="modal-danger">
-    
+
     <!-- Paso 1: Advertencia inicial -->
     <div *ngIf="confirmacionEliminacion.paso === 1" class="modal-paso">
       <div class="modal-header-danger">
         <i class="bi bi-exclamation-triangle-fill text-danger"></i>
         <h3>⚠️ ADVERTENCIA CRÍTICA</h3>
       </div>
-      
+
       <div class="modal-body-danger">
         <div class="alert alert-danger">
-          <h5><i class="bi bi-x-octagon-fill"></i> ESTA ACCIÓN NO SE PUEDE DESHACER</h5>
+          <h5><i class="bi bi-x-octagon-fill"></i> ESTA ACCIÓN NO SE PUEDE
+            DESHACER</h5>
         </div>
-        
+
         <p class="text-danger">
-          Está a punto de eliminar <strong>TODOS los registros</strong> de la base de datos.
+          Está a punto de eliminar <strong>TODOS los registros</strong> de la
+          base de datos.
         </p>
-        
+
         <ul class="lista-advertencias">
-         
-          <li><i class="bi bi-arrow-clockwise"></i> Los contadores (IDs) se reiniciarán a 1</li>
-          <li><i class="bi bi-layers"></i> La <strong>estructura</strong> (tablas, vistas, triggers) se mantendrá</li>
+
+          <li><i class="bi bi-arrow-clockwise"></i> Los contadores (IDs) se
+            reiniciarán a 1</li>
+          <li><i class="bi bi-layers"></i> La <strong>estructura</strong>
+            (tablas, vistas, triggers) se mantendrá</li>
         </ul>
-        
+
         <div class="text-center mt-4">
           <p class="fw-bold">¿Desea continuar con esta acción irreversible?</p>
         </div>
       </div>
-      
+
       <div class="modal-footer-danger">
-        <button class="btn btn-secondary" (click)="cerrarConfirmacionEliminacion()">
+        <button class="btn btn-secondary"
+          (click)="cerrarConfirmacionEliminacion()">
           <i class="bi bi-x-circle"></i> Cancelar
         </button>
         <button class="btn btn-warning" (click)="avanzarConfirmacion()">
@@ -1934,99 +2036,110 @@
         </button>
       </div>
     </div>
-    
+
     <!-- Paso 2: Confirmación con texto -->
     <div *ngIf="confirmacionEliminacion.paso === 2" class="modal-paso">
       <div class="modal-header-danger">
         <i class="bi bi-shield-exclamation text-danger"></i>
         <h3>CONFIRMACIÓN FINAL</h3>
       </div>
-      
+
       <div class="modal-body-danger">
         <div class="alert alert-warning">
           <h5><i class="bi bi-key-fill"></i> Confirmación por texto</h5>
-          <p>Para proceder, escriba exactamente: <code class="bg-dark text-warning p-1">ELIMINAR</code></p>
+          <p>Para proceder, escriba exactamente: <code
+              class="bg-dark text-warning p-1">ELIMINAR</code></p>
         </div>
-        
+
         <div class="mb-3">
-          <input 
-            type="text" 
+          <input
+            type="text"
             class="form-control form-control-lg text-center"
             [(ngModel)]="confirmacionEliminacion.textoConfirmacion"
             placeholder="Escriba aquí..."
             autocomplete="off"
             [class.is-valid]="textoConfirmacionValido()"
-            [class.is-invalid]="confirmacionEliminacion.textoConfirmacion && !textoConfirmacionValido()"
-          >
-          
+            [class.is-invalid]="confirmacionEliminacion.textoConfirmacion && !textoConfirmacionValido()">
+
           <div *ngIf="textoConfirmacionValido()" class="valid-feedback">
             <i class="bi bi-check-circle"></i> Texto correcto
           </div>
-          
-          <div *ngIf="confirmacionEliminacion.textoConfirmacion && !textoConfirmacionValido()" class="invalid-feedback">
-            <i class="bi bi-x-circle"></i> Texto incorrecto. Debe escribir exactamente: <strong>ELIMINAR</strong>
+
+          <div
+            *ngIf="confirmacionEliminacion.textoConfirmacion && !textoConfirmacionValido()"
+            class="invalid-feedback">
+            <i class="bi bi-x-circle"></i> Texto incorrecto. Debe escribir
+            exactamente: <strong>ELIMINAR</strong>
           </div>
         </div>
-        
+
         <p class="text-muted small">
           Esta medida de seguridad previene eliminaciones accidentales.
         </p>
       </div>
-      
+
       <div class="modal-footer-danger">
-        <button class="btn btn-secondary" (click)="cerrarConfirmacionEliminacion()">
+        <button class="btn btn-secondary"
+          (click)="cerrarConfirmacionEliminacion()">
           <i class="bi bi-x-circle"></i> Cancelar
         </button>
-        <button 
-          class="btn btn-danger" 
+        <button
+          class="btn btn-danger"
           (click)="avanzarConfirmacion()"
           [disabled]="!textoConfirmacionValido()">
           <i class="bi bi-shield-check"></i> Confirmar
         </button>
       </div>
     </div>
-    
+
     <!-- Paso 3: Ejecución final -->
     <div *ngIf="confirmacionEliminacion.paso === 3" class="modal-paso">
       <div class="modal-header-danger">
         <i class="bi bi-gear-fill text-danger"></i>
         <h3>EJECUTANDO ELIMINACIÓN</h3>
       </div>
-      
+
       <div class="modal-body-danger text-center">
         <div *ngIf="!confirmacionEliminacion.eliminando">
           <div class="alert alert-danger">
             <h5><i class="bi bi-play-circle-fill"></i> ÚLTIMA OPORTUNIDAD</h5>
           </div>
-          
+
           <p class="mb-4">
-            ¿Está <strong>absolutamente seguro</strong> de proceder con la eliminación total?
+            ¿Está <strong>absolutamente seguro</strong> de proceder con la
+            eliminación total?
           </p>
-          
+
           <div class="d-grid gap-2">
-            <button class="btn btn-lg btn-outline-secondary" (click)="cerrarConfirmacionEliminacion()">
+            <button class="btn btn-lg btn-outline-secondary"
+              (click)="cerrarConfirmacionEliminacion()">
               <i class="bi bi-x-octagon"></i> NO, CANCELAR
             </button>
-            <button class="btn btn-lg btn-danger" (click)="ejecutarEliminacionTotal()">
+            <button class="btn btn-lg btn-danger"
+              (click)="ejecutarEliminacionTotal()">
               <i class="bi bi-trash3-fill"></i> SÍ, ELIMINAR TODO
             </button>
           </div>
         </div>
-        
+
         <!-- Estado de carga -->
-        <div *ngIf="confirmacionEliminacion.eliminando" class="text-center py-4">
-          <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status">
+        <div *ngIf="confirmacionEliminacion.eliminando"
+          class="text-center py-4">
+          <div class="spinner-border text-danger"
+            style="width: 3rem; height: 3rem;" role="status">
             <span class="visually-hidden">Eliminando...</span>
           </div>
           <h4 class="mt-3 text-danger">ELIMINANDO REGISTROS...</h4>
-          <p class="text-muted">Por favor espere. Esto puede tomar unos segundos.</p>
+          <p class="text-muted">Por favor espere. Esto puede tomar unos
+            segundos.</p>
           <div class="progress mt-3">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" 
-                 style="width: 100%"></div>
+            <div
+              class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+              style="width: 100%"></div>
           </div>
         </div>
       </div>
     </div>
-    
+
   </div>
 </div>

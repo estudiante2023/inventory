@@ -169,13 +169,13 @@
             </td>
             <td class="col-cantidad">{{ registro.cantidad }}</td>
             <td class="col-ubicaciones">
-              <div *ngIf="registro.ubicacion_origen" class="ubicacion">
-                <span class="ubicacion-label">De:</span> {{ registro.ubicacion_origen }}
-              </div>
-              <div *ngIf="registro.ubicacion_destino" class="ubicacion">
-                <span class="ubicacion-label">A:</span> {{ registro.ubicacion_destino }}
-              </div>
-            </td>
+  <div *ngIf="registro.ubicacion_origen" class="ubicacion">
+    <span class="ubicacion-label">De:</span> {{ getUbicacionNombre(registro.ubicacion_origen) }}
+  </div>
+  <div *ngIf="registro.ubicacion_destino" class="ubicacion">
+    <span class="ubicacion-label">A:</span> {{ getUbicacionNombre(registro.ubicacion_destino) }}
+  </div>
+</td>
             <td class="col-usuario">{{ registro.usuario_nombre || 'Sistema' }}</td>
             <td class="col-estado">
               <span class="badge-estado" [class]="getColorEstado(registro.estado_evento)">
@@ -396,17 +396,17 @@
           <span class="detalle-valor">{{ registroSeleccionado.motivo }}</span>
         </div>
         <div class="detalle-item full-width" *ngIf="registroSeleccionado.detalles">
-          <span class="detalle-label">Detalles:</span>
-          <span class="detalle-valor">{{ registroSeleccionado.detalles }}</span>
-        </div>
-        <div class="detalle-item" *ngIf="registroSeleccionado.ubicacion_origen">
-          <span class="detalle-label">Origen:</span>
-          <span class="detalle-valor">{{ registroSeleccionado.ubicacion_origen }}</span>
-        </div>
-        <div class="detalle-item" *ngIf="registroSeleccionado.ubicacion_destino">
-          <span class="detalle-label">Destino:</span>
-          <span class="detalle-valor">{{ registroSeleccionado.ubicacion_destino }}</span>
-        </div>
+  <span class="detalle-label">Detalles:</span>
+  <span class="detalle-valor">{{ procesarDetalles(registroSeleccionado.detalles) }}</span>
+</div>
+       <div class="detalle-item" *ngIf="registroSeleccionado.ubicacion_origen">
+  <span class="detalle-label">Origen:</span>
+  <span class="detalle-valor">{{ getUbicacionNombre(registroSeleccionado.ubicacion_origen) }}</span>
+</div>
+<div class="detalle-item" *ngIf="registroSeleccionado.ubicacion_destino">
+  <span class="detalle-label">Destino:</span>
+  <span class="detalle-valor">{{ getUbicacionNombre(registroSeleccionado.ubicacion_destino) }}</span>
+</div>
         <div class="detalle-item">
           <span class="detalle-label">Usuario:</span>
           <span class="detalle-valor">{{ registroSeleccionado.usuario_nombre || 'Sistema' }}</span>
