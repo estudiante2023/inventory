@@ -233,6 +233,9 @@
           (click)="buscarProductos()">
           Buscar
         </button>
+        <div class="inventario-total" *ngIf="!loading">
+    Total repuestos: <strong>{{ totalProductos }}</strong>
+  </div>
       </div>
 
       <div class="inventario-filters-grid">

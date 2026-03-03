@@ -3228,3 +3228,12 @@ input[type="text"].is-invalid {
   animation: spin 0.6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.inventario-total {
+  margin-top: 10px;
+  margin-left: 10px !important;
+  padding: 8px 12px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  font-size: 14px;
+  display: inline-block;
+}
